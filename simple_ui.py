@@ -45,6 +45,7 @@ class DisplayApp:
 		
 	def buildCntrl(self):
 		'''
+		CHCHCH CHAAAAAANGES -David Bowie
 		'''
 		discover_button = tk.Button( self.cntrlframe, text="Discover", 
 							   		 command=self.discover, width=8 )
