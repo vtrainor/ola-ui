@@ -47,7 +47,7 @@ class DisplayApp:
 	def buildCntrl(self):
 		'''
 		'''
-		function = lambda : self.ola_thread.RunDiscovery(self.cur_universe, self.uponDiscover)
+		function = lambda : self.ola_thread.RunDiscovery(self.cur_universe.get(), self.uponDiscover)
 		discover_button = tk.Button( self.cntrlframe, text="Discover", 
 							   		 command=function,  width=8 )
 		discover_button.grid(row=0, column=0)
@@ -81,9 +81,7 @@ class DisplayApp:
 		self.uids = uids
 		self.curUID.set(self.uids[0]) # initial value
 		for uid in self.uids:
-			func = lambda: self.ola_thread._client.RDMGet(self.cur_universe.get(), uid, 
-														  0, 0x0082, self.addDevice)
-			self.ola_thread.Execute(func) 
+			self.ola_thread.RDMGet(self.cur_universe.get(), uid, 0, 0x0082, self.addDevice)
 		print self.devicenames
 		self.initDeviceMenu(self.devicenames)
 		

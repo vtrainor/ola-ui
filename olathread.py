@@ -42,6 +42,10 @@ class OLAThread(threading.Thread):
 	def _RunDiscovery(self, universe, callback):
 		"""This method is only run in the OLA thread."""
 		self._client.RunRDMDiscovery(universe, True, callback)
+		
+	def RDMGet(self, universe, uid, sub_device, pid, callback, data = ' '):
+		function = self._client.RDMGet(universe, uid, sub_device, pid, callback, data)
+		self.Execute( function )
  
 if __name__ == '__main__':
 	print 'olathreading'
