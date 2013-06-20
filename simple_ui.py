@@ -47,8 +47,9 @@ class DisplayApp:
 	def buildCntrl(self):
 		'''
 		'''
+		function = lambda : self.ola_thread.RunDiscovery(self.cur_universe, self.uponDiscover)
 		discover_button = tk.Button( self.cntrlframe, text="Discover", 
-							   		 command=self.discover, width=8 )
+							   		 command=function,  width=8 )
 		discover_button.grid(row=0, column=0)
 		tk.Label( self.cntrlframe, width=3).grid(row=0, column=1)
 		tk.Label(self.cntrlframe, text='Select\nUniverse:').grid(row=0, column=2)

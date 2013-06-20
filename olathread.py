@@ -5,32 +5,43 @@ import time
  
  
 class OLAThread(threading.Thread):
-  """The thread which runs the OLA Client."""
-  def __init__(self):
-    super(OLAThread, self).__init__()
-    self._client = OlaClient()
-    self._ss = None  # created in run()
-    self.daemon = True
+	"""The thread which runs the OLA Client."""
+	def __init__(self):
+		super(OLAThread, self).__init__()
+		self._client = OlaClient()
+		self._ss = None	 # created in run()
+		self.daemon = True
  
-  def run(self):
-    self._ss = SelectServer()
-    self._ss.AddReadDescriptor(self._client.GetSocket(),
-                               self._client.SocketReady)
-    print 'Starting the OLA event loop'
-    self._ss.Run()
-    print 'OLA thread finished'
+	def run(self):
+		self._ss = SelectServer()
+		self._ss.AddReadDescriptor(self._client.GetSocket(),
+															 self._client.SocketReady)
+		print 'Starting the OLA event loop'
+		self._ss.Run()
+		print 'OLA thread finished'
  
-  def Stop(self):
-    if self._ss is None:
-      print 'OLAThread.Stop() called before thread was running'
-      return
+	def Stop(self):
+		if self._ss is None:
+			print 'OLAThread.Stop() called before thread was running'
+			return
  
-    print 'Stopping OLA thread'
-    self._ss.Terminate()                                                                                                                                  
+		print 'Stopping OLA thread'
+		self._ss.Terminate()			 
+																																																															 
+	def RunDiscovery(self, universe, callback):
+		"""Can be called from any thread.
+			 Callback takes two arguments(bool, [UID])
+			 Callback is run in the OLA thread.
+		"""
+		self._ss.Execute(lambda : self._RunDiscovery(universe, callback))																																																														 
  
-  def Execute(self, cb):
-    print 'calling execute'
-    self._ss.Execute(cb)
+	def Execute(self, cb):
+		print 'calling execute'
+		self._ss.Execute(cb)
+ 
+	def _RunDiscovery(self, universe, callback):
+		"""This method is only run in the OLA thread."""
+		self._client.RunRDMDiscovery(universe, True, callback)
  
 if __name__ == '__main__':
 	print 'olathreading'
