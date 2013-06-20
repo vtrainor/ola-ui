@@ -27,6 +27,7 @@ class DisplayApp:
 		self.universe_list = [1, 2, 3, 4, 5]
 		self.state = 0
 		self.device_menu = None
+		self.devicenames = []
 		# Call initialing functions
 		self.buildFrames()
 		self.buildCntrl()
@@ -45,7 +46,6 @@ class DisplayApp:
 		
 	def buildCntrl(self):
 		'''
-		CHCHCH CHAAAAAANGES -David Bowie
 		'''
 		discover_button = tk.Button( self.cntrlframe, text="Discover", 
 							   		 command=self.discover, width=8 )
@@ -73,11 +73,30 @@ class DisplayApp:
 		self.ola_thread.Execute(func) 
 	
 	def uponDiscover(self, status, uids):
+		'''
+		callback for client.RunRDMDiscovery
+		'''
 		print 'discovered'
 		self.uids = uids
 		self.curUID.set(self.uids[0]) # initial value
-		self.initDeviceMenu(self.uids)
-	
+		for uid in self.uids:
+			func = lambda: self.ola_thread._client.RDMGet(self.cur_universe.get(), uid, 
+														  0, 0x0082, self.addDevice)
+			self.ola_thread.Execute(func) 
+		print self.devicenames
+		self.initDeviceMenu(self.devicenames)
+		
+	def addDevice(self, RDMResponce ):
+		'''
+		adds device name to self.devicenames
+		'''
+		print 'herro'
+		if RDMResponse.ResponseCodeAsString() not in self.devicenames:
+			self.devicenames.append( RDMResponse.ResponseCodeAsString() )
+			print self.devicenames
+		else:
+			return
+		
 	def main(self):
 		print 'Entering main loop'
 		self.root.mainloop()	
