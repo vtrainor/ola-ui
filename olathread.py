@@ -5,67 +5,74 @@ import time
  
  
 class OLAThread(threading.Thread):
-	"""The thread which runs the OLA Client."""
-	def __init__(self):
-		super(OLAThread, self).__init__()
-		self._client = OlaClient()
-		self._ss = None	 # created in run()
-		self.daemon = True
+  """The thread which runs the OLA Client."""
+  def __init__(self):
+    super(OLAThread, self).__init__()
+    self._client = OlaClient()
+    self._ss = None  # created in run()
+    self.daemon = True
  
-	def run(self):
-		self._ss = SelectServer()
-		self._ss.AddReadDescriptor(self._client.GetSocket(),
-															 self._client.SocketReady)
-		print 'Starting the OLA event loop'
-		self._ss.Run()
-		print 'OLA thread finished'
+  def run(self):
+    self._ss = SelectServer()
+    self._ss.AddReadDescriptor(self._client.GetSocket(),
+                               self._client.SocketReady)
+    print 'Starting the OLA event loop'
+    self._ss.Run()
+    print 'OLA thread finished'
  
-	def Stop(self):
-		if self._ss is None:
-			print 'OLAThread.Stop() called before thread was running'
-			return
+  def Stop(self):
+    if self._ss is None:
+      print 'OLAThread.Stop() called before thread was running'
+      return
  
-		print 'Stopping OLA thread'
-		self._ss.Terminate()			 
-																																																															 
-	def RunDiscovery(self, universe, callback):
-		"""Can be called from any thread.
-			 Callback takes two arguments(bool, [UID])
-			 Callback is run in the OLA thread.
-		"""
-		self._ss.Execute(lambda : self._RunDiscovery(universe, callback))																																																														 
+    print 'Stopping OLA thread'
+    self._ss.Terminate()       
+                                                                                                                               
+  def RunDiscovery(self, universe, callback):
+    """Can be called from any thread.
+       Callback takes two arguments(bool, [UID])
+       Callback is run in the OLA thread.
+    """
+    self._ss.Execute(lambda : self._RunDiscovery(universe, callback))                                                                                                                            
  
-	def Execute(self, cb):
-		print 'calling execute'
-		self._ss.Execute(cb)
+  def Execute(self, cb):
+    print 'calling execute'
+    self._ss.Execute(cb)
  
-	def _RunDiscovery(self, universe, callback):
-		"""This method is only run in the OLA thread."""
-		self._client.RunRDMDiscovery(universe, True, callback)
-		
-	def RDMGet(self, universe, uid, sub_device, pid, callback, data = ' '):
-		function = self._client.RDMGet(universe, uid, sub_device, pid, callback, data)
-		self.Execute( function )
- 
+  def _RunDiscovery(self, universe, callback):
+    """This method is only run in the OLA thread."""
+    response = self._client.RunRDMDiscovery(universe, True, callback)
+    if response == False:
+      callback( False, [] )
+    
+  def RDMGet(self, universe, uid, sub_device, pid, callback, data = ' '):
+    self._ss.Execute(lambda: self._RDMGet(universe, uid, sub_device, pid, callback, data) )
+    
+  def _RDMGet(self, universe, uid, sub_device, pid, callback, data):
+    """This method is only run in the OLA thread."""
+    r = self._client.RDMGet(universe, uid, sub_device, pid, callback, data)
+    if r == False:
+      callback(None)
+    
 if __name__ == '__main__':
-	print 'olathreading'
-# 	def thread_fn(olathread):
-# 		olathread._client.RunRDMDiscovery(1, True, upondiscover)
-# 		print 'currently in thread: %d \n' % threading.currentThread().ident
+  print 'olathreading'
+#   def thread_fn(olathread):
+#     olathread._client.RunRDMDiscovery(1, True, upondiscover)
+#     print 'currently in thread: %d \n' % threading.currentThread().ident
 # 
-# 	def upondiscover(status, uids):
-# 		print 'discovered'
-# 		for uid in uids:
-# 			print uid
+#   def upondiscover(status, uids):
+#     print 'discovered'
+#     for uid in uids:
+#       print uid
 # 
-# 	ola_thread = OLAThread()
-# 	ola_thread.start()
-# 	print 'currently in thread: %d \n' % threading.currentThread().ident
-# 	time.sleep(1)
+#   ola_thread = OLAThread()
+#   ola_thread.start()
+#   print 'currently in thread: %d \n' % threading.currentThread().ident
+#   time.sleep(1)
 #  
-# 	print 'back from sleep'
-# 	f = lambda : thread_fn(ola_thread)
-# 	ola_thread.Execute(f)
-# 	print 'back from sleep'
+#   print 'back from sleep'
+#   f = lambda : thread_fn(ola_thread)
+#   ola_thread.Execute(f)
+#   print 'back from sleep'
 #  
-# 	time.sleep(1)
+#   time.sleep(1)
