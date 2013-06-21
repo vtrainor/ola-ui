@@ -24,7 +24,6 @@ class DisplayApp:
     self.universe_list = [1, 2, 3, 4, 5]
     self.cur_device = None
     self.state = 0
-#     self.device_menu = None
     self._uid_dict = {}
     # Call initialing functions
     self.buildFrames()
@@ -72,7 +71,7 @@ class DisplayApp:
     '''
     print 'discovered'
     for uid in uids:
-      self._uid_dict[uid.__str__()] = {}
+      self._uid_dict[uid] = {}
       self.ola_thread.RDMGet(self.cur_universe.get(), uid, 0, 0x0082, lambda: self.addDevice(uid))
       self.device_menu['menu'].insert('end', lambda : self.display_info(uid), self._uid_dict[uid.__str__()]['device label'])
     self.cur_device = self._uid_dict[uids[0]] # initial value
@@ -82,7 +81,7 @@ class DisplayApp:
     adds device name to self.devicenames
     '''
     print 'add device'
-    self._uid_dict[uid.__str__()] = {'device label': RDMResponse.ResponseCodeAsString()} 
+    self._uid_dict[uid] = {'device label': RDMResponse.ResponseCodeAsString()} 
         
   def display_info(self, uid):
   	print 'display info'
