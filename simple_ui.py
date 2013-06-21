@@ -5,6 +5,7 @@ import threading
 import thread
 import Queue
 import olathread
+import uid_dictionary
 
 class DisplayApp:
   
@@ -19,15 +20,12 @@ class DisplayApp:
     self.root.lift()
     self.root.update_idletasks()
     # Assigning fields
-    self.curUID = tk.StringVar(self.root)
-    self.curUID.set('Devices')
-    self.uids = ['no items']
     self.cur_universe = tk.IntVar(self.root)
     self.cur_universe.set(1)
     self.universe_list = [1, 2, 3, 4, 5]
+    self.cur_device = None
     self.state = 0
     self.device_menu = None
-    self.devicenames = []
     # Call initialing functions
     self.buildFrames()
     self.buildCntrl()
@@ -56,17 +54,12 @@ class DisplayApp:
     menu = tk.OptionMenu(self.cntrlframe, self.cur_universe, *self.universe_list)
     menu.config(width=1)
     menu.grid(row=0, column=3)
-    self.initDeviceMenu(self.uids)
     tk.Label(self.cntrlframe, width=6, text='Identify').grid(row=0,column=5)
     tk.Checkbutton(self.cntrlframe).grid(row=0, column=6)
     tk.Label( self.cntrlframe, width=3).grid(row=0, column=7)
     tk.Label( self.cntrlframe, text='Automatic\nDiscovery' ).grid(row=0, column=8)
     tk.Checkbutton(self.cntrlframe).grid(row=0, column=9)
-    
-  def initDeviceMenu(self, devlist):
-    if self.device_menu != None:
-      self.device_menu.destroy()
-    self.device_menu = tk.OptionMenu(self.cntrlframe, self.curUID, *devlist)
+    self.device_menu = tk.OptionMenu(self.cntrlframe, self.cur_device, ['no items'])
     self.device_menu.grid(row=0, column=4)
 
   def discover(self):
@@ -78,11 +71,13 @@ class DisplayApp:
     callback for client.RunRDMDiscovery
     '''
     print 'discovered'
-    self.uids = uids
-    self.curUID.set(self.uids[0]) # initial value
-    for uid in self.uids:
-      self.ola_thread.RDMGet(self.cur_universe.get(), uid, 0, 0x0082, self.addDevice)
+    
+    self.device_dict = uid_dictionary.UID_Dictionary(uids)
+    for uid in self.device_dict.getUIDs():
+      self.device_dict[uid]['device label'] = self.ola_thread.RDMGet(self.cur_universe.get(), uid, 0, 0x0082, self.addDevice)
+      self.devicenames.append( self.device_dict[uid]['device label'] )
     print self.devicenames
+    self.cur_device = self._device_dict[self._device_dict.getUIDs()[0]] # initial value
     self.initDeviceMenu(self.devicenames)
     
   def addDevice(self, RDMResponce ):
