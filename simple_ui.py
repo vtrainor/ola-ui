@@ -5,7 +5,6 @@ import threading
 import thread
 import Queue
 import olathread
-import uid_dictionary
 
 class DisplayApp:
   
@@ -25,7 +24,8 @@ class DisplayApp:
     self.universe_list = [1, 2, 3, 4, 5]
     self.cur_device = None
     self.state = 0
-    self.device_menu = None
+#     self.device_menu = None
+    self._uid_dict = {}
     # Call initialing functions
     self.buildFrames()
     self.buildCntrl()
@@ -59,7 +59,7 @@ class DisplayApp:
     tk.Label( self.cntrlframe, width=3).grid(row=0, column=7)
     tk.Label( self.cntrlframe, text='Automatic\nDiscovery' ).grid(row=0, column=8)
     tk.Checkbutton(self.cntrlframe).grid(row=0, column=9)
-    self.device_menu = tk.OptionMenu(self.cntrlframe, self.cur_device, ['no items'])
+    self.device_menu = tk.OptionMenu(self.cntrlframe, self.cur_device, [])
     self.device_menu.grid(row=0, column=4)
 
   def discover(self):
@@ -71,26 +71,22 @@ class DisplayApp:
     callback for client.RunRDMDiscovery
     '''
     print 'discovered'
+    for uid in uids:
+      self._uid_dict[uid.__str__()] = {}
+      self.ola_thread.RDMGet(self.cur_universe.get(), uid, 0, 0x0082, lambda: self.addDevice(uid))
+      self.device_menu['menu'].insert('end', lambda : self.display_info(uid), self._uid_dict[uid.__str__()]['device label'])
+    self.cur_device = self._uid_dict[uids[0]] # initial value
     
-    self.device_dict = uid_dictionary.UID_Dictionary(uids)
-    for uid in self.device_dict.getUIDs():
-      self.device_dict[uid]['device label'] = self.ola_thread.RDMGet(self.cur_universe.get(), uid, 0, 0x0082, self.addDevice)
-      self.devicenames.append( self.device_dict[uid]['device label'] )
-    print self.devicenames
-    self.cur_device = self._device_dict[self._device_dict.getUIDs()[0]] # initial value
-    self.initDeviceMenu(self.devicenames)
-    
-  def addDevice(self, RDMResponce ):
+  def addDevice(self, uid, RDMResponce ):
     '''
     adds device name to self.devicenames
     '''
-    print 'herro'
-    if RDMResponse.ResponseCodeAsString() not in self.devicenames:
-      self.devicenames.append( RDMResponse.ResponseCodeAsString() )
-      print self.devicenames
-    else:
-      return
-    
+    print 'add device'
+    self._uid_dict[uid.__str__()] = {'device label': RDMResponse.ResponseCodeAsString()} 
+        
+  def display_info(self, uid):
+  	print 'display info'
+
   def main(self):
     print 'Entering main loop'
     self.root.mainloop()  

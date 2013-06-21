@@ -57,6 +57,7 @@ class OLAThread(threading.Thread):
     '''
     
     '''
+    print 'rdm get'
     self._ss.Execute(lambda: self._RDMGet(universe, uid, sub_device, pid, callback, data) )
     
   def _RDMGet(self, universe, uid, sub_device, pid, callback, data):
