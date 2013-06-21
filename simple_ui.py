@@ -72,16 +72,16 @@ class DisplayApp:
     print 'discovered'
     for uid in uids:
       self._uid_dict[uid] = {}
-      self.ola_thread.RDMGet(self.cur_universe.get(), uid, 0, 0x0082, lambda: self.addDevice(uid))
-      self.device_menu['menu'].insert('end', lambda : self.display_info(uid), self._uid_dict[uid.__str__()]['device label'])
+      self.ola_thread.RDMGet(self.cur_universe.get(), uid, 0, 0x0082, lambda x: self.addDevice(uid, x))
+#       self.device_menu['menu'].insert('end', lambda : self.display_info(uid), self._uid_dict[uid.__str__()]['device label'])
     self.cur_device = self._uid_dict[uids[0]] # initial value
     
-  def addDevice(self, uid, RDMResponce ):
+  def addDevice(self, uid, response ):
     '''
     adds device name to self.devicenames
     '''
     print 'add device'
-    self._uid_dict[uid] = {'device label': RDMResponse.ResponseCodeAsString()} 
+    self._uid_dict[uid] = {'device label': response.ResponseCodeAsString()} 
         
   def display_info(self, uid):
   	print 'display info'
