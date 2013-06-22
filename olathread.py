@@ -64,9 +64,22 @@ class OLAThread(threading.Thread):
     '''
     This method is only run in the OLA thread.
     '''
-    r = self._client.RDMGet(universe, uid, sub_device, pid, callback, data)
-    if r == False:
-      callback(None)
+    print '_rdm_get'
+    self._client.RDMGet(universe, uid, sub_device, pid, lambda r: self.CompleteGet(callback, r), data)
+      
+  def CompleteGet(self, callback, response):
+    '''
+    
+    '''
+    print 'RDM get completed'
+    if response.status.Succeeded() != True:
+      callback( False, '' )
+    elif response.response_code != 'RDM_COMPLETED_OK':
+      callback( False, '' )
+    elif response.response_type != 'ACK':
+      callback( False, '' )
+    else: 
+      callback( True, response.data )
     
 if __name__ == '__main__':
   print 'olathreading'

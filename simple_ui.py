@@ -73,16 +73,17 @@ class DisplayApp:
     self.device_menu['menu'].delete(0,'end')
     for uid in uids:
       self._uid_dict[uid] = {}
-      self.ola_thread.RDMGet(self.cur_universe.get(), uid, 0, 0x0082, lambda x: self.addDevice(uid, x))
+      self.ola_thread.RDMGet(self.cur_universe.get(), uid, 0, 0x0082, lambda b, s: self.addDevice(uid, b, s))
     self.cur_device = self._uid_dict[uids[0]] # initial value
     
-  def addDevice(self, uid, response ):
+  def addDevice(self, uid, b, s ):
     '''
     adds device name to self.devicenames
     '''
     print 'add device'
-    self._uid_dict[uid] = {'device label': response.ResponseCodeAsString()}
-    self.device_menu['menu'].add_command( label = response.ResponseCodeAsString())
+    if b == True:
+    	self._uid_dict[uid] = {'device label': s}
+    	self.device_menu['menu'].add_command( label = s)
         
   def display_info(self, uid):
   	print 'display info'
