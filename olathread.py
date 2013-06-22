@@ -53,7 +53,7 @@ class OLAThread(threading.Thread):
     if response == False:
       callback( False, [] )
     
-  def RDMGet(self, universe, uid, sub_device, pid, callback, data = ' '):
+  def RDMGet(self, universe, uid, sub_device, pid, callback, data = ''):
     '''
     
     '''
@@ -72,12 +72,8 @@ class OLAThread(threading.Thread):
     
     '''
     print 'RDM get completed'
-    if response.status.Succeeded() != True:
-      callback( False, '' )
-    elif response.response_code != 'RDM_COMPLETED_OK':
-      callback( False, '' )
-    elif response.response_type != 'ACK':
-      callback( False, '' )
+    if response.WasAcked() == False:
+    	callback(False, '')
     else: 
       callback( True, response.data )
     

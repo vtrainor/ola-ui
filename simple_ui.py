@@ -80,13 +80,14 @@ class DisplayApp:
     '''
     adds device name to self.devicenames
     '''
-    print 'add device'
+    print b
     if b == True:
-    	self._uid_dict[uid] = {'device label': s}
-    	self.device_menu['menu'].add_command( label = s)
+      print s
+      self._uid_dict[uid] = {'device label': s}
+      self.device_menu['menu'].add_command( label = s)
         
   def display_info(self, uid):
-  	print 'display info'
+    print 'display info'
 
   def main(self):
     print 'Entering main loop'
