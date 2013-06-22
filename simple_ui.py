@@ -9,25 +9,27 @@ import olathread
 class DisplayApp:
   
   def __init__(self, width, height):
+    '''
+    '''
     # Initialize the tk root window
     self.root = tk.Tk()
-    self.initDx = width
-    self.initDy = height
-    self.root.geometry( "%dx%d+50+30" % (self.initDx, self.initDy) )
+    self.init_dx = width
+    self.init_dy = height
+    self.root.geometry( "%dx%d+50+30" % (self.init_dx, self.init_dy) )
     self.root.title("RDM user interface version: 1.0")
     self.root.maxsize( 1600, 900 )
     self.root.lift()
     self.root.update_idletasks()
     # Assigning fields
-    self.cur_universe = tk.IntVar(self.root)
-    self.cur_universe.set(1)
+    self.universe = tk.IntVar(self.root)
+    self.universe.set(1)
     self.universe_list = [1, 2, 3, 4, 5]
     self.cur_device = None
     self.state = 0
     self._uid_dict = {}
     # Call initialing functions
-    self.buildFrames()
-    self.buildCntrl()
+    self.build_frames()
+    self.build_cntrl()
     # Start the ola thread
     self.ola_thread = olathread.OLAThread()
     self.ola_thread.start()
@@ -35,37 +37,36 @@ class DisplayApp:
     time.sleep(1)
     print 'back from sleep'
     
-  def buildFrames(self):
+  def build_frames(self):
     '''
     '''
-    self.cntrlframe = tk.PanedWindow(self.root)
-    self.cntrlframe.pack(side=tk.TOP, padx=2, pady=2, fill=tk.Y)
+    self.cntrl_frame = tk.PanedWindow(self.root)
+    self.cntrl_frame.pack(side=tk.TOP, padx=2, pady=2, fill=tk.Y)
     
-  def buildCntrl(self):
+  def build_cntrl(self):
     '''
+    builds the top bar of the GUI where the options for the information display are
+    located
     '''
-    function = lambda : self.ola_thread.RunDiscovery(self.cur_universe.get(), self.uponDiscover)
-    discover_button = tk.Button( self.cntrlframe, text="Discover", 
+    function = lambda : self.ola_thread.run_discovery(self.universe.get(), self.upon_discover)
+    discover_button = tk.Button( self.cntrl_frame, text="Discover", 
                      command=function,  width=8 )
-    discover_button.grid(row=0, column=0)
-    tk.Label( self.cntrlframe, width=3).grid(row=0, column=1)
-    tk.Label(self.cntrlframe, text='Select\nUniverse:').grid(row=0, column=2)
-    menu = tk.OptionMenu(self.cntrlframe, self.cur_universe, *self.universe_list)
-    menu.config(width=1)
-    menu.grid(row=0, column=3)
-    tk.Label(self.cntrlframe, width=6, text='Identify').grid(row=0,column=5)
-    tk.Checkbutton(self.cntrlframe).grid(row=0, column=6)
-    tk.Label( self.cntrlframe, width=3).grid(row=0, column=7)
-    tk.Label( self.cntrlframe, text='Automatic\nDiscovery' ).grid(row=0, column=8)
-    tk.Checkbutton(self.cntrlframe).grid(row=0, column=9)
-    self.device_menu = tk.OptionMenu(self.cntrlframe, self.cur_device, [])
-    self.device_menu.grid(row=0, column=4)
+    discover_button.pack(side = tk.LEFT)
+    tk.Label( self.cntrl_frame, width=3).pack(side = tk.LEFT)
+    tk.Label(self.cntrl_frame, text='Select\nUniverse:').pack(side = tk.LEFT)
+    menu = tk.OptionMenu(self.cntrl_frame, self.universe, *self.universe_list, command=self.set_universe)
+#     menu.config(width=1)
+    menu.pack(side = tk.LEFT)
+    self.device_menu = tk.OptionMenu(self.cntrl_frame, self.cur_device, [])
+    self.device_menu.pack(side = tk.LEFT)
+    tk.Label(self.cntrl_frame, width=6, text='Identify').pack(side = tk.LEFT)
+    tk.Checkbutton(self.cntrl_frame).pack(side = tk.LEFT)
+    tk.Label( self.cntrl_frame, width=3).pack(side = tk.LEFT)
+    tk.Label( self.cntrl_frame, text='Automatic\nDiscovery' ).pack(side = tk.LEFT)
+    tk.Checkbutton(self.cntrl_frame).pack(side = tk.LEFT)
 
-  def discover(self):
-    func = lambda: self.ola_thread._client.RunRDMDiscovery(1, True, self.uponDiscover)
-    self.ola_thread.Execute(func) 
-  
-  def uponDiscover(self, status, uids):
+    
+  def upon_discover(self, status, uids):
     '''
     callback for client.RunRDMDiscovery
     '''
@@ -73,20 +74,29 @@ class DisplayApp:
     self.device_menu['menu'].delete(0,'end')
     for uid in uids:
       self._uid_dict[uid] = {}
-      self.ola_thread.RDMGet(self.cur_universe.get(), uid, 0, 0x0082, lambda b, s: self.addDevice(uid, b, s))
+      self.ola_thread.rdm_get(self.universe.get(), uid, 0, 0x0082, lambda b, s: self.add_device(uid, b, s))
     self.cur_device = self._uid_dict[uids[0]] # initial value
     
-  def addDevice(self, uid, b, s ):
+  def add_device(self, uid, succeeded, device_label ):
     '''
     adds device name to self.devicenames
     '''
-    print b
-    if b == True:
-      print s
-      self._uid_dict[uid] = {'device label': s}
-      self.device_menu['menu'].add_command( label = s)
+    if succeeded == True:
+      self._uid_dict[uid] = {'device label': device_label}
+      self.device_menu['menu'].add_command( label = '%s (%s)' %(device_label, uid), 
+                               command = lambda : self.display_info(uid) )
+    
+  def set_universe(self, i):
+    '''
+    sets the int var self.universe to the value of i
+    '''
+    self.universe.set(i)
         
   def display_info(self, uid):
+    '''
+    this function will be called by self.device_menu and will display the information for
+    a particular device in the botton half of the GUI
+    '''
     print 'display info'
 
   def main(self):

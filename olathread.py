@@ -22,7 +22,7 @@ class OLAThread(threading.Thread):
     self._ss.Run()
     print 'OLA thread finished'
  
-  def Stop(self):
+  def stop(self):
     '''
     terminates SelectServer object (created in self.run())
     '''
@@ -33,19 +33,19 @@ class OLAThread(threading.Thread):
     print 'Stopping OLA thread'
     self._ss.Terminate()       
                                                                                                                                
-  def RunDiscovery(self, universe, callback):
+  def run_discovery(self, universe, callback):
     '''
     Can be called from any thread.
     Callback takes two arguments(bool, [UID])
     Callback is run in the OLA thread.
     '''
-    self._ss.Execute(lambda : self._RunDiscovery(universe, callback))                                                                                                                            
+    self._ss.Execute(lambda : self._run_discovery(universe, callback))                                                                                                                            
  
   def Execute(self, cb):
     print 'calling execute'
     self._ss.Execute(cb)
  
-  def _RunDiscovery(self, universe, callback):
+  def _run_discovery(self, universe, callback):
     '''
     This method is only run in the OLA thread.
     '''
@@ -53,21 +53,21 @@ class OLAThread(threading.Thread):
     if response == False:
       callback( False, [] )
     
-  def RDMGet(self, universe, uid, sub_device, pid, callback, data = ''):
+  def rdm_get(self, universe, uid, sub_device, pid, callback, data = ''):
     '''
     
     '''
     print 'rdm get'
-    self._ss.Execute(lambda: self._RDMGet(universe, uid, sub_device, pid, callback, data) )
+    self._ss.Execute(lambda: self._rdm_get(universe, uid, sub_device, pid, callback, data) )
     
-  def _RDMGet(self, universe, uid, sub_device, pid, callback, data):
+  def _rdm_get(self, universe, uid, sub_device, pid, callback, data):
     '''
     This method is only run in the OLA thread.
     '''
     print '_rdm_get'
-    self._client.RDMGet(universe, uid, sub_device, pid, lambda r: self.CompleteGet(callback, r), data)
+    self._client.RDMGet(universe, uid, sub_device, pid, lambda r: self.complete_get(callback, r), data)
       
-  def CompleteGet(self, callback, response):
+  def complete_get(self, callback, response):
     '''
     
     '''
