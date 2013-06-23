@@ -94,7 +94,7 @@ class OLAThread(threading.Thread):
     if response.WasAcked() == False:
     	callback(False, '')
     else: 
-      callback( True, response.data ) # should this line be: callback( True, data)
+      callback( True, data)
     
   def complete_set(self, callback, response, data, unpack_exception):
     '''
@@ -103,9 +103,9 @@ class OLAThread(threading.Thread):
     print 'RDM set completed'
     # need to do something with the unpack_exception here
     if response.WasAcked() == False:
-    	callback(False, '')
+      callback(False, unpack_exception.__str__())
     else: 
-      callback( True, response.data ) # again, should this just be callback( True, data)?
+      callback( True, data)
       
 if __name__ == '__main__':
   print 'olathreading'

@@ -81,15 +81,18 @@ class DisplayApp:
       self.ola_thread.rdm_get(self.universe.get(), uid, 0, 0x0082, lambda b, s, uid = uid: self.add_device(uid, b, s))
     self.cur_uid = uids[0] # initial value
     
-  def add_device(self, uid, succeeded, device_label ):
+  def add_device(self, uid, succeeded, data):
     '''
     adds device name to self.devicenames
     '''
     if succeeded == True:
-      self._uid_dict[uid] = {'device label': device_label}
-      self.device_menu['menu'].add_command( label = '%s (%s)' %(device_label, uid), 
+      self._uid_dict[uid] = {'device label': data['label']}
+      self.device_menu['menu'].add_command( label = '%s (%s)' %(data['label'], uid), 
                                command = lambda : self.display_info(uid) )
-    
+
+  def identify(self, uid, succeeded, value):
+    print 'Succeeded? %s\n value: %s' % (succeeded, value)
+
   def set_universe(self, i):
     '''
     sets the int var self.universe to the value of i
@@ -104,9 +107,9 @@ class DisplayApp:
     self.dev_label.set('%s (%s)' %(self._uid_dict[uid]['device label'], uid))
     print 'uid: %s\ncur_uid: %s\nid_state: %d' % (uid, self.cur_uid, self.id_state.get())
     if uid != self.cur_uid and self.id_state.get() == 1:
-    	print 'same ui'
-    	self.id_box.deselect()
-    self.ola_thread.rdm_set(self.universe.get(), uid, 0, 0x1000, lambda b, s, uid = uid: self.add_device(uid, b, s), self.id_state.get())
+      print 'same ui'
+      self.id_box.deselect()
+    self.ola_thread.rdm_set(self.universe.get(), uid, 0, 0x1000, lambda b, s, uid = uid: self.identify(uid, b, s), [self.id_state.get()])
     self.cur_uid = uid
     print 'display info'
 
