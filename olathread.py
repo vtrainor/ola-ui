@@ -2,7 +2,9 @@ from ola.ClientWrapper import ClientWrapper, SelectServer
 from ola.OlaClient import OlaClient, OLADNotRunningException
 import threading
 import time
- 
+from ola.RDMAPI import RDMAPI
+from ola import PidStore
+
 class OLAThread(threading.Thread):
   """The thread which runs the OLA Client."""
   def __init__(self):
@@ -10,6 +12,8 @@ class OLAThread(threading.Thread):
     self._client = OlaClient()
     self._ss = None  # created in run()
     self.daemon = True #allows the program to Terminate correctly
+    self._pid_store = PidStore.GetStore()
+    self._rdm_api = RDMAPI(self._client, self._pid_store)
  	
   def run(self):
     '''
@@ -47,7 +51,14 @@ class OLAThread(threading.Thread):
  
   def rdm_get(self, universe, uid, sub_device, pid, callback, data = ''):
     '''
-    
+    get rdm message
+    '''
+    print 'rdm get'
+    self._ss.Execute(lambda: self._rdm_get(universe, uid, sub_device, pid, callback, data) )
+ 
+  def rdm_set(self, universe, uid, sub_device, pid, callback, data):
+    '''
+    send rdm message
     '''
     print 'rdm get'
     self._ss.Execute(lambda: self._rdm_get(universe, uid, sub_device, pid, callback, data) )
@@ -65,17 +76,36 @@ class OLAThread(threading.Thread):
     This method is only run in the OLA thread.
     '''
     print '_rdm_get'
-    self._client.RDMGet(universe, uid, sub_device, pid, lambda r: self.complete_get(callback, r), data)
+    self._rdm_api.Get(universe, uid, sub_device, self._pid_store.GetPid(pid), lambda r, d, e: self.complete_get(callback, r, d, e), data)
       
-  def complete_get(self, callback, response):
+  def _rdm_set(self, universe, uid, sub_device, pid, callback, data):
+    '''
+    This method is only run in the OLA thread.
+    '''
+    print '_rdm_get'
+    self._rdm_api[0].Set(universe, uid, sub_device, self._pid_store.GetPid(pid), lambda r, d, e: self.complete_get(callback, r, d, e), data)
+      
+  def complete_get(self, callback, response, data, unpack_exception):
     '''
     
     '''
     print 'RDM get completed'
+    # need to do something with unpack_exception here
     if response.WasAcked() == False:
     	callback(False, '')
     else: 
-      callback( True, response.data )
+      callback( True, response.data ) # should this line be: callback( True, data)
     
+  def complete_set(self, callback, response, data, unpack_exception):
+    '''
+    
+    '''
+    print 'RDM set completed'
+    # need to do something with the unpack_exception here
+    if response.WasAcked() == False:
+    	callback(False, '')
+    else: 
+      callback( True, response.data ) # again, should this just be callback( True, data)?
+      
 if __name__ == '__main__':
   print 'olathreading'
