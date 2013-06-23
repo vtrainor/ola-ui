@@ -24,8 +24,10 @@ class DisplayApp:
     self.universe = tk.IntVar(self.root)
     self.universe.set(1)
     self.universe_list = [1, 2, 3, 4, 5]
-    self.cur_device = None
-    self.state = 0
+    self.cur_uid = None
+    self.id_state = tk.IntVar(self.root)
+    self.id_state.set(0)
+#     self.state = 0
     self._uid_dict = {}
     # Call initialing functions
     self.build_frames()
@@ -41,7 +43,9 @@ class DisplayApp:
     '''
     '''
     self.cntrl_frame = tk.PanedWindow(self.root)
-    self.cntrl_frame.pack(side=tk.TOP, padx=2, pady=2, fill=tk.Y)
+    self.cntrl_frame.pack(side=tk.TOP, padx=1, pady=1, fill=tk.Y)
+    self.info_frame = tk.PanedWindow(self.root)
+    self.info_frame.pack(side=tk.TOP, padx=1, pady=2, fill=tk.Y)
     
   def build_cntrl(self):
     '''
@@ -57,10 +61,10 @@ class DisplayApp:
     menu = tk.OptionMenu(self.cntrl_frame, self.universe, *self.universe_list, command=self.set_universe)
 #     menu.config(width=1)
     menu.pack(side = tk.LEFT)
-    self.device_menu = tk.OptionMenu(self.cntrl_frame, self.cur_device, [])
+    self.device_menu = tk.OptionMenu(self.cntrl_frame, self.cur_uid, [])
     self.device_menu.pack(side = tk.LEFT)
-    tk.Label(self.cntrl_frame, width=6, text='Identify').pack(side = tk.LEFT)
-    tk.Checkbutton(self.cntrl_frame).pack(side = tk.LEFT)
+    self.id_box = tk.Checkbutton(self.cntrl_frame, text='Identify', variable=self.id_state ).pack(side = tk.LEFT)
+    tk.Button( self.cntrl_frame, text = 'Redisplay Info', command = lambda : self.display_info(self.cur_uid) ).pack(side = tk.LEFT)
     tk.Label( self.cntrl_frame, width=3).pack(side = tk.LEFT)
     tk.Label( self.cntrl_frame, text='Automatic\nDiscovery' ).pack(side = tk.LEFT)
     tk.Checkbutton(self.cntrl_frame).pack(side = tk.LEFT)
@@ -75,7 +79,7 @@ class DisplayApp:
     for uid in uids:
       self._uid_dict[uid] = {}
       self.ola_thread.rdm_get(self.universe.get(), uid, 0, 0x0082, lambda b, s: self.add_device(uid, b, s))
-    self.cur_device = self._uid_dict[uids[0]] # initial value
+    self.cur_uid = uids[0] # initial value
     
   def add_device(self, uid, succeeded, device_label ):
     '''
@@ -97,6 +101,10 @@ class DisplayApp:
     this function will be called by self.device_menu and will display the information for
     a particular device in the botton half of the GUI
     '''
+    print 'uid: %s\ncur_uid: %s\nid_state: %d' % (uid, self.cur_uid, self.id_state.get())
+    if uid != self.cur_uid and self.id_state.get() == 1:
+    	print 'same ui'
+    	self.id_box.deselect()
     print 'display info'
 
   def main(self):
@@ -104,7 +112,7 @@ class DisplayApp:
     self.root.mainloop()  
 
 if __name__ == '__main__':
-  display = DisplayApp(600, 400)
+  display = DisplayApp(800, 600)
   display.main()
 
 

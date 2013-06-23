@@ -9,7 +9,6 @@ class OLAThread(threading.Thread):
     super(OLAThread, self).__init__()
     self._client = OlaClient()
     self._ss = None  # created in run()
-    self.daemon = True
  
   def run(self):
     '''
@@ -45,6 +44,13 @@ class OLAThread(threading.Thread):
     print 'calling execute'
     self._ss.Execute(cb)
  
+  def rdm_get(self, universe, uid, sub_device, pid, callback, data = ''):
+    '''
+    
+    '''
+    print 'rdm get'
+    self._ss.Execute(lambda: self._rdm_get(universe, uid, sub_device, pid, callback, data) )
+ 
   def _run_discovery(self, universe, callback):
     '''
     This method is only run in the OLA thread.
@@ -52,13 +58,6 @@ class OLAThread(threading.Thread):
     response = self._client.RunRDMDiscovery(universe, True, callback)
     if response == False:
       callback( False, [] )
-    
-  def rdm_get(self, universe, uid, sub_device, pid, callback, data = ''):
-    '''
-    
-    '''
-    print 'rdm get'
-    self._ss.Execute(lambda: self._rdm_get(universe, uid, sub_device, pid, callback, data) )
     
   def _rdm_get(self, universe, uid, sub_device, pid, callback, data):
     '''
