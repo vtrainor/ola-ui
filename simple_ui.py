@@ -52,20 +52,17 @@ class DisplayApp:
     builds the top bar of the GUI where the options for the information display are
     located
     '''
-    function = lambda : self.ola_thread.run_discovery(self.universe.get(), self.upon_discover)
-    discover_button = tk.Button( self.cntrl_frame, text="Discover", 
-                     command=function,  width=8 )
-    discover_button.pack(side = tk.LEFT)
-    tk.Label( self.cntrl_frame, width=3).pack(side = tk.LEFT)
-    tk.Label(self.cntrl_frame, text='Select\nUniverse:').pack(side = tk.LEFT)
+    tk.Label( self.cntrl_frame, text='Select\nUniverse:').pack(side = tk.LEFT)
     menu = tk.OptionMenu(self.cntrl_frame, self.universe, *self.universe_list, command=self.set_universe)
 #     menu.config(width=1)
     menu.pack(side = tk.LEFT)
-    self.device_menu = tk.OptionMenu(self.cntrl_frame, self.cur_uid, [])
+    function = lambda : self.ola_thread.run_discovery(self.universe.get(), self.upon_discover)
+    discover_button = tk.Button( self.cntrl_frame, text="Discover", command=function,  width=8 )
+    discover_button.pack(side = tk.LEFT)
+    self.device_menu = tk.OptionMenu(self.cntrl_frame, self.cur_uid, [], command=self.display_info)
     self.device_menu.pack(side = tk.LEFT)
     self.id_box = tk.Checkbutton(self.cntrl_frame, text='Identify', variable=self.id_state ).pack(side = tk.LEFT)
     tk.Button( self.cntrl_frame, text = 'Redisplay Info', command = lambda : self.display_info(self.cur_uid) ).pack(side = tk.LEFT)
-    tk.Label( self.cntrl_frame, width=3).pack(side = tk.LEFT)
     tk.Label( self.cntrl_frame, text='Automatic\nDiscovery' ).pack(side = tk.LEFT)
     tk.Checkbutton(self.cntrl_frame).pack(side = tk.LEFT)
 
@@ -78,7 +75,7 @@ class DisplayApp:
     self.device_menu['menu'].delete(0,'end')
     for uid in uids:
       self._uid_dict[uid] = {}
-      self.ola_thread.rdm_get(self.universe.get(), uid, 0, 0x0082, lambda b, s: self.add_device(uid, b, s))
+      self.ola_thread.rdm_get(self.universe.get(), uid, 0, 0x0082, lambda b, s, uid = uid: self.add_device(uid, b, s))
     self.cur_uid = uids[0] # initial value
     
   def add_device(self, uid, succeeded, device_label ):

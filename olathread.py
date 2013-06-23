@@ -9,7 +9,8 @@ class OLAThread(threading.Thread):
     super(OLAThread, self).__init__()
     self._client = OlaClient()
     self._ss = None  # created in run()
- 
+    self.daemon = True #allows the program to Terminate correctly
+ 	
   def run(self):
     '''
     creates a SelectServer object and runs it
