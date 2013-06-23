@@ -59,9 +59,9 @@ class DisplayApp:
     function = lambda : self.ola_thread.run_discovery(self.universe.get(), self.upon_discover)
     discover_button = tk.Button( self.cntrl_frame, text="Discover", command=function,  width=8 )
     discover_button.pack(side = tk.LEFT)
-    dev_label = tk.StringVar(self.root)
-    dev_label.set('Devices')
-    self.device_menu = tk.OptionMenu(self.cntrl_frame, dev_label, [])
+    self.dev_label = tk.StringVar(self.root)
+    self.dev_label.set('Devices')
+    self.device_menu = tk.OptionMenu(self.cntrl_frame, self.dev_label, [])
     self.device_menu.pack(side = tk.LEFT)
     self.id_box = tk.Checkbutton(self.cntrl_frame, text='Identify', variable=self.id_state )
     self.id_box.pack(side = tk.LEFT)
@@ -101,6 +101,7 @@ class DisplayApp:
     this function will be called by self.device_menu and will display the information for
     a particular device in the botton half of the GUI
     '''
+    self.dev_label.set('%s (%s)' %(self._uid_dict[uid]['device label'], uid))
     print 'uid: %s\ncur_uid: %s\nid_state: %d' % (uid, self.cur_uid, self.id_state.get())
     if uid != self.cur_uid and self.id_state.get() == 1:
     	print 'same ui'
