@@ -106,9 +106,7 @@ class DisplayApp:
     if uid != self.cur_uid and self.id_state.get() == 1:
     	print 'same ui'
     	self.id_box.deselect()
-    elif self.id_state.get() == 1:
-    	print 'identify'
-    	# Identify device
+    self.ola_thread.rdm_set(self.universe.get(), uid, 0, 0x1000, lambda b, s, uid = uid: self.add_device(uid, b, s), self.id_state.get())
     self.cur_uid = uid
     print 'display info'
 

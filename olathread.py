@@ -61,7 +61,7 @@ class OLAThread(threading.Thread):
     send rdm message
     '''
     print 'rdm get'
-    self._ss.Execute(lambda: self._rdm_get(universe, uid, sub_device, pid, callback, data) )
+    self._ss.Execute(lambda: self._rdm_set(universe, uid, sub_device, pid, callback, data) )
  
   def _run_discovery(self, universe, callback):
     '''
@@ -83,7 +83,7 @@ class OLAThread(threading.Thread):
     This method is only run in the OLA thread.
     '''
     print '_rdm_get'
-    self._rdm_api[0].Set(universe, uid, sub_device, self._pid_store.GetPid(pid), lambda r, d, e: self.complete_get(callback, r, d, e), data)
+    self._rdm_api.Set(universe, uid, sub_device, self._pid_store.GetPid(pid), lambda r, d, e: self.complete_get(callback, r, d, e), data)
       
   def complete_get(self, callback, response, data, unpack_exception):
     '''
