@@ -59,9 +59,12 @@ class DisplayApp:
     function = lambda : self.ola_thread.run_discovery(self.universe.get(), self.upon_discover)
     discover_button = tk.Button( self.cntrl_frame, text="Discover", command=function,  width=8 )
     discover_button.pack(side = tk.LEFT)
-    self.device_menu = tk.OptionMenu(self.cntrl_frame, self.cur_uid, [], command=self.display_info)
+    dev_label = tk.StringVar(self.root)
+    dev_label.set('Devices')
+    self.device_menu = tk.OptionMenu(self.cntrl_frame, dev_label, [])
     self.device_menu.pack(side = tk.LEFT)
-    self.id_box = tk.Checkbutton(self.cntrl_frame, text='Identify', variable=self.id_state ).pack(side = tk.LEFT)
+    self.id_box = tk.Checkbutton(self.cntrl_frame, text='Identify', variable=self.id_state )
+    self.id_box.pack(side = tk.LEFT)
     tk.Button( self.cntrl_frame, text = 'Redisplay Info', command = lambda : self.display_info(self.cur_uid) ).pack(side = tk.LEFT)
     tk.Label( self.cntrl_frame, text='Automatic\nDiscovery' ).pack(side = tk.LEFT)
     tk.Checkbutton(self.cntrl_frame).pack(side = tk.LEFT)
@@ -102,6 +105,10 @@ class DisplayApp:
     if uid != self.cur_uid and self.id_state.get() == 1:
     	print 'same ui'
     	self.id_box.deselect()
+    elif self.id_state.get() == 1:
+    	print 'identify'
+    	# Identify device
+    self.cur_uid = uid
     print 'display info'
 
   def main(self):
