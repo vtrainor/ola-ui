@@ -109,8 +109,8 @@ class DisplayApp:
     if uid != self.cur_uid:
       if 'id' in self._uid_dict:
         self.id_state.set(self._uid_dict[uid]['id'])
-      else:
-      	self.id_state.set(0)
+#       else:
+#       	self.id_state.set(0)
       self.cur_uid = uid
     self.ola_thread.rdm_set(self.universe.get(), uid, 0, 0x1000, lambda b, s, uid = uid: self.identify(uid, b, s), [self.id_state.get()])
     print 'display info'
