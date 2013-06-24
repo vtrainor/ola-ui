@@ -55,16 +55,16 @@ class DisplayApp:
     '''
     tk.Label( self.cntrl_frame, text='Select\nUniverse:').pack(side = tk.LEFT)
     menu = tk.OptionMenu(self.cntrl_frame, self.universe, *self.universe_list, command=self.set_universe)
-#     menu.config(width=1)
     menu.pack(side = tk.LEFT)
     function = lambda : self.ola_thread.run_discovery(self.universe.get(), self.upon_discover)
-    discover_button = tk.Button( self.cntrl_frame, text="Discover", command=function,  width=8 )
+    discover_button = tk.Button( self.cntrl_frame, text="Discover", command=function)
     discover_button.pack(side = tk.LEFT)
     self.dev_label = tk.StringVar(self.root)
     self.dev_label.set('Devices')
     self.device_menu = tk.OptionMenu(self.cntrl_frame, self.dev_label, [])
     self.device_menu.pack(side = tk.LEFT)
-    self.id_box = tk.Checkbutton(self.cntrl_frame, text='Identify', variable=self.id_state, command=self.toggle_ident )
+    self.id_box = tk.Checkbutton(self.cntrl_frame, text='Identify', variable=self.id_state, 
+         command=self.ola_thread.rdm_set(self.universe.get(), self.cur_uid, 0, 0x1000, lambda b, s, uid = self.cur_uid: self.set_identify_complete(uid, b, s), [self.id_state.get()]))
     self.id_box.pack(side = tk.LEFT)
     tk.Button( self.cntrl_frame, text = 'Redisplay Info', command = lambda : self.display_info(self.cur_uid) ).pack(side = tk.LEFT)
     tk.Label( self.cntrl_frame, text='Automatic\nDiscovery' ).pack(side = tk.LEFT)
@@ -80,7 +80,6 @@ class DisplayApp:
     for uid in uids:
       self._uid_dict[uid] = {}
       self.ola_thread.rdm_get(self.universe.get(), uid, 0, 0x0082, lambda b, s, uid = uid: self.add_device(uid, b, s))
-    self.cur_uid = uids[0] # initial value
     
   def add_device(self, uid, succeeded, data):
     '''
@@ -88,10 +87,12 @@ class DisplayApp:
     '''
     if succeeded == True:
       self._uid_dict[uid] = {'device label': data['label']}
-      self.device_menu['menu'].add_command( label = '%s (%s)' %(data['label'], uid), 
-                               command = lambda : self.device_selected(uid) )
+      self.device_menu['menu'].add_command( label = '%s (%s)' %(self._uid_dict[uid]['device label'], uid), command = lambda : self.device_selected(uid) )
 
-  def identify(self, uid, succeeded, value):
+  def get_identify_complete(self, uid, succeeded, value):
+    '''
+    sets the checkbox's state to that of the currently selected device
+    '''
     if succeeded:
       self.id_state.set(value['identify_state'])
 
@@ -108,20 +109,15 @@ class DisplayApp:
     '''
     if uid == self.cur_uid:
       return
-    self.dev_label.set('%s (%s)' %(self._uid_dict[uid]['device label'], uid))
     print 'uid: %s\ncur_uid: %s\nid_state: %d' % (uid, self.cur_uid, self.id_state.get())
-    self.ola_thread.rdm_get(self.universe.get(), uid, 0, 0x1000, lambda b, s, uid = uid: self.identify(uid, b, s))
-    self.cur_uid = uid
-    print 'display info'
-  
-  def toggle_ident(self):
-    print 'toggle'
-    pass
-   #  print self.cur_uid
-#     if self.cur_uid is None:
-#       return
-#     else:
-#       self.ola_thread.rdm_set(self.universe.get(), self.cur_uid, 0, 0x1000, lambda b, s, uid = self.cur_uid: self.identify(uid, b, s), [self.id_state.get()])
+    self.dev_label.set('%s (%s)' %(self._uid_dict[uid]['device label'], uid))
+    self.ola_thread.rdm_get(self.universe.get(), uid, 0, 0x1000, lambda b, s, uid = uid: self.get_identify_complete(uid, b, s))
+    self.cur_uid = uid  
+    
+  def set_identify_complete(self, uid, succeded, value):
+    '''
+    '''
+    print 'rdm set complete'
 
   def main(self):
     print 'Entering main loop'
