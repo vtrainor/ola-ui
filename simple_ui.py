@@ -63,14 +63,12 @@ class DisplayApp:
     self.dev_label.set('Devices')
     self.device_menu = tk.OptionMenu(self.cntrl_frame, self.dev_label, [])
     self.device_menu.pack(side = tk.LEFT)
-    self.id_box = tk.Checkbutton(self.cntrl_frame, text='Identify', variable=self.id_state, 
-         command=self.ola_thread.rdm_set(self.universe.get(), self.cur_uid, 0, 0x1000, lambda b, s, uid = self.cur_uid: self.set_identify_complete(uid, b, s), [self.id_state.get()]))
+    self.id_box = tk.Checkbutton(self.cntrl_frame, text='Identify', variable=self.id_state, command=self.identify)
     self.id_box.pack(side = tk.LEFT)
     tk.Button( self.cntrl_frame, text = 'Redisplay Info', command = lambda : self.display_info(self.cur_uid) ).pack(side = tk.LEFT)
     tk.Label( self.cntrl_frame, text='Automatic\nDiscovery' ).pack(side = tk.LEFT)
     tk.Checkbutton(self.cntrl_frame).pack(side = tk.LEFT)
 
-    
   def upon_discover(self, status, uids):
     '''
     callback for client.RunRDMDiscovery
@@ -118,6 +116,12 @@ class DisplayApp:
     '''
     '''
     print 'rdm set complete'
+    
+  def identify(self):
+    if self.cur_uid is not None:
+      self.ola_thread.rdm_set(self.universe.get(), self.cur_uid, 0, 0x1000, lambda b, s, uid = self.cur_uid: self.set_identify_complete(uid, b, s), [self.id_state.get()])
+    else:
+      return
 
   def main(self):
     print 'Entering main loop'
