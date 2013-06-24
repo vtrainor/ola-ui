@@ -116,11 +116,12 @@ class DisplayApp:
   
   def toggle_ident(self):
     print 'toggle'
-    print self.cur_uid
-    if self.cur_uid is None:
-      return
-    else:
-      self.ola_thread.rdm_set(self.universe.get(), self.cur_uid, 0, 0x1000, lambda b, s, uid = self.cur_uid: self.identify(uid, b, s), [self.id_state.get()])
+    pass
+   #  print self.cur_uid
+#     if self.cur_uid is None:
+#       return
+#     else:
+#       self.ola_thread.rdm_set(self.universe.get(), self.cur_uid, 0, 0x1000, lambda b, s, uid = self.cur_uid: self.identify(uid, b, s), [self.id_state.get()])
 
   def main(self):
     print 'Entering main loop'
