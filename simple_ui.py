@@ -30,11 +30,12 @@ class DisplayApp:
 #     self.state = 0
     self._uid_dict = {}
     # Call initialing functions
+    self.ola_thread = olathread.OLAThread()
+    self.ola_thread.start()
     self.build_frames()
     self.build_cntrl()
     # Start the ola thread
-    self.ola_thread = olathread.OLAThread()
-    self.ola_thread.start()
+
     print 'currently in thread: %d' % threading.currentThread().ident
     time.sleep(1)
     print 'back from sleep'
@@ -63,7 +64,7 @@ class DisplayApp:
     self.dev_label.set('Devices')
     self.device_menu = tk.OptionMenu(self.cntrl_frame, self.dev_label, [])
     self.device_menu.pack(side = tk.LEFT)
-    self.id_box = tk.Checkbutton(self.cntrl_frame, text='Identify', variable=self.id_state )
+    self.id_box = tk.Checkbutton(self.cntrl_frame, text='Identify', variable=self.id_state, command=self.toggle_ident )
     self.id_box.pack(side = tk.LEFT)
     tk.Button( self.cntrl_frame, text = 'Redisplay Info', command = lambda : self.display_info(self.cur_uid) ).pack(side = tk.LEFT)
     tk.Label( self.cntrl_frame, text='Automatic\nDiscovery' ).pack(side = tk.LEFT)
@@ -113,8 +114,13 @@ class DisplayApp:
     self.cur_uid = uid
     print 'display info'
   
-  # create toggle identify for when the user clicks on the identify box
-    # self.ola_thread.rdm_set(self.universe.get(), uid, 0, 0x1000, lambda b, s, uid = uid: self.identify(uid, b, s), [self.id_state.get()])
+  def toggle_ident(self):
+    print 'toggle'
+    print self.cur_uid
+    if self.cur_uid is None:
+      return
+    else:
+      self.ola_thread.rdm_set(self.universe.get(), self.cur_uid, 0, 0x1000, lambda b, s, uid = self.cur_uid: self.identify(uid, b, s), [self.id_state.get()])
 
   def main(self):
     print 'Entering main loop'
@@ -123,6 +129,3 @@ class DisplayApp:
 if __name__ == '__main__':
   display = DisplayApp(800, 600)
   display.main()
-
-
-  
