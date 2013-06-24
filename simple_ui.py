@@ -88,10 +88,11 @@ class DisplayApp:
     if succeeded == True:
       self._uid_dict[uid] = {'device label': data['label']}
       self.device_menu['menu'].add_command( label = '%s (%s)' %(data['label'], uid), 
-                               command = lambda : self.display_info(uid) )
+                               command = lambda : self.device_selected(uid) )
 
   def identify(self, uid, succeeded, value):
-    self._uid_dict[uid]['id'] = self.id_state.get()
+    if succeeded:
+      self.id_state.set(value['identify_state'])
 
   def set_universe(self, i):
     '''
@@ -99,21 +100,21 @@ class DisplayApp:
     '''
     self.universe.set(i)
         
-  def display_info(self, uid):
+  def device_selected(self, uid):
     '''
     this function will be called by self.device_menu and will display the information for
     a particular device in the botton half of the GUI
     '''
+    if uid == self.cur_uid:
+      return
     self.dev_label.set('%s (%s)' %(self._uid_dict[uid]['device label'], uid))
     print 'uid: %s\ncur_uid: %s\nid_state: %d' % (uid, self.cur_uid, self.id_state.get())
-    if uid != self.cur_uid:
-      if 'id' in self._uid_dict:
-        self.id_state.set(self._uid_dict[uid]['id'])
-#       else:
-#       	self.id_state.set(0)
-      self.cur_uid = uid
-    self.ola_thread.rdm_set(self.universe.get(), uid, 0, 0x1000, lambda b, s, uid = uid: self.identify(uid, b, s), [self.id_state.get()])
+    self.ola_thread.rdm_get(self.universe.get(), uid, 0, 0x1000, lambda b, s, uid = uid: self.identify(uid, b, s))
+    self.cur_uid = uid
     print 'display info'
+  
+  # create toggle identify for when the user clicks on the identify box
+    # self.ola_thread.rdm_set(self.universe.get(), uid, 0, 0x1000, lambda b, s, uid = uid: self.identify(uid, b, s), [self.id_state.get()])
 
   def main(self):
     print 'Entering main loop'
