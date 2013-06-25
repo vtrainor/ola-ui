@@ -14,7 +14,7 @@ class OLAThread(threading.Thread):
     self.daemon = True #allows the program to Terminate correctly
     self._pid_store = PidStore.GetStore()
     self._rdm_api = RDMAPI(self._client, self._pid_store)
- 	
+  
   def run(self):
     """ creates a SelectServer object and runs it """
     self._ss = SelectServer()
@@ -35,13 +35,13 @@ class OLAThread(threading.Thread):
                                                                                                                                
   def run_discovery(self, universe, callback):
     """ runs discovery in specified universe
-    	
-    	Args:
-    	  universe: int, specifies the universe in which to run discovery
-    	  callback: method called upon discovery, takes two arguments(bool, [UID])
+      
+      Args:
+        universe: int, specifies the universe in which to run discovery
+        callback: method called upon discovery, takes two arguments(bool, [UID])
     
-    	Can be called from any thread.
-    	Callback is run in the OLA thread.
+      Can be called from any thread.
+      Callback is run in the OLA thread.
     """
     self._ss.Execute(lambda : self._run_discovery(universe, callback))
      
@@ -76,7 +76,7 @@ class OLAThread(threading.Thread):
     print 'RDM get completed'
     # need to do something with unpack_exception here
     if response.WasAcked() == False:
-    	callback(False, '')
+      callback(False, '')
     else: 
       callback( True, data)
     

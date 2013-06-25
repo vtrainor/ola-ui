@@ -46,7 +46,7 @@ class DisplayApp:
     
   def build_frames(self):
     """ builds the two tkinter frames that are used as parents for the tkinter widgets
-    	that both control and display the RDM messages.
+      that both control and display the RDM messages.
     """
     self.cntrl_frame = tk.PanedWindow(self.root)
     self.cntrl_frame.pack(side=tk.TOP, padx=1, pady=1, fill=tk.Y)
@@ -87,7 +87,7 @@ class DisplayApp:
     
   def add_device(self, uid, succeeded, data):
     """ callback for the rdm_get in upon_discover.
-    	populates self.device_menu"""
+      populates self.device_menu"""
     if succeeded == True:
       self._uid_dict[uid] = {'device label': data['label']}
       self.device_menu['menu'].add_command( label = '%s (%s)' %(self._uid_dict[uid]['device label'], uid), command = lambda : self.device_selected(uid) )
@@ -95,7 +95,7 @@ class DisplayApp:
   def get_identify_complete(self, uid, succeeded, value):
     """ Callback for rdm_get in device_selected.
     
-    	Sets the checkbox's state to that of the currently selected device
+      Sets the checkbox's state to that of the currently selected device
     """
     if succeeded:
       self.id_state.set(value['identify_state'])
@@ -106,9 +106,9 @@ class DisplayApp:
         
   def device_selected(self, uid):
     """ called when a new device is chosen from dev_menu.
-    	
-    	Args: 
-    	  uid: the uid of the newly selected device
+      
+      Args: 
+        uid: the uid of the newly selected device
     """
     if uid == self.cur_uid:
       return
@@ -122,10 +122,10 @@ class DisplayApp:
     print 'rdm set complete'
     
   def identify(self):
-  	""" Command is called by id_box.
-  	
-  		sets the value of the device's identify field based on the value of id_box
-  	"""
+    """ Command is called by id_box.
+    
+      sets the value of the device's identify field based on the value of id_box
+    """
     if self.cur_uid is not None:
       self.ola_thread.rdm_set(self.universe.get(), self.cur_uid, 0, 0x1000, lambda b, s, uid = self.cur_uid: self.set_identify_complete(uid, b, s), [self.id_state.get()])
     else:
