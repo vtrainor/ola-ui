@@ -5,6 +5,7 @@ import threading
 import thread
 import Queue
 import olathread
+from ola import PidStore
 
 class DisplayApp:
   """ Creates the GUI for sending and receiving RDM messages through the
@@ -36,7 +37,8 @@ class DisplayApp:
 #     self.state = 0
     self._uid_dict={}
     # Call initialing functions
-    self.ola_thread=olathread.OLAThread()
+    self._pid_store=PidStore.GetStore()
+    self.ola_thread=olathread.OLAThread(self._pid_store)
     self.ola_thread.start()
     self.build_frames()
     self.build_cntrl()
@@ -90,6 +92,8 @@ class DisplayApp:
       self._uid_dict[uid] = {}
       self.ola_thread.rdm_get(self.universe.get(),uid,0,0x0082,
                               lambda b,s,uid=uid:self.add_device(uid,b,s))
+      self.ola_thread.rdm_get(self.universe.get(),uid,0,0x0050,
+                         lambda b,l,uid=uid:self.get_pids_complete(uid,b,l))
 
   def add_device(self,uid,succeeded,data):
     """ callback for the rdm_get in upon_discover.
@@ -100,6 +104,34 @@ class DisplayApp:
       self.device_menu['menu'].add_command(
                       label='%s (%s)'%(self._uid_dict[uid]['device label'],uid),
                       command=lambda:self.device_selected(uid))
+
+  def device_info(self):
+    """ Uses the return of getting the supported parameters RDM message to
+        display information about the selected device.
+    """
+    pass
+
+  def get_pids_complete(self,uid,succeeded,params):
+    """ Callback for get_supported_pids.
+
+        Args:
+          succeeded: bool, whether or not the get was a success
+          params: packed list of 16-bit pids
+    """
+    if not succeeded:
+        return
+    pid_list=params['params']
+    for item in pid_list:
+      pid=self._pid_store.GetPid(item['param_id']).name
+      self._uid_dict[uid][pid]=None
+
+  def get_value_complete(self,uid,succeeded,value):
+    """ Callback for get_pid_value. """
+    if not succeeded:
+        return
+    key=value.keys()[0]
+    print key
+    self._uid_dict[uid][key]=value.get(key)
 
   def get_identify_complete(self,uid,succeeded,value):
     """ Callback for rdm_get in device_selected.
@@ -113,19 +145,27 @@ class DisplayApp:
     """ sets the int var self.universe to the value of i """
     self.universe.set(i)
         
-  def device_selected(self, uid):
+  def device_selected(self,uid):
     """ called when a new device is chosen from dev_menu.
 
       Args: 
         uid: the uid of the newly selected device
     """
     if uid == self.cur_uid:
+      print 'this device is already selected'
       return
     print 'uid: %s\ncur_uid: %s\nid_state: %d'%(uid,self.cur_uid,
                                                 self.id_state.get())
     self.dev_label.set('%s (%s)'%(self._uid_dict[uid]['device label'],uid))
     self.ola_thread.rdm_get(self.universe.get(),uid,0,0x1000,
                          lambda b,s,uid=uid:self.get_identify_complete(uid,b,s))
+    for key in self._uid_dict[uid]:
+      print 'key %s'%key
+      if key == 'device label':
+          break
+      self.ola_thread.rdm_get(self.universe.get(),uid,0,key,
+                         lambda b,s,uid=uid:self.get_value_complete(uid,b,s))
+    print self._uid_dict
     self.cur_uid=uid  
 
   def set_identify_complete(self,uid,succeded,value):

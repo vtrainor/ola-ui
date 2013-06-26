@@ -3,16 +3,15 @@ from ola.OlaClient import OlaClient, OLADNotRunningException
 import threading
 import time
 from ola.RDMAPI import RDMAPI
-from ola import PidStore
 
 class OLAThread(threading.Thread):
   """The thread which runs the OLA Client."""
-  def __init__(self):
+  def __init__(self, pid_store):
     super(OLAThread,self).__init__()
     self._client=OlaClient()
     self._ss=None# created in run()
     self.daemon=True#allows the program to Terminate correctly
-    self._pid_store=PidStore.GetStore()
+    self._pid_store=pid_store
     self._rdm_api=RDMAPI(self._client, self._pid_store)
 
   def run(self):
