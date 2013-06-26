@@ -128,9 +128,10 @@ class DisplayApp:
   def get_value_complete(self,uid,succeeded,value):
     """ Callback for get_pid_value. """
     if not succeeded:
-        return
+      print 'did not succeed'
+      return
+    print 'value: %s'%value
     key=value.keys()[0]
-    print key
     self._uid_dict[uid][key]=value.get(key)
 
   def get_identify_complete(self,uid,succeeded,value):
@@ -151,7 +152,7 @@ class DisplayApp:
       Args: 
         uid: the uid of the newly selected device
     """
-    if uid == self.cur_uid:
+    if uid==self.cur_uid:
       print 'this device is already selected'
       return
     print 'uid: %s\ncur_uid: %s\nid_state: %d'%(uid,self.cur_uid,
@@ -160,9 +161,7 @@ class DisplayApp:
     self.ola_thread.rdm_get(self.universe.get(),uid,0,0x1000,
                          lambda b,s,uid=uid:self.get_identify_complete(uid,b,s))
     for key in self._uid_dict[uid]:
-      print 'key %s'%key
-      if key == 'device label':
-          break
+      print'key: %s'%key
       self.ola_thread.rdm_get(self.universe.get(),uid,0,key,
                          lambda b,s,uid=uid:self.get_value_complete(uid,b,s))
     print self._uid_dict
