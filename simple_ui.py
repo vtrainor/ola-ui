@@ -6,6 +6,7 @@ import thread
 import Queue
 import olathread
 from ola import PidStore
+import ttk
 
 class DisplayApp:
   """ Creates the GUI for sending and receiving RDM messages through the
@@ -52,9 +53,9 @@ class DisplayApp:
     """ builds the two tkinter frames that are used as parents for the
        tkinter widgets that both control and display the RDM messages.
     """
-    self.cntrl_frame = tk.PanedWindow(self.root)
+    self.cntrl_frame=tk.PanedWindow(self.root)
     self.cntrl_frame.pack(side=tk.TOP,padx=1,pady=1,fill=tk.Y)
-    self.info_frame = tk.PanedWindow(self.root)
+    self.info_frame=tk.PanedWindow(self.root)
     self.info_frame.pack(side=tk.TOP,padx=1,pady=2,fill=tk.Y)
     
   def build_cntrl(self):
@@ -62,7 +63,7 @@ class DisplayApp:
 
     Initializes all the general tkinter control widgets, including:
       dev_label: tk string variable for the currently selected device
-      id_box: 
+      id_box:
       device_menu:
     """
     tk.Label(self.cntrl_frame,text='Select\nUniverse:').pack(side=tk.LEFT)
@@ -70,7 +71,7 @@ class DisplayApp:
                        command=self.set_universe)
     menu.pack(side=tk.LEFT)
     function=lambda:self.ola_thread.run_discovery(self.universe.get(),
-                                                  self.upon_discover)
+                                                  self._upon_discover)
     discover_button=tk.Button(self.cntrl_frame,text="Discover",
                                 command=function)
     discover_button.pack(side=tk.LEFT)
@@ -84,68 +85,10 @@ class DisplayApp:
     tk.Label(self.cntrl_frame,text='Automatic\nDiscovery').pack(side=tk.LEFT)
     tk.Checkbutton(self.cntrl_frame).pack(side=tk.LEFT)
 
-  def upon_discover(self,status,uids):
-    """ callback for client.RunRDMDiscovery. """
-    print 'discovered'
-    self.device_menu['menu'].delete(0,'end')
-    for uid in uids:
-      self._uid_dict[uid] = {}
-      self.ola_thread.rdm_get(self.universe.get(),uid,0,0x0082,
-                              lambda b,s,uid=uid:self.add_device(uid,b,s))
-      self.ola_thread.rdm_get(self.universe.get(),uid,0,0x0050,
-                         lambda b,l,uid=uid:self.get_pids_complete(uid,b,l))
-
-  def add_device(self,uid,succeeded,data):
-    """ callback for the rdm_get in upon_discover.
-        populates self.device_menu
-    """
-    if succeeded==True:
-      self._uid_dict[uid]={'device label':data['label']}
-      self.device_menu['menu'].add_command(
-                      label='%s (%s)'%(self._uid_dict[uid]['device label'],uid),
-                      command=lambda:self.device_selected(uid))
-
-  def device_info(self):
-    """ Uses the return of getting the supported parameters RDM message to
-        display information about the selected device.
-    """
-    pass
-
-  def get_pids_complete(self,uid,succeeded,params):
-    """ Callback for get_supported_pids.
-
-        Args:
-          succeeded: bool, whether or not the get was a success
-          params: packed list of 16-bit pids
-    """
-    if not succeeded:
-        return
-    pid_list=params['params']
-    for item in pid_list:
-      pid=self._pid_store.GetPid(item['param_id']).name
-      self._uid_dict[uid][pid]=None
-
-  def get_value_complete(self,uid,succeeded,value):
-    """ Callback for get_pid_value. """
-    if not succeeded:
-      print 'did not succeed'
-      return
-    print 'value: %s'%value
-    key=value.keys()[0]
-    self._uid_dict[uid][key]=value.get(key)
-
-  def get_identify_complete(self,uid,succeeded,value):
-    """ Callback for rdm_get in device_selected.
-
-        Sets the checkbox's state to that of the currently selected device
-    """
-    if succeeded:
-      self.id_state.set(value['identify_state'])
-
   def set_universe(self,i):
     """ sets the int var self.universe to the value of i """
     self.universe.set(i)
-        
+
   def device_selected(self,uid):
     """ called when a new device is chosen from dev_menu.
 
@@ -157,19 +100,13 @@ class DisplayApp:
       return
     print 'uid: %s\ncur_uid: %s\nid_state: %d'%(uid,self.cur_uid,
                                                 self.id_state.get())
-    self.dev_label.set('%s (%s)'%(self._uid_dict[uid]['device label'],uid))
-    self.ola_thread.rdm_get(self.universe.get(),uid,0,0x1000,
-                         lambda b,s,uid=uid:self.get_identify_complete(uid,b,s))
-    for key in self._uid_dict[uid]:
-      print'key: %s'%key
-      self.ola_thread.rdm_get(self.universe.get(),uid,0,key,
-                         lambda b,s,uid=uid:self.get_value_complete(uid,b,s))
-    print self._uid_dict
-    self.cur_uid=uid  
-
-  def set_identify_complete(self,uid,succeded,value):
-    """ callback for the rdm_set in identify. """
-    print 'rdm set complete'
+    pid_key=self._pid_store.GetName('DEVICE_LABEL',uid.manufacturer_id).name
+    self.dev_label.set('%s (%s)'%(self._uid_dict[uid][pid_key],uid))
+    self.ola_thread.rdm_get(self.universe.get(),uid,0,'IDENTIFY_DEVICE',
+                        lambda b,s,uid=uid:self._get_identify_complete(uid,b,s))
+    self.ola_thread.rdm_get(self.universe.get(),uid,0,'SUPPORTED_PARAMETERS',
+                         lambda b,l,uid=uid:self._get_pids_complete(uid,b,l))
+    self.cur_uid=uid
 
   def identify(self):
     """ Command is called by id_box.
@@ -177,12 +114,81 @@ class DisplayApp:
         sets the value of the device's identify field based on the value of 
         id_box.
     """
-    if self.cur_uid is not None:
-      self.ola_thread.rdm_set(self.universe.get(),self.cur_uid,0,0x1000,
-              lambda b,s,uid = self.cur_uid:self.set_identify_complete(uid,b,s),
-              [self.id_state.get()])
-    else:
+    if self.cur_uid is None:
       return
+    self.ola_thread.rdm_set(self.universe.get(),self.cur_uid,0,
+               'IDENTIFY_DEVICE',
+               lambda b,s,uid=self.cur_uid:self._set_identify_complete(uid,b,s),
+               [self.id_state.get()])
+
+  def build_info_display(self):
+    """ Uses the return of getting the supported parameters RDM message to
+        display information about the selected device.
+    """
+    pass
+
+  def _upon_discover(self,status,uids):
+    """ callback for client.RunRDMDiscovery. """
+    print 'discovered'
+    self.device_menu['menu'].delete(0,'end')
+    for uid in uids:
+      self._uid_dict[uid] = {}
+      self.ola_thread.rdm_get(self.universe.get(),uid,0,'DEVICE_LABEL',
+                              lambda b,s,uid=uid:self._add_device(uid,b,s))
+
+  def _add_device(self,uid,succeeded,data):
+    """ callback for the rdm_get in upon_discover.
+        populates self.device_menu
+    """
+    if succeeded==True:
+      pid_key=self._pid_store.GetName('DEVICE_LABEL',uid.manufacturer_id).name
+      self._uid_dict[uid]={pid_key:data['label']}
+      self.device_menu['menu'].add_command( label='%s (%s)'%(
+                  self._uid_dict[uid][pid_key],uid),
+                  command=lambda:self.device_selected(uid))
+
+  def _get_pids_complete(self,uid,succeeded,params):
+    """ Callback for get_supported_pids.
+
+        Args:
+          succeeded: bool, whether or not the get was a success
+          params: packed list of 16-bit pids
+    """
+    if not succeeded:
+        return
+    pid_list=params['params']
+    for item in pid_list:
+      print item
+      if item is not None:
+        pid=self._pid_store.GetPid(item['param_id'],uid.manufacturer_id).name
+        print 'pid: %s'%pid
+        if pid=='DMX_PERSONALITY_DESCRIPTION':
+          data=[1]
+        else:
+          data=[]
+        self.ola_thread.rdm_get(self.universe.get(),uid,0,pid,
+                      lambda b,s,uid=uid:self._get_value_complete(uid,b,s),data)
+
+  def _get_value_complete(self,uid,succeeded,value):
+    """ Callback for get_pid_value. """
+    if not succeeded:
+      print 'did not succeed'
+      return
+    print 'value: %s'%value
+    key=value.keys()[0]
+    self._uid_dict[uid][key]=value.get(key)
+
+  def _get_identify_complete(self,uid,succeeded,value):
+    """ Callback for rdm_get in device_selected.
+
+        Sets the checkbox's state to that of the currently selected device
+    """
+    if succeeded:
+      self.id_state.set(value['identify_state'])
+
+  def _set_identify_complete(self,uid,succeded,value):
+    """ callback for the rdm_set in identify. """
+    print 'rdm set complete'
 
   def main(self):
     print 'Entering main loop'

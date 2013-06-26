@@ -64,13 +64,13 @@ class OLAThread(threading.Thread):
   def _rdm_get(self,universe,uid,sub_device,pid,callback,data):
     """ This method is only run in the OLA thread. """
     print '_rdm_get'
-    self._rdm_api.Get(universe,uid,sub_device,self._pid_store.GetPid(pid),
+    self._rdm_api.Get(universe,uid,sub_device,self._pid_store.GetName(pid),
                       lambda r,d,e:self.complete_get(callback,r,d,e),data)
       
   def _rdm_set(self,universe,uid,sub_device,pid,callback,data):
     """ This method is only run in the OLA thread. """
     print '_rdm_set'
-    self._rdm_api.Set(universe,uid,sub_device,self._pid_store.GetPid(pid),
+    self._rdm_api.Set(universe,uid,sub_device,self._pid_store.GetName(pid),
                       lambda r,d,e:self.complete_set(callback,r,d,e),data)
 
   def complete_get(self,callback,response,data,unpack_exception):
