@@ -12,7 +12,7 @@ class DisplayApp:
   """ Creates the GUI for sending and receiving RDM messages through the
       ola thread. 
   """
-  def __init__(self,width,height):
+  def __init__(self, width, height):
     """ initializes the GUI and the ola thread
     
     Args:
@@ -20,180 +20,202 @@ class DisplayApp:
       height: the int value of the height of the tkinter window
     """
     # Initialize the tk root window
-    self.root=tk.Tk()
-    self.init_dx=width
-    self.init_dy=height
-    self.root.geometry("%dx%d+50+30"%(self.init_dx,self.init_dy))
+    self.root = tk.Tk()
+    self.init_dx = width
+    self.init_dy = height
+    self.root.geometry("%dx%d+50+30"%(self.init_dx, self.init_dy))
     self.root.title("RDM user interface version: 1.0")
-    self.root.maxsize(1600,900)
+    self.root.maxsize(1600, 900)
     self.root.lift()
     self.root.update_idletasks()
     # Assigning fields
-    self.universe=tk.IntVar(self.root)
+    self.universe = tk.IntVar(self.root)
     self.universe.set(1)
-    self.universe_list=[1,2,3,4,5]
-    self.cur_uid=None
-    self.id_state=tk.IntVar(self.root)
+    self.universe_list = [1, 2, 3, 4, 5]
+    self.cur_uid = None
+    self.id_state = tk.IntVar(self.root)
     self.id_state.set(0)
-#     self.state = 0
-    self._uid_dict={}
+#     self.state  =  0
+    self._uid_dict = {}
     # Call initialing functions
-    self._pid_store=PidStore.GetStore()
-    self.ola_thread=olathread.OLAThread(self._pid_store)
+    self._pid_store = PidStore.GetStore()
+    self.ola_thread = olathread.OLAThread(self._pid_store)
     self.ola_thread.start()
     self.build_frames()
     self.build_cntrl()
     # Start the ola thread
 
-    print 'currently in thread: %d'%threading.currentThread().ident
+    print "currently in thread: %d"%threading.currentThread().ident
     time.sleep(1)
-    print 'back from sleep'
+    print "back from sleep"
 
   def build_frames(self):
     """ builds the two tkinter frames that are used as parents for the
        tkinter widgets that both control and display the RDM messages.
     """
-    self.cntrl_frame=tk.PanedWindow(self.root)
-    self.cntrl_frame.pack(side=tk.TOP,padx=1,pady=1,fill=tk.Y)
-    self.info_frame=tk.PanedWindow(self.root)
-    self.info_frame.pack(side=tk.TOP,padx=1,pady=2,fill=tk.Y)
+    self.cntrl_frame = tk.PanedWindow(self.root)
+    self.cntrl_frame.pack(side = tk.TOP, padx = 1, pady = 1, fill = tk.Y)
+    self.info_frame_1 = tk.PanedWindow(self.root)
+    self.info_frame_1.pack(side = tk.TOP, padx = 1, pady = 2, fill = tk.Y)
     
   def build_cntrl(self):
     """ Builds the top bar of the GUI.
 
-    Initializes all the general tkinter control widgets, including:
+    Initializes all the general tkinter control widgets,  including:
       dev_label: tk string variable for the currently selected device
       id_box:
       device_menu:
     """
-    tk.Label(self.cntrl_frame,text='Select\nUniverse:').pack(side=tk.LEFT)
-    menu=tk.OptionMenu(self.cntrl_frame,self.universe,*self.universe_list,
-                       command=self.set_universe)
-    menu.pack(side=tk.LEFT)
-    function=lambda:self.ola_thread.run_discovery(self.universe.get(),
-                                                  self._upon_discover)
-    discover_button=tk.Button(self.cntrl_frame,text="Discover",
-                                command=function)
-    discover_button.pack(side=tk.LEFT)
-    self.dev_label=tk.StringVar(self.root)
-    self.dev_label.set('Devices')
-    self.device_menu=tk.OptionMenu(self.cntrl_frame,self.dev_label,[])
-    self.device_menu.pack(side=tk.LEFT)
-    self.id_box=tk.Checkbutton(self.cntrl_frame,text='Identify',
-                               variable=self.id_state,command=self.identify)
-    self.id_box.pack(side=tk.LEFT)
-    tk.Label(self.cntrl_frame,text='Automatic\nDiscovery').pack(side=tk.LEFT)
-    tk.Checkbutton(self.cntrl_frame).pack(side=tk.LEFT)
+    tk.Label(self.cntrl_frame, text = "Select\nUniverse:").pack(side = tk.LEFT)
+    menu = tk.OptionMenu(self.cntrl_frame, self.universe, *self.universe_list, 
+                       command = self.set_universe)
+    menu.pack(side = tk.LEFT)
+    discover_button = tk.Button(self.cntrl_frame, text = "Discover", 
+                                command = self.discover)
+    discover_button.pack(side = tk.LEFT)
+    self.dev_label = tk.StringVar(self.root)
+    self.dev_label.set("Devices")
+    self.device_menu = tk.OptionMenu(self.cntrl_frame, self.dev_label, [])
+    self.device_menu.pack(side = tk.LEFT)
+    self.id_box = tk.Checkbutton(self.cntrl_frame, text = "Identify", 
+                                 variable = self.id_state, 
+                                 command = self.identify)
+    self.id_box.pack(side = tk.LEFT)
+    tk.Button(self.cntrl_frame, text = "display info", 
+              command = self.build_info_display).pack(side = tk.LEFT)
+    label = tk.Label(self.cntrl_frame, text = "Automatic\nDiscovery")
+    label.pack(side = tk.LEFT)
+    tk.Checkbutton(self.cntrl_frame).pack(side = tk.LEFT)
 
-  def set_universe(self,i):
-    """ sets the int var self.universe to the value of i """
-    self.universe.set(i)
-
-  def device_selected(self,uid):
+  def device_selected(self, uid):
     """ called when a new device is chosen from dev_menu.
 
       Args: 
         uid: the uid of the newly selected device
     """
-    if uid==self.cur_uid:
-      print 'this device is already selected'
+    if uid == self.cur_uid:
+      print "this device is already selected"
       return
-    print 'uid: %s\ncur_uid: %s\nid_state: %d'%(uid,self.cur_uid,
+    print "uid: %s\ncur_uid: %s\nid_state: %d"%(uid, self.cur_uid, 
                                                 self.id_state.get())
-    pid_key=self._pid_store.GetName('DEVICE_LABEL',uid.manufacturer_id).name
-    self.dev_label.set('%s (%s)'%(self._uid_dict[uid][pid_key],uid))
-    self.ola_thread.rdm_get(self.universe.get(),uid,0,'IDENTIFY_DEVICE',
-                        lambda b,s,uid=uid:self._get_identify_complete(uid,b,s))
-    self.ola_thread.rdm_get(self.universe.get(),uid,0,'SUPPORTED_PARAMETERS',
-                         lambda b,l,uid=uid:self._get_pids_complete(uid,b,l))
-    self.cur_uid=uid
-
-  def identify(self):
-    """ Command is called by id_box.
-
-        sets the value of the device's identify field based on the value of 
-        id_box.
-    """
-    if self.cur_uid is None:
-      return
-    self.ola_thread.rdm_set(self.universe.get(),self.cur_uid,0,
-               'IDENTIFY_DEVICE',
-               lambda b,s,uid=self.cur_uid:self._set_identify_complete(uid,b,s),
-               [self.id_state.get()])
+    pid_key = self._pid_store.GetName("DEVICE_LABEL", uid.manufacturer_id).name
+    self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key], uid))
+    self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
+                  lambda b, s, uid = uid:self._get_identify_complete(uid, b, s))
+    if len(self._uid_dict[uid]) < 1:
+      self.ola_thread.rdm_get(self.universe.get(), uid, 0, 
+                      "SUPPORTED_PARAMETERS", 
+                      lambda b, l, uid = uid:self._get_pids_complete(uid, b, l))
+    self.cur_uid = uid
 
   def build_info_display(self):
     """ Uses the return of getting the supported parameters RDM message to
         display information about the selected device.
     """
-    pass
+    for pid_key in self._uid_dict[self.cur_uid]:
+      # may want to split this into two labels
+      # two 
+      label = tk.Label(self.info_frame_1,
+               text = "%s: %s"%(pid_key, self._uid_dict[self.cur_uid][pid_key]))
+      label.pack(side = tk.TOP)
 
-  def _upon_discover(self,status,uids):
+  def set_universe(self, i):
+    """ sets the int var self.universe to the value of i """
+    self.universe.set(i)
+
+  def discover(self):
+    """ runs discovery for the current universe. """
+    self.ola_thread.run_discovery(self.universe.get(), self._upon_discover)
+
+  def identify(self):
+    """ Command is called by id_box.
+
+        sets the value of the device"s identify field based on the value of 
+        id_box.
+    """
+    if self.cur_uid is None:
+      return
+    self.ola_thread.rdm_set(self.universe.get(), self.cur_uid, 0, 
+         "IDENTIFY_DEVICE", 
+         lambda b, s, uid = self.cur_uid:self._set_identify_complete(uid, b, s), 
+         [self.id_state.get()])
+
+  def _upon_discover(self, status, uids):
     """ callback for client.RunRDMDiscovery. """
-    print 'discovered'
-    self.device_menu['menu'].delete(0,'end')
+    print "discovered"
+    self.device_menu["menu"].delete(0, "end")
     for uid in uids:
-      self._uid_dict[uid] = {}
-      self.ola_thread.rdm_get(self.universe.get(),uid,0,'DEVICE_LABEL',
-                              lambda b,s,uid=uid:self._add_device(uid,b,s))
+      self._uid_dict[uid]  =  {}
+      self.ola_thread.rdm_get(self.universe.get(), uid, 0, "DEVICE_LABEL", 
+                             lambda b, s, uid = uid:self._add_device(uid, b, s))
 
-  def _add_device(self,uid,succeeded,data):
+  def _add_device(self, uid, succeeded, data):
     """ callback for the rdm_get in upon_discover.
         populates self.device_menu
     """
-    if succeeded==True:
-      pid_key=self._pid_store.GetName('DEVICE_LABEL',uid.manufacturer_id).name
-      self._uid_dict[uid]={pid_key:data['label']}
-      self.device_menu['menu'].add_command( label='%s (%s)'%(
-                  self._uid_dict[uid][pid_key],uid),
-                  command=lambda:self.device_selected(uid))
+    # self._uid_dict[uid]  =  {'label': "", 'supported_params': [], ...}
+    if succeeded:
+      self._uid_dict.setdefault(uid, {})['DEVICE_LABEL'] = data['label']
+      self.device_menu["menu"].add_command( label = "%s (%s)"%(
+                  self._uid_dict[uid][pid_key], uid), 
+                  command = lambda:self.device_selected(uid))
 
-  def _get_pids_complete(self,uid,succeeded,params):
+  def _get_pids_complete(self, uid, succeeded, params):
     """ Callback for get_supported_pids.
 
         Args:
-          succeeded: bool, whether or not the get was a success
+          succeeded: bool,  whether or not the get was a success
           params: packed list of 16-bit pids
     """
     if not succeeded:
         return
-    pid_list=params['params']
+    pid_list = params["params"]
     for item in pid_list:
       print item
-      if item is not None:
-        pid=self._pid_store.GetPid(item['param_id'],uid.manufacturer_id).name
-        print 'pid: %s'%pid
-        if pid=='DMX_PERSONALITY_DESCRIPTION':
-          data=[1]
+      pid = self._pid_store.GetPid(item["param_id"], uid.manufacturer_id).name
+      if pid is not None:
+        print "pid: %s"%pid
+        # will either have to make a series of elifs here for pids that take pds
+        # or will have to come up with a different system for dealing with this
+        # kind of pid
+        if pid == "DMX_PERSONALITY_DESCRIPTION":
+          data = [1]
         else:
-          data=[]
-        self.ola_thread.rdm_get(self.universe.get(),uid,0,pid,
-                      lambda b,s,uid=uid:self._get_value_complete(uid,b,s),data)
+          data = []
+        self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
+               lambda b, s, uid = uid:self._get_value_complete(uid, b, s), data)
+      elif pid is None:
+        # look up how to handle manufactuer pids
+        # need to be able to:
+        #   1. get the value for the pid
+        #   2. figure out what kind of widget I need to display this information
+        pass
 
-  def _get_value_complete(self,uid,succeeded,value):
+  def _get_value_complete(self, uid, succeeded, value):
     """ Callback for get_pid_value. """
     if not succeeded:
-      print 'did not succeed'
+      print "did not succeed"
       return
-    print 'value: %s'%value
-    key=value.keys()[0]
-    self._uid_dict[uid][key]=value.get(key)
+    print "value: %s"%value
+    key =value.keys()[0]
+    self._uid_dict[uid][key] =value.get(key) 
 
-  def _get_identify_complete(self,uid,succeeded,value):
+  def _get_identify_complete(self, uid, succeeded, value):
     """ Callback for rdm_get in device_selected.
 
-        Sets the checkbox's state to that of the currently selected device
+        Sets the checkbox"s state to that of the currently selected device
     """
     if succeeded:
-      self.id_state.set(value['identify_state'])
+      self.id_state.set(value["identify_state"])
 
-  def _set_identify_complete(self,uid,succeded,value):
+  def _set_identify_complete(self, uid, succeded, value):
     """ callback for the rdm_set in identify. """
-    print 'rdm set complete'
+    print "rdm set complete"
 
   def main(self):
-    print 'Entering main loop'
-    self.root.mainloop()  
+    print "Entering main loop"
+    self.root.mainloop()
 
-if __name__ == '__main__':
-  display = DisplayApp(800,600)
+if __name__  ==  "__main__":
+  display  =  DisplayApp(800, 600)
   display.main()
