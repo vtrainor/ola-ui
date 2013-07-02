@@ -170,7 +170,28 @@ class DisplayApp:
     if not succeeded:
         return
     pid_list = params["params"]
-    pass
+        # the following code was copy and pasted from simple_ui and has not yet been
+    # edited to work within the notebook class.
+    for item in pid_list:
+      print item
+      pid = self._pid_store.GetPid(item["param_id"], uid.manufacturer_id).name
+      if pid is not None:
+        print "pid: %s"%pid
+        # will either have to make a series of elifs here for pids that take pds
+        # or will have to come up with a different system for dealing with this
+        # kind of pid
+        if pid == "DMX_PERSONALITY_DESCRIPTION":
+          data = [1]
+        else:
+          data = []
+        self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
+               lambda b, s, uid = uid:self._get_value_complete(uid, b, s), data)
+      elif pid is None:
+        # look up how to handle manufactuer pids
+        # need to be able to:
+        #   1. get the value for the pid
+        #   2. figure out what kind of widget I need to display this information
+        pass
 
   def _get_value_complete(self, uid, succeeded, value):
     """ Callback for get_pid_value. """
@@ -178,8 +199,8 @@ class DisplayApp:
       print "did not succeed"
       return
     print "value: %s"%value
-    key =value.keys()[0]
-    self._uid_dict[uid][key] =value.get(key) 
+    key = value.keys()[0]
+    self._uid_dict[uid][key] = value.get(key) 
 
   def _get_identify_complete(self, uid, succeeded, value):
     """ Callback for rdm_get in device_selected.
