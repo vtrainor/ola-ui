@@ -84,8 +84,6 @@ class DisplayApp:
                                  variable = self.id_state, 
                                  command = self.identify)
     self.id_box.pack(side = tk.LEFT)
-    tk.Button(self.cntrl_frame, text = "display info", 
-              command = self.build_info_display).pack(side = tk.LEFT)
     label = tk.Label(self.cntrl_frame, text = "Automatic\nDiscovery")
     label.pack(side = tk.LEFT)
     tk.Checkbutton(self.cntrl_frame).pack(side = tk.LEFT)
@@ -110,17 +108,7 @@ class DisplayApp:
                       "SUPPORTED_PARAMETERS", 
                       lambda b, l, uid = uid:self._get_pids_complete(uid, b, l))
     self.cur_uid = uid
-
-  def build_info_display(self):
-    """ Uses the return of getting the supported parameters RDM message to
-        display information about the selected device.
-    """
-    for pid_key in self._uid_dict[self.cur_uid]:
-      # may want to split this into two labels
-      # two 
-      label = tk.Label(self.info_frame_1,
-               text = "%s: %s"%(pid_key, self._uid_dict[self.cur_uid][pid_key]))
-      label.pack(side = tk.TOP)
+    self.rdm_notebook.update_tabs(self._uid_dict[uid])
 
   def set_universe(self, i):
     """ sets the int var self.universe to the value of i """
@@ -202,7 +190,7 @@ class DisplayApp:
       return
     print "value: %s"%value
     key = value.keys()[0]
-    self._uid_dict[uid][key] = value.get(key) 
+    self._uid_dict[uid][key] = value.get(key)
 
   def _get_identify_complete(self, uid, succeeded, value):
     """ Callback for rdm_get in device_selected.
