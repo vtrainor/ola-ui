@@ -2,34 +2,33 @@ import Tkinter as tk
 import ttk
 
 class RDMNotebook:
-  def __init__(self, root, display_app, width=600, height=400):
+  def __init__(self, root, width=800, height=500,side=tk.TOP):
     """ Builds the ttk.Notebook """
     self.root = root
-    self.ui = display_app
     self.cur_uid = None
     self.init_dx = width
     self.init_dy = height
-    self._notebook = ttk.Notebook(self.root, name = 'nb')
+    self._notebook = ttk.Notebook(self.root, name="nb", height=height, width=width)
     self.populate_defaults()
     # self.update_info_tab()
-    self._notebook.pack()
+    self._notebook.pack(side=side)
 
   def populate_defaults(self):
     """ creates the default frames. """
-    print 'creating default tabs...'
+    print "creating default tabs..."
     # create and populate the three default tabs
     self._init_objects()
-    self.info_tab = self.create_tab('info_tab',
-                            'This will display the info device monitoring pids', 
-                            'Device Information')
-    self.dmx_tab = self.create_tab('dmx_tab',
-                             'This will display the info from DMX related pids', 
-                             'DMX')
-    self.sensor_tab = self.create_tab('sensors', 
-                          'This will display the info from sensor related pids',
-                          'Sensors')
+    self.info_tab = self.create_tab("info_tab",
+                            "This will display the info device monitoring pids", 
+                            "Device Information")
+    self.dmx_tab = self.create_tab("dmx_tab",
+                             "This will display the info from DMX related pids", 
+                             "DMX")
+    self.sensor_tab = self.create_tab("sensors", 
+                          "This will display the info from sensor related pids",
+                          "Sensors")
 
-  def create_tab(self, tab_name, words, tab_label = None):
+  def create_tab(self, tab_name, words, tab_label=None):
     """ Creates a tab. 
 
         will want to have all the options allowed by the ttk notebook widget to
@@ -62,18 +61,36 @@ class RDMNotebook:
   def update_sensor_tab(self, uid_data):
     """ updates all the widgets in the sensor tab. """
     pass
-
-  def _init_objects(self):
-    """ creates a dictionary of all pids that are assigned to the frame, tab.
-
-        Hand coded for pids
-
-        Returns:
-          object_list = [{param,(get_object, set_object)...}{...}{...}]
-    """
   
-  def _init_info_dict():
+  def _init_info():
     """ Initializes the parameters that will be in the info dictionary. """
+    self.procol_version = tk.StringVar(self.info_tab)
+    self.factory_defaults = tk.BoolVar(self.info_tab)
+    if factory_default_callback is None:
+      # show that that parameter is not supported 
+      pass
+    self.device_model = tk.StringVar(self.info_tab)
+    self.manufacturer = tk.StringVar(self.info_tab)
+    self.software_version = tk.StringVar(self.info_tab)
+    self.info_objects = [tk.Label(self.info_tab, text="Protocol Version"),
+                         tk.Label(self.info_tab, text=self.protcol_version),
+                         tk.CheckButton(self.info_tab, 
+                           text = "Factory Defaults", 
+                           variable = self.factory_defaults, 
+                           command = factory_default_callback) 
+                         tk.Label(self.info_tab, text="Device Model"),
+                         tk.Label(self.info_tab, text=self.device_model),
+                         tk.Label(self.info_tab, text="will be entry box"),
+                         tk.Label(self.info_tab, text="Manufacturer"),
+                         tk.Label(self.info_tab,text=self.manufacturer),
+                         tk.Button(self.info_tab, text="reset"),
+                         tk.Label(self.info_tab, text="Software Version"),
+                         tk.Label(self,info_tab, text=self.sofware_version),
+                         tk.Label(self.info_tab, text=""),
+                         tk.Label(self.info_tab, text="Boot Software Version"),
+                         tk.Label(self.info_tab, 
+                           text="version %d" % self.boot_
+                         ]
 
   def _init_dmx_dict():
     """ Initializes the parameters that will be in the dmx dictionary. """
@@ -82,6 +99,17 @@ class RDMNotebook:
     """ Initializes the paramters that will be in the device monitoring 
         dictionary.
     """
+    
+  def _init_objects(self, factory_default_callback=None):
+    """ creates a dictionary of all pids that are assigned to the frame, tab.
+
+        Hand coded for pids
+
+        Returns:
+          object_list = [{param,(get_object, set_object)...}{...}{...}]
+    """
+
+
 
   def _display_info(self, frame, object_dict):
     """ 
@@ -125,13 +153,13 @@ class RDMNotebook:
     """ Main method for Notebook class. """
     self.root.mainloop()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   ui = simple_ui.DisplayApp()
 
-  master = tk.Frame(root, name='master', width = 200, heigh = 200)
+  master = tk.Frame(root, name="master", width = 200, heigh = 200)
   master.pack(fill=tk.BOTH) # fill both sides of the parent
 
-  root.title('EZ') # title for top-level window
+  root.title("EZ") # title for top-level window
 
   nb = RDMNotebook(master, ui)
   nb.main()

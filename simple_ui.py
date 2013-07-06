@@ -7,6 +7,7 @@ import Queue
 import olathread
 from ola import PidStore
 import ttk
+import notebook
 
 class DisplayApp:
   """ Creates the GUI for sending and receiving RDM messages through the
@@ -37,12 +38,14 @@ class DisplayApp:
     self.id_state.set(0)
 #     self.state  =  0
     self._uid_dict = {}
+    
     # Call initialing functions
     self._pid_store = PidStore.GetStore()
     self.ola_thread = olathread.OLAThread(self._pid_store)
     self.ola_thread.start()
     self.build_frames()
     self.build_cntrl()
+    self.rdm_notebook = notebook.RDMNotebook(self.root)
     # Start the ola thread
 
     print "currently in thread: %d"%threading.currentThread().ident
@@ -102,7 +105,7 @@ class DisplayApp:
     self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key], uid))
     self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
                   lambda b, s, uid = uid:self._get_identify_complete(uid, b, s))
-    if len(self._uid_dict[uid]) < 1:
+    if len(self._uid_dict[uid]) <= 1:
       self.ola_thread.rdm_get(self.universe.get(), uid, 0, 
                       "SUPPORTED_PARAMETERS", 
                       lambda b, l, uid = uid:self._get_pids_complete(uid, b, l))
@@ -173,9 +176,8 @@ class DisplayApp:
         # the following code was copy and pasted from simple_ui and has not yet been
     # edited to work within the notebook class.
     for item in pid_list:
-      print item
-      pid = self._pid_store.GetPid(item["param_id"], uid.manufacturer_id).name
-      if pid is not None:
+      try:
+        pid = self._pid_store.GetPid(item["param_id"], uid.manufacturer_id).name
         print "pid: %s"%pid
         # will either have to make a series of elifs here for pids that take pds
         # or will have to come up with a different system for dealing with this
@@ -186,12 +188,12 @@ class DisplayApp:
           data = []
         self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
                lambda b, s, uid = uid:self._get_value_complete(uid, b, s), data)
-      elif pid is None:
+      except:
         # look up how to handle manufactuer pids
         # need to be able to:
         #   1. get the value for the pid
         #   2. figure out what kind of widget I need to display this information
-        pass
+        print 'manufactuer pid'
 
   def _get_value_complete(self, uid, succeeded, value):
     """ Callback for get_pid_value. """
