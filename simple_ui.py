@@ -103,12 +103,11 @@ class DisplayApp:
     self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key], uid))
     self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
                   lambda b, s, uid = uid:self._get_identify_complete(uid, b, s))
-    if len(self._uid_dict[uid]) <= 1:
+    if len(self._uid_dict[uid]) <= 4:
       self.ola_thread.rdm_get(self.universe.get(), uid, 0, 
                       "SUPPORTED_PARAMETERS", 
                       lambda b, l, uid = uid:self._get_pids_complete(uid, b, l))
     self.cur_uid = uid
-    self.rdm_notebook.update_tabs(self._uid_dict[uid])
 
   def set_universe(self, i):
     """ sets the int var self.universe to the value of i """
@@ -144,12 +143,13 @@ class DisplayApp:
     """ callback for the rdm_get in upon_discover.
         populates self.device_menu
     """
-    # self._uid_dict[uid]  =  {'label': "", 'supported_params': [], ...}
+    # self._uid_dict[uid]  =  {"label": "", "supported_params": [], ...}
     if succeeded:
-      self._uid_dict.setdefault(uid, {})['DEVICE_LABEL'] = data['label']
+      self._uid_dict.setdefault(uid, {})["DEVICE_LABEL"] = data["label"]
       self.device_menu["menu"].add_command( label = "%s (%s)"%(
-                  self._uid_dict[uid]['DEVICE_LABEL'], uid), 
+                  self._uid_dict[uid]["DEVICE_LABEL"], uid), 
                   command = lambda:self.device_selected(uid))
+      self._uid_dict[uid]["supported pids"] = ["DEVICE_LABEL"]
 
   def _get_pids_complete(self, uid, succeeded, params):
     """ Callback for get_supported_pids.
@@ -158,6 +158,7 @@ class DisplayApp:
           succeeded: bool,  whether or not the get was a success
           params: packed list of 16-bit pids
     """
+    print "get pids complete"
     if not succeeded:
         return
     pid_list = params["params"]
@@ -166,31 +167,35 @@ class DisplayApp:
     for item in pid_list:
       try:
         pid = self._pid_store.GetPid(item["param_id"], uid.manufacturer_id).name
-        print "pid: %s"%pid
         # will either have to make a series of elifs here for pids that take pds
         # or will have to come up with a different system for dealing with this
         # kind of pid
-        if pid == "DMX_PERSONALITY_DESCRIPTION":
-          data = [1]
-        else:
-          data = []
-        self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
-               lambda b, s, uid = uid:self._get_value_complete(uid, b, s), data)
       except:
         # look up how to handle manufactuer pids
         # need to be able to:
         #   1. get the value for the pid
         #   2. figure out what kind of widget I need to display this information
-        print 'manufactuer pid'
+        print "manufactuer pid"
+      if pid == "DMX_PERSONALITY_DESCRIPTION":
+        data = [1]
+      else:
+        data = []
+      self._uid_dict[uid]["supported pids"].append(pid)
+      self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
+             lambda b, s, pid = pid:self._get_value_complete(pid, b, s), data)
+    for pid in ["DEVICE_INFO"]: # list of required pids
+      print "required pids"
+      self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
+             lambda b, s, pid = pid:self._get_value_complete(pid, b, s), data)
 
-  def _get_value_complete(self, uid, succeeded, value):
+  def _get_value_complete(self, pid, succeeded, value):
     """ Callback for get_pid_value. """
+    print "pid: %s"%pid
+    print "value: %s"%value
     if not succeeded:
       print "did not succeed"
       return
-    print "value: %s"%value
-    key = value.keys()[0]
-    self._uid_dict[uid][key] = value.get(key)
+    self.rdm_notebook.update_tabs(value, [pid])
 
   def _get_identify_complete(self, uid, succeeded, value):
     """ Callback for rdm_get in device_selected.

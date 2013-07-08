@@ -19,9 +19,8 @@ class RDMNotebook:
     # create and populate the three default tabs
     self.info_tab = self.create_tab("info_tab", "Device Information")
     self._init_info()
-    self.dmx_tab = self.create_tab("dmx_tab",
-                             "This will display the info from DMX related pids", 
-                             "DMX")
+    self.dmx_tab = self.create_tab("dmx_tab", "DMX")
+    self._init_dmx()
     self.sensor_tab = self.create_tab("sensors", 
                           "This will display the info from sensor related pids",
                           "Sensors")
@@ -47,10 +46,11 @@ class RDMNotebook:
     self._notebook.add(tab, text = tab_label)
     return tab
 
-  def update_tabs(self, param_dict):
+  def update_tabs(self, value, supported_pids):
     """
     """
-    self._update_info(param_dict)
+    self._update_info(value, supported_pids)
+    self._update_dmx(value, supported_pids)
 
   def _init_info(self):
     """ Initializes the parameters that will be in the info dictionary. """
@@ -77,82 +77,116 @@ class RDMNotebook:
     self.lamp_on_modes = ["lamp on modes"]
     self.power_states = ["power states"]
     self.info_objects = [tk.Label(self.info_tab, text="Protocol Version"),
-                         tk.Label(self.info_tab, text=self.protocol_version),
+                         tk.Label(self.info_tab, textvariable=self.protocol_version),
                          tk.Checkbutton(self.info_tab, 
                            text = "Factory Defaults", 
                            variable = self.factory_defaults),
+                         
                          tk.Label(self.info_tab, text="Device Model"),
-                         tk.Label(self.info_tab, text=self.device_model),
+                         tk.Label(self.info_tab, textvariable=self.device_model),
                          tk.Label(self.info_tab, text="will be entry box"),
+                         
                          tk.Label(self.info_tab, text="Product Category"),
-                         tk.Label(self.info_tab, text=self.product_category),
+                         tk.Label(self.info_tab, textvariable=self.product_category),
                          tk.Button(self.info_tab, text="reset"),
+                         
                          tk.Label(self.info_tab, text="Manufacturer"),
-                         tk.Label(self.info_tab, text=self.manufacturer),
+                         tk.Label(self.info_tab, textvariable=self.manufacturer),
                          tk.Label(self.info_tab, text=""),
+                         
                          tk.Label(self.info_tab, text="Current Language"),
-                         tk.Label(self.info_tab, text=self.language),
+                         tk.Label(self.info_tab, textvariable=self.language),
                          tk.OptionMenu(self.info_tab, self.language, 
                            *self.languages),
+                         
                          tk.Label(self.info_tab, text="Software Version"),
                          tk.Label(self.info_tab, 
-                           text=self.software_version_val),
+                           textvariable=self.software_version_val),
                          tk.Label(self.info_tab, text=""),
+                         
                          tk.Label(self.info_tab, text=""),
                          tk.Label(self.info_tab, 
-                           text=self.software_version_lab),
+                           textvariable=self.software_version_lab),
                          tk.Label(self.info_tab, text=""),
+                         
                          tk.Label(self.info_tab, text="Boot Software Version"),
                          tk.Label(self.info_tab, 
-                           text=self.boot_software_val),
+                           textvariable=self.boot_software_val),
                          tk.Label(self.info_tab, text=""),
+                         
                          tk.Label(self.info_tab, text=""),
-                         tk.Label(self.info_tab, text=self.boot_software_lab),
+                         tk.Label(self.info_tab, textvariable=self.boot_software_lab),
                          tk.Label(self.info_tab, text=""),
+                         
                          tk.Label(self.info_tab, text="Device Hours"),
-                         tk.Label(self.info_tab, text=self.device_hours),
+                         tk.Label(self.info_tab, textvariable=self.device_hours),
                          tk.OptionMenu(self.info_tab, self.lamp_on_mode,
                            *self.lamp_on_modes),
+                         
                          tk.Label(self.info_tab, text="Lamp Hours"),
-                         tk.Label(self.info_tab, text=self.lamp_hours),
+                         tk.Label(self.info_tab, textvariable=self.lamp_hours),
                          tk.Label(self.info_tab, text=""),
+                         
                          tk.Label(self.info_tab, text="Lamp Strikes"),
-                         tk.Label(self.info_tab, text=self.lamp_strikes),
+                         tk.Label(self.info_tab, textvariable=self.lamp_strikes),
                          tk.OptionMenu(self.info_tab, self.power_state, 
                            *self.power_states),
+                         
                          tk.Label(self.info_tab, text="Lamp State"),
-                         tk.Label(self.info_tab, text=self.lamp_state),
+                         tk.Label(self.info_tab, textvariable=self.lamp_state),
                          tk.Label(self.info_tab, text=""),
+                         
                          tk.Label(self.info_tab, text="Device Power Cycles"),
-                         tk.Label(self.info_tab, text=self.device_power_cycles),
+                         tk.Label(self.info_tab, textvariable=self.device_power_cycles),
                          tk.Label(self.info_tab, 
                            text="Will be set widget for device power cycles"),
                          ]
-    self._grid_info()
+    # for widget in self.info_objects:
+    #   widget.config(state = tk.DISABLED)
+    self._grid_info(self.info_objects)
 
-  def _init_dmx_dict():
+  def _init_dmx(self):
     """ Initializes the parameters that will be in the dmx dictionary. """
+    self.dmx_personality = tk.StringVar(self.dmx_tab)
+    self.dmx_personalities = ["dmx personalities"]
+    self.personality_des = tk.StringVar(self.dmx_tab)
+    self.dmx_start_address = tk.IntVar(self.dmx_tab)
+    self.dmx_objects = [tk.Label(self.dmx_tab, text="DMX Personality"),
+                        tk.Label(self.dmx_tab, textvariable=self.dmx_personality),
+                        tk.OptionMenu(self.dmx_tab, self.dmx_personality,
+                          *self.dmx_personalities),
+
+                        tk.Label(self.dmx_tab, text=""),
+                        tk.Label(self.dmx_tab, textvariable=self.personality_des),
+                        tk.Label(self.dmx_tab, text=""),
+                        
+                        tk.Label(self.dmx_tab, text="DMX Start Address"),
+                        tk.Label(self.dmx_tab, textvariable=self.dmx_start_address),
+                        tk.Label(self.dmx_tab, text=""),
+                       ]
+    # for widget in self.dmx_objects:
+    #     widget.config(state = tk.DISABLED)
+    self._grid_info(self.dmx_objects)
 
   def _init_monitor_dict():
     """ Initializes the paramters that will be in the device monitoring 
         dictionary.
     """
 
-  def _grid_info(self):
+  def _grid_info(self, obj_list):
     """
     """
     print "griding..."
-    for i in range(len(self.info_objects)):
+    print "length: %d" % len(obj_list)
+    for i in range(len(obj_list)):
       if i%3 == 1:
-        print self.info_objects[i]
-        self.info_objects[i].config(width=30)
+        obj_list[i].config(width=35)
       else:
-        self.info_objects[i].config(width=20)
-    objects = self.info_objects
-    objects.reverse()
-    for r in range((len(objects)+2)/3):
+        obj_list[i].config(width=20)
+    obj_list.reverse()
+    for r in range((len(obj_list)+2)/3):
       for c in range(3):
-        objects.pop().grid(row=r, column=c)
+        obj_list.pop().grid(row=r, column=c)
 
   def _display_info(self, frame, object_list):
     """ 
@@ -161,7 +195,7 @@ class RDMNotebook:
           frame: 
     """
 
-  def _update_info(self, pid_dict,):
+  def _update_info(self, value, supported_pids):
     """ this function will allow me to update the tabs once the notebook has
         been intialized. Should work in a way similar to the _display_info 
         above. One way this could work is if 2 object dictionaries could
@@ -174,29 +208,45 @@ class RDMNotebook:
           param_dict: dictionary, from the ui class, keys are supported 
             parameters and values are obtian from RDM get of key
     """
-    self.protocol_version.set("%d.%d" % 
-                              (pid_dict["DEVICE_INFO"]["protocol_major"], 
-                               pid_dict["DEVICE_INFO"]["protocol_minor"]))
-    self.factory_defaults.set(pid_dict["FACTORY_DEFAULTS"])
-    self.device_model.set(pid_dict["DEVICE_INFO"]["device_model"])
-    self.product_category.set(pid_dict["DEVICE_INFO"]["product_category"])
-    self.manufacturer.set(pid_dict["MANUFACTURER_LABEL"])
-    self.sofware_version_val.set(pid_dict["DEVICE_INFO"]["software_version"])
-    self.software_version_lab.set(pid_dict["SOFTWARE_VERSION_LABEL"])
-    self.language.set(pid_dict["LANGUAGE"])
-    self.boot_software_val.set(pid_dict["BOOT_SOFTWARE_VERSION"])
-    self.boot_software_lab.set(pid_dict["BOOT_SOFTWARE_LABEL"])
-    self.device_hours.set(pid_dict["DEVICE_HOURS"])
-    self.lamp_hours.set(pid_dict["LAMP_HOURS"])
-    self.lamp_strikes.set(pid_dict["LAMP_STRIKES"])
-    self.power_state.set(pid_dict["POWER_STATE"])
-    self.lamp_state.set(pid_dict["LAMP_STATE"])
-    self.device_power_cycles.set(pid_dict["DEVICES_POWER_CYCLES"])
-    # sets:
-    self.factory_default_callback = None
-    self.languages = ["languages"] 
-    self.lamp_on_modes = ["lamp on modes"]
-    self.powerstates = ["power states"]
+    print "updating"
+
+    if "MANUFACTURER_LABEL" in supported_pids:
+      self.manufacturer.set(value["label"])
+    elif "LAMP_STRIKES" in supported_pids:
+      self.lamp_strikes.set(value["strikes"])
+    elif "DEVICE_INFO" in supported_pids:
+      self.protocol_version.set("%d.%d" % 
+                                (value["protocol_major"], 
+                                 value["protocol_minor"]))
+      self.device_model.set(value["device_model"])
+      self.product_category.set(value["product_category"])
+      self.software_version_val.set(value["software_version"])
+    elif "FACTORY_DEFAULTS" in supported_pids:
+      self.factory_defaults.set(value["using_defaults"])
+    # self.software_version_lab.set(value["label"])
+    # self.language.set(value["language"])
+    # self.boot_software_val.set(value["version"])
+    # self.boot_software_lab.set(value["label"])
+    # self.device_hours.set(value["hours"])
+    # self.power_state.set(value["state"])
+    # self.lamp_state.set(value["state"])
+    # self.device_power_cycles.set(value["power_cycles"])
+    # # sets:
+    # self.factory_default_callback = None
+    # self.languages = ["languages"] 
+    # self.lamp_on_modes = ["lamp on modes"]
+    # self.powerstates = ["power states"]
+
+  def _update_dmx(self, value, supported_pids):
+    """ update tab """
+    if "DEVICE_INFO" in supported_pids:
+      self.dmx_personality.set(value["current_personality"])
+      self.dmx_personalities = []
+      for i in range(value["personality_count"]):
+        self.dmx_personalities.append(i)
+      self.dmx_start_address.set(value["dmx_start_address"])
+    elif "DMX_PERSONALITY_DESCRIPTION" in supported_pids:
+      self.personality_des.set(value["personality"])
 
   def main(self):
     """ Main method for Notebook class. """
