@@ -8,6 +8,8 @@ class RDMNotebook:
     self.cur_uid = None
     self.init_dx = width
     self.init_dy = height
+    self.objects = []
+    self.pid_index_dict = {}
     self._notebook = ttk.Notebook(self.root, name="nb", height=height, width=width)
     self.populate_defaults()
     # self.update_info_tab()
@@ -19,11 +21,35 @@ class RDMNotebook:
     # create and populate the three default tabs
     self.info_tab = self.create_tab("info_tab", "Device Information")
     self._init_info()
+    print len(self.objects)
     self.dmx_tab = self.create_tab("dmx_tab", "DMX")
     self._init_dmx()
+    print len(self.objects)
     self.sensor_tab = self.create_tab("sensors", 
                           "This will display the info from sensor related pids",
                           "Sensors")
+    self.pid_index_dict = { "DEVICE_INFO": [0,1,3,4,6,7,15,16,42,43,48,49],
+                            "FACTORY_DEFAULTS": [2],
+                            "DEVICE_LABEL": [5],
+                            "MANUFACTURER_LABEL": [9,10],
+                            "LANGUAGE": [12,13,14],
+                            "SOFTWARE_VERSION_LABEL": [19],
+                            "BOOT_SOFTWARE_VERSION":[21,22],
+                            "BOOT_SOFTWARE_LABEL": [25],
+                            "DEVICE_HOURS": [27,28],
+                            "LAMP_ON_MODE": [29],
+                            "LAMP_HOURS": [30,31],
+                            "LAMP_STRIKES": [33,34],
+                            "POWER_STATE": [35],
+                            "LAMP_STATE": [36,37],
+                            "DEVICE_POWER_CYCLE": [39,40,41],
+                            "DMX_PERSONALITY": [], #44
+                            "PERSONALITY_DESCRIPTION": [46],
+                            "DMX_START_ADDRESS": [50],
+                            "DEVICE_MODEL_DESCRIPTION": [],
+                            "DMX_PERSONALITY_DESCRIPTION":[],
+                            "PRODUCT_DETAIL_ID_LIST": [],
+                            "REAL_TIME_CLOCK":[]}
 
   def create_tab(self, tab_name, words, tab_label=None):
     """ Creates a tab. 
@@ -49,8 +75,16 @@ class RDMNotebook:
   def update_tabs(self, value, supported_pids):
     """
     """
+    print len(self.objects)
+    print supported_pids
+    for widget in self.objects:
+        widget.config(state = tk.DISABLED)
     self._update_info(value, supported_pids)
     self._update_dmx(value, supported_pids)
+    for pid in supported_pids:
+        for i in self.pid_index_dict[pid]:
+          print i
+          self.objects[i].config(state = tk.ACTIVE)
 
   def _init_info(self):
     """ Initializes the parameters that will be in the info dictionary. """
@@ -141,8 +175,8 @@ class RDMNotebook:
                          tk.Label(self.info_tab, 
                            text="Will be set widget for device power cycles"),
                          ]
-    # for widget in self.info_objects:
-    #   widget.config(state = tk.DISABLED)
+    for widget in self.info_objects:
+        self.objects.append(widget)
     self._grid_info(self.info_objects)
 
   def _init_dmx(self):
@@ -164,11 +198,12 @@ class RDMNotebook:
                         tk.Label(self.dmx_tab, textvariable=self.dmx_start_address),
                         tk.Label(self.dmx_tab, text=""),
                        ]
-    # for widget in self.dmx_objects:
-    #     widget.config(state = tk.DISABLED)
+    for widget in self.dmx_objects:
+        print widget
+        self.objects.append(widget)
     self._grid_info(self.dmx_objects)
 
-  def _init_monitor_dict():
+  def _init_monitor():
     """ Initializes the paramters that will be in the device monitoring 
         dictionary.
     """
@@ -223,14 +258,22 @@ class RDMNotebook:
       self.software_version_val.set(value["software_version"])
     elif "FACTORY_DEFAULTS" in supported_pids:
       self.factory_defaults.set(value["using_defaults"])
-    # self.software_version_lab.set(value["label"])
-    # self.language.set(value["language"])
-    # self.boot_software_val.set(value["version"])
-    # self.boot_software_lab.set(value["label"])
-    # self.device_hours.set(value["hours"])
-    # self.power_state.set(value["state"])
-    # self.lamp_state.set(value["state"])
-    # self.device_power_cycles.set(value["power_cycles"])
+    elif "SOFTWARE_VERSION_LABEL" in supported_pids:
+      self.software_version_lab.set(value["label"])
+    elif "LANGUAGE" in supported_pids:
+      self.language.set(value["language"])
+    elif "BOOT_SOFTWARE_VERSION" in supported_pids:
+      self.boot_software_val.set(value["version"])
+    elif "BOOT_SOFTWARE_LABEL" in supported_pids:
+      self.boot_software_lab.set(value["label"])
+    elif "DEVICE_HOURS" in supported_pids:
+      self.device_hours.set(value["hours"])
+    elif "POWER_STATE" in supported_pids:
+      self.power_state.set(value["state"])
+    elif "LAMP_STATE" in supported_pids:
+      self.lamp_state.set(value["state"])
+    elif "DEVICE_POWER_CYCLE" in supported_pids:
+      self.device_power_cycles.set(value["power_cycles"])
     # # sets:
     # self.factory_default_callback = None
     # self.languages = ["languages"] 
@@ -247,6 +290,9 @@ class RDMNotebook:
       self.dmx_start_address.set(value["dmx_start_address"])
     elif "DMX_PERSONALITY_DESCRIPTION" in supported_pids:
       self.personality_des.set(value["personality"])
+    #sets:
+    # elif "DMX_PERSONALITY" in supported_pids:
+    # elif "DMX_START_ADDRESS" in supported_pids:
 
   def main(self):
     """ Main method for Notebook class. """

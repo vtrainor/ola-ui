@@ -162,6 +162,7 @@ class DisplayApp:
     if not succeeded:
         return
     pid_list = params["params"]
+    print pid_list
         # the following code was copy and pasted from simple_ui and has not yet been
     # edited to work within the notebook class.
     for item in pid_list:
