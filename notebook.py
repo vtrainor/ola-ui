@@ -21,13 +21,10 @@ class RDMNotebook:
     # create and populate the three default tabs
     self.info_tab = self.create_tab("info_tab", "Device Information")
     self._init_info()
-    print len(self.objects)
     self.dmx_tab = self.create_tab("dmx_tab", "DMX")
     self._init_dmx()
-    print len(self.objects)
-    self.sensor_tab = self.create_tab("sensors", 
-                          "This will display the info from sensor related pids",
-                          "Sensors")
+    self.sensor_tab = self.create_tab("sensor_tab", "Sensors")
+    self._init_sensor()
     self.pid_index_dict = { "DEVICE_INFO": [0,1,3,4,6,7,15,16,42,43,48,49],
                             "FACTORY_DEFAULTS": [2],
                             "DEVICE_LABEL": [5],
@@ -51,7 +48,7 @@ class RDMNotebook:
                             "PRODUCT_DETAIL_ID_LIST": [],
                             "REAL_TIME_CLOCK":[]}
 
-  def create_tab(self, tab_name, words, tab_label=None):
+  def create_tab(self, tab_name, tab_label=None):
     """ Creates a tab. 
 
         will want to have all the options allowed by the ttk notebook widget to
@@ -72,23 +69,23 @@ class RDMNotebook:
     self._notebook.add(tab, text = tab_label)
     return tab
 
-  def update_tabs(self, value, supported_pids):
+  def update_tabs(self, value, supported_pid):
     """
     """
-    print len(self.objects)
-    print supported_pids
+    self._update_info(value, supported_pid)
+    self._update_dmx(value, supported_pid)
+
+  def act_objects(self, supported_pids):
+    """
+    """
     for widget in self.objects:
-        widget.config(state = tk.DISABLED)
-    self._update_info(value, supported_pids)
-    self._update_dmx(value, supported_pids)
+      widget.config(state = tk.DISABLED)
     for pid in supported_pids:
-        for i in self.pid_index_dict[pid]:
-          print i
-          self.objects[i].config(state = tk.ACTIVE)
+      for i in self.pid_index_dict[pid]:
+        self.objects[i].config(state = tk.NORMAL)
 
   def _init_info(self):
     """ Initializes the parameters that will be in the info dictionary. """
-    print "init info"
     self.protocol_version = tk.StringVar(self.info_tab)
     self.factory_defaults = tk.BooleanVar(self.info_tab)
     self.factory_default_callback = None
@@ -199,21 +196,42 @@ class RDMNotebook:
                         tk.Label(self.dmx_tab, text=""),
                        ]
     for widget in self.dmx_objects:
-        print widget
         self.objects.append(widget)
     self._grid_info(self.dmx_objects)
 
-  def _init_monitor():
+  def _init_sensor(self):
     """ Initializes the paramters that will be in the device monitoring 
         dictionary.
     """
+    self.sensor_number = tk.IntVar(self.sensor_tab)
+    self.sensors = ["sensors"]
+    self.sensor_type = tk.IntVar(self.sensor_tab)
+    self.sensor_prefix = tk.IntVar(self.sensor_tab)
+    self.sensor_objects = [ tk.Label(self.sensor_tab, text="Sensor Number"),
+                            tk.Label(self.sensor_tab, 
+                              textvariable=self.sensor_number),
+                            tk.OptionMenu(self.sensor_tab, self.sensor_number,
+                              self.sensors),
+
+                            tk.Label(self.sensor_tab, text="Sensor Type"),
+                            tk.Label(self.sensor_tab, 
+                              textvariable=self.sensor_type),
+                            tk.Label(self.sensor_tab, text=""),
+
+                            tk.Label(self.sensor_tab, text="Prefix"),
+                            tk.Label(self.sensor_tab, 
+                              textvariable=self.sensor_prefix),
+                            tk.Label(self.sensor_tab, text="")
+                          ]
+    for widget in self.sensor_objects:
+      self.objects.append(widget)
+    self._grid_info(self.sensor_objects)
 
   def _grid_info(self, obj_list):
     """
     """
-    print "griding..."
-    print "length: %d" % len(obj_list)
     for i in range(len(obj_list)):
+      obj_list[i].config(height=1)
       if i%3 == 1:
         obj_list[i].config(width=35)
       else:
@@ -289,10 +307,18 @@ class RDMNotebook:
         self.dmx_personalities.append(i)
       self.dmx_start_address.set(value["dmx_start_address"])
     elif "DMX_PERSONALITY_DESCRIPTION" in supported_pids:
-      self.personality_des.set(value["personality"])
+      self.personality_des.set(value["name"])
     #sets:
     # elif "DMX_PERSONALITY" in supported_pids:
     # elif "DMX_START_ADDRESS" in supported_pids:
+
+  def _update_sensor(self, value, supported_pids):
+    """
+    """
+    if "SENSOR_DEFINITION" in supported_pids:
+        self.sensor_number.set(value["sensor_number"])
+        self.sensor_type.set(value["type"])
+        self.sensor_prefix.set(value["prefix"])
 
   def main(self):
     """ Main method for Notebook class. """

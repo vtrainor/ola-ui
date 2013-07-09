@@ -46,7 +46,7 @@ class DisplayApp:
     self.build_frames()
     self.build_cntrl()
     self.rdm_notebook = notebook.RDMNotebook(self.root)
-    # Start the ola thread
+  
 
     print "currently in thread: %d"%threading.currentThread().ident
     time.sleep(1)
@@ -158,11 +158,9 @@ class DisplayApp:
           succeeded: bool,  whether or not the get was a success
           params: packed list of 16-bit pids
     """
-    print "get pids complete"
     if not succeeded:
         return
     pid_list = params["params"]
-    print pid_list
         # the following code was copy and pasted from simple_ui and has not yet been
     # edited to work within the notebook class.
     for item in pid_list:
@@ -185,9 +183,10 @@ class DisplayApp:
       self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
              lambda b, s, pid = pid:self._get_value_complete(pid, b, s), data)
     for pid in ["DEVICE_INFO"]: # list of required pids
-      print "required pids"
+      self._uid_dict[uid]["supported pids"].append(pid)
       self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
              lambda b, s, pid = pid:self._get_value_complete(pid, b, s), data)
+    self.rdm_notebook.act_objects(self._uid_dict[uid]["supported pids"])
 
   def _get_value_complete(self, pid, succeeded, value):
     """ Callback for get_pid_value. """
