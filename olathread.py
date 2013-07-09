@@ -45,7 +45,6 @@ class OLAThread(threading.Thread):
 
   def rdm_get(self,universe,uid,sub_device,pid,callback,data=''):
     """ Executes, in the ola thread, an rdm inquiry. """
-    print 'rdm get'
     self._ss.Execute(lambda:self._rdm_get(universe,uid,sub_device,pid,
                                           callback,data))
 
@@ -55,7 +54,12 @@ class OLAThread(threading.Thread):
     self._ss.Execute(lambda:self._rdm_set(universe,uid,sub_device,pid,
                                           callback,data))
 
-  def _run_discovery(self,universe,callback):
+  def add_event(self, mili_secs, callback):
+    """
+    """
+    self._ss.AddEvent(mili_secs, callback)
+
+  def _run_discovery(self, universe, callback):
     """ This method is only run in the OLA thread. """
     response=self._client.RunRDMDiscovery(universe,True,callback)
     if response==False:
@@ -63,7 +67,6 @@ class OLAThread(threading.Thread):
 
   def _rdm_get(self,universe,uid,sub_device,pid,callback,data):
     """ This method is only run in the OLA thread. """
-    print '_rdm_get'
     self._rdm_api.Get(universe,uid,sub_device,self._pid_store.GetName(pid),
                       lambda r,d,e:self.complete_get(callback,r,d,e),data)
       
@@ -75,7 +78,6 @@ class OLAThread(threading.Thread):
 
   def complete_get(self,callback,response,data,unpack_exception):
     """ Checks if the get was a success, calls the callback from run_get. """
-    print 'RDM get completed'
     # need to do something with unpack_exception here
     if response.WasAcked()==False:
       callback(False,'')

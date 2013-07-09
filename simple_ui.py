@@ -35,6 +35,7 @@ class DisplayApp:
     self.universe_list = [1, 2, 3, 4, 5]
     self.cur_uid = None
     self.id_state = tk.IntVar(self.root)
+    self.auto_disc = tk.BooleanVar(self.root)
     self.id_state.set(0)
 #     self.state  =  0
     self._uid_dict = {}
@@ -46,7 +47,8 @@ class DisplayApp:
     self.build_frames()
     self.build_cntrl()
     self.rdm_notebook = notebook.RDMNotebook(self.root)
-  
+    self.auto_disc.set(False)
+    self.discover() 
 
     print "currently in thread: %d"%threading.currentThread().ident
     time.sleep(1)
@@ -84,9 +86,11 @@ class DisplayApp:
                                  variable = self.id_state, 
                                  command = self.identify)
     self.id_box.pack(side = tk.LEFT)
-    label = tk.Label(self.cntrl_frame, text = "Automatic\nDiscovery")
-    label.pack(side = tk.LEFT)
-    tk.Checkbutton(self.cntrl_frame).pack(side = tk.LEFT)
+    self.auto_disc_box = tk.Checkbutton(self.cntrl_frame, 
+                                        text = "Automatic\nDiscovery",
+                                        variable = self.auto_disc, 
+                                        command = self.discover)
+    self.auto_disc_box.pack(side = tk.LEFT)
 
   def device_selected(self, uid):
     """ called when a new device is chosen from dev_menu.
@@ -116,6 +120,10 @@ class DisplayApp:
   def discover(self):
     """ runs discovery for the current universe. """
     self.ola_thread.run_discovery(self.universe.get(), self._upon_discover)
+    if self.auto_disc.get():
+      self.ola_thread.add_event(5000, self.discover)
+    else: 
+      print "auto_disc is off"
 
   def identify(self):
     """ Command is called by id_box.
@@ -133,10 +141,15 @@ class DisplayApp:
   def _upon_discover(self, status, uids):
     """ callback for client.RunRDMDiscovery. """
     print "discovered"
-    self.device_menu["menu"].delete(0, "end")
+    if len(self._uid_dict.keys()) < 1:
+      self.device_menu["menu"].delete(0, "end")
     for uid in uids:
-      self._uid_dict[uid]  =  {}
-      self.ola_thread.rdm_get(self.universe.get(), uid, 0, "DEVICE_LABEL", 
+      if uid in self._uid_dict.keys():
+        return
+      else:
+        print "adding device..."
+        self._uid_dict[uid]  =  {}
+        self.ola_thread.rdm_get(self.universe.get(), uid, 0, "DEVICE_LABEL", 
                              lambda b, s, uid = uid:self._add_device(uid, b, s))
 
   def _add_device(self, uid, succeeded, data):
