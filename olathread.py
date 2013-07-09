@@ -55,6 +55,16 @@ class OLAThread(threading.Thread):
                                           callback,data))
 
   def add_event(self, mili_secs, callback):
+    """ creates an event that will happen after the specified number of mili 
+        seconds.
+
+        Args:
+          mili_secs: the number of mili seconds before callback is called.
+          callback: the function called on completion of the timer
+    """
+    self._ss.Execute(lambda: self._add_event(mili_secs, callback))
+
+  def _add_event(self, mili_secs, callback):
     """
     """
     self._ss.AddEvent(mili_secs, callback)

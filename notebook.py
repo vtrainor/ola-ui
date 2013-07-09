@@ -46,7 +46,12 @@ class RDMNotebook:
                             "DEVICE_MODEL_DESCRIPTION": [],
                             "DMX_PERSONALITY_DESCRIPTION":[],
                             "PRODUCT_DETAIL_ID_LIST": [],
-                            "REAL_TIME_CLOCK":[]}
+                            "REAL_TIME_CLOCK":[],
+                            "PAN_INVERT": [],
+                            "TILT_INVERT":[],
+                            "SENSOR_DEFINITION": [],
+                            "SENSOR_VALUE": [],
+                            "RECORD_SENSORS": []}
 
   def create_tab(self, tab_name, tab_label=None):
     """ Creates a tab. 
