@@ -45,6 +45,8 @@ class OLAThread(threading.Thread):
 
   def rdm_get(self,universe,uid,sub_device,pid,callback,data=''):
     """ Executes, in the ola thread, an rdm inquiry. """
+    # print "pid: %s" % pid
+    # print "data %s" % data
     self._ss.Execute(lambda:self._rdm_get(universe,uid,sub_device,pid,
                                           callback,data))
 
@@ -79,6 +81,8 @@ class OLAThread(threading.Thread):
     """ This method is only run in the OLA thread. """
     self._rdm_api.Get(universe,uid,sub_device,self._pid_store.GetName(pid),
                       lambda r,d,e:self.complete_get(callback,r,d,e),data)
+    # print "pid: %s" % pid
+    # print "data: %s" % data
       
   def _rdm_set(self,universe,uid,sub_device,pid,callback,data):
     """ This method is only run in the OLA thread. """
@@ -92,7 +96,7 @@ class OLAThread(threading.Thread):
     if response.WasAcked()==False:
       callback(False,'')
     else:
-      callback(True,data)
+      callback(True, data)
 
   def complete_set(self,callback,response,data,unpack_exception):
     """ Checks if the set was a success, calls the callback from run_set. """
