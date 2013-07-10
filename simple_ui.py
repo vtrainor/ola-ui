@@ -193,24 +193,25 @@ class DisplayApp:
         #   2. figure out what kind of widget I need to display this information
         print "manufactuer pid"
       if pid in ["RECORD_SENSORS", "RESET_DEVICE", "CAPTURE_PRESET"]:
-        return
-      elif pid == "DMX_PERSONALITY_DESCRIPTION":
-        data = [1]
-      elif pid == "SLOT_DESCRIPTION":
-        data = [1]
-      elif pid == "SELF_TEST_DESCRIPTION":
-        data = [1]
-      elif pid == "QUEUED_MESSAGE":
-        data = [0x01]
-      elif pid == "SENSOR_DEFINITION":
-        data = [1]
-      elif pid == "SENSOR_VALUE":
-        data = [1]
-      else:
-        data = []
-      self._uid_dict[uid]["supported_pids"].append(pid)
-      self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
-             lambda b, s, pid = pid:self._get_value_complete(pid, b, s), data)
+        pass
+      else: 
+        if pid == "DMX_PERSONALITY_DESCRIPTION":
+          data = [1]
+        elif pid == "SLOT_DESCRIPTION":
+          data = [1]
+        elif pid == "SELF_TEST_DESCRIPTION":
+          data = [1]
+        elif pid == "QUEUED_MESSAGE":
+          data = [0x01]
+        elif pid == "SENSOR_DEFINITION":
+          data = [1]
+        elif pid == "SENSOR_VALUE":
+          data = [1]
+        else:
+          data = []
+        self._uid_dict[uid]["supported_pids"].append(pid)
+        self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
+               lambda b, s, pid = pid:self._get_value_complete(pid, b, s), data)
       print "pid: %s" % pid
     for pid in ["DEVICE_INFO"]: # list of required pids
       self._uid_dict[uid]["supported_pids"].append(pid)
@@ -220,8 +221,8 @@ class DisplayApp:
 
   def _get_value_complete(self, pid, succeeded, value):
     """ Callback for get_pid_value. """
-    # print "pid: %s"%pid
-    # print "value: %s"%value
+    print "pid: %s"%pid
+    print "value: %s"%value
     if not succeeded:
       print "did not succeed"
       return

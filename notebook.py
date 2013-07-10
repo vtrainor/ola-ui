@@ -80,6 +80,7 @@ class RDMNotebook:
     """
     self._update_info(value, supported_pid)
     self._update_dmx(value, supported_pid)
+    self._update_sensor(value, supported_pid)
 
   def act_objects(self, supported_pids):
     """
