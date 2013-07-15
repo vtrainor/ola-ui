@@ -1,4 +1,5 @@
 import Tkinter as tk
+import simple_ui
 import ttk
 
 class RDMNotebook:
@@ -25,34 +26,48 @@ class RDMNotebook:
     self._init_dmx()
     self.sensor_tab = self.create_tab("sensor_tab", "Sensors")
     self._init_sensor()
-    self.pid_index_dict = { "DEVICE_INFO": [0,1,3,4,6,7,15,16,42,43,48,49],
-                            "FACTORY_DEFAULTS": [2],
-                            "DEVICE_LABEL": [5],
-                            "MANUFACTURER_LABEL": [9,10],
-                            "LANGUAGE": [12,13,14],
-                            "SOFTWARE_VERSION_LABEL": [19],
-                            "BOOT_SOFTWARE_VERSION":[21,22],
-                            "BOOT_SOFTWARE_LABEL": [25],
-                            "DEVICE_HOURS": [27,28],
-                            "LAMP_ON_MODE": [29],
-                            "LAMP_HOURS": [30,31],
-                            "LAMP_STRIKES": [33,34],
-                            "POWER_STATE": [35],
-                            "LAMP_STATE": [36,37],
-                            "DEVICE_POWER_CYCLE": [39,40,41],
-                            "DMX_PERSONALITY": [], #44
-                            "PERSONALITY_DESCRIPTION": [46],
-                            "DMX_START_ADDRESS": [50],
-                            "DEVICE_MODEL_DESCRIPTION": [],
-                            "DMX_PERSONALITY_DESCRIPTION":[],
-                            "PRODUCT_DETAIL_ID_LIST": [],
-                            "REAL_TIME_CLOCK":[],
-                            "PAN_INVERT": [],
-                            "TILT_INVERT":[],
-                            "SENSOR_DEFINITION": [],
-                            "SENSOR_VALUE": [],
-                            "RECORD_SENSORS": [],
-                            "QUEUED_MESSAGE": []}
+    self.pid_index_dict = {"DEVICE_INFO": [0,1,3,4,6,7,9,10,12,13,54,55,57,58,
+                                           60,61,93,94],
+                           "PRODUCT_DETAIL_ID_LIST": [15,16],
+                           "DEVICE_MODEL_DESCRIPTION": [4],
+                           "MANUFACTURER_LABEL": [18,19],
+                           "DEVICE_LABEL": [2],
+                           "FACTORY_DEFAULTS": [5],
+                           "LANGUAGE_CAPABILITIES": [25],
+                           "LANGUAGE": [24,25],
+                           "SOFTWARE_VERSION_LABEL": [10],
+                           "BOOT_SOFTWARE_VERSION_ID": [21,22],
+                           "BOOT_SOFTWARE_VERSION_LABEL": [22],
+                           "DMX_PERSONALITY": [61],
+                           "DMX_PERSONALITY_DESCRIPTION": [64,65,67,68],
+                           "DMX_START_ADDRESS": [55],
+                           "SLOT_INFO": [69,70,71,73,74,76,77,79,80],
+                           "SLOT_DESCRIPTION": [82,83,85,86],
+                           "DEFAULT_SLOT_VALUE": [87,88,89,91,92],
+                           "SENSOR_DEFINITION": [111,112,115,116,118,119,121,
+                                                 122,124,125,127,128,130,131,
+                                                 133,134,136,137,139,140],
+                           "SENSOR_VALUE": [96,97,100,101,103,104,106,107,109,
+                                            110],
+                           "RECORD_SENSORS": [95],
+                           "DEVICE_HOURS": [29],
+                           "LAMP_HOURS": [28],
+                           "LAMP_STRIKES": [32],
+                           "LAMP_STATE": [30,31],
+                           "LAMP_ON_MODE": [33,34],
+                           "DEVICE_POWER_CYCLES": [36,37],
+                           "DISPLAY_INVERT": [39,40],
+                           "DISPLAY_LEVEL": [42,43],
+                           "PAN_INVERT": [41],
+                           "TILT_INVERT": [38],
+                           "PAN_TILT_SWAP": [44],
+                           "REAL_TIME_CLOCK": [8,11],
+                           "RESET_DEVICE": [14],
+                           "POWER_STATE": [45,46],
+                           "PERFORM_SELFTEST": [48,49],
+                           "SELF_TEST_DESCRIPTION": [50],
+                           "CAPTURE_PRESET": [53],
+                           "PRESET_PLAYBACK": [51,52] }
 
   def create_tab(self, tab_name, tab_label=None):
     """ Creates a tab. 
@@ -94,113 +109,219 @@ class RDMNotebook:
   def _init_info(self):
     """ Initializes the parameters that will be in the info dictionary. """
     self.protocol_version = tk.StringVar(self.info_tab)
-    self.factory_defaults = tk.BooleanVar(self.info_tab)
-    self.factory_default_callback = None
+    self.device_label = tk.StringVar(self.info_tab)
     self.device_model = tk.StringVar(self.info_tab)
-    self.product_category = tk.IntVar(self.info_tab)
+    self.factory_defaults = tk.BooleanVar(self.info_tab)
+    self.product_category = tk.StringVar(self.info_tab)
+    self.real_time = tk.StringVar(self.info_tab)
+    self.software_version = tk.StringVar(self.info_tab)
+    self.sub_device_count = tk.StringVar(self.info_tab)
+    self.product_ids = tk.StringVar(self.info_tab)
     self.manufacturer = tk.StringVar(self.info_tab)
-    self.software_version_val = tk.IntVar(self.info_tab)
-    self.software_version_lab = tk.StringVar(self.info_tab)
+    self.boot_software = tk.StringVar(self.info_tab)
     self.language = tk.StringVar(self.info_tab)
-    self.boot_software_val = tk.IntVar(self.info_tab)
-    self.boot_software_lab = tk.StringVar(self.info_tab)
-    self.device_hours = tk.IntVar(self.info_tab)
-    self.lamp_hours = tk.IntVar(self.info_tab)
-    self.lamp_strikes = tk.IntVar(self.info_tab)
-    self.power_state = tk.StringVar(self.info_tab)
+    self.languages = ["languages"]
+    self.tilt_invert = tk.BooleanVar(self.info_tab)
+    self.pan_invert = tk.BooleanVar(self.info_tab)
+    self.pan_tilt_swap = tk.BooleanVar(self.info_tab)
     self.lamp_state = tk.StringVar(self.info_tab)
-    self.device_power_cycles = tk.IntVar(self.info_tab)
+    self.lamp_states = ["lamp states"]
+    self.device_hours = tk.StringVar(self.info_tab)
     self.lamp_on_mode = tk.StringVar(self.info_tab)
-    self.languages = ["languages"] 
     self.lamp_on_modes = ["lamp on modes"]
+    self.lamp_hours = tk.StringVar(self.info_tab)
+    self.device_power_cycles = tk.StringVar(self.info_tab)
+    self.lamp_strikes = tk.StringVar(self.info_tab)
+    self.display_invert = tk.StringVar(self.info_tab)
+    self.display_inverts = ["display inverts"]
+    self.display_level = tk.StringVar(self.info_tab)
+    self.power_state = tk.StringVar(self.info_tab)
     self.power_states = ["power states"]
-    self.info_objects = [tk.Label(self.info_tab, text="Protocol Version"),
-                         tk.Label(self.info_tab, textvariable=self.protocol_version),
-                         tk.Checkbutton(self.info_tab, 
-                           text = "Factory Defaults", 
-                           variable = self.factory_defaults),
+    self.self_test_val = tk.StringVar(self.info_tab)
+    self.self_test_vals = ["self test values"]
+    self.self_test_desc = tk.StringVar(self.info_tab)
+    self.preset_playback = tk.StringVar(self.info_tab)
+    self.preset_playbacks = ["preset playbacks"]
+    self.info_objects = [
+                        tk.Label(self.info_tab, text="Protocol Version"),
+                        tk.Label(self.info_tab,
+                          textvariable=self.protocol_version),
+                        tk.Entry(self.info_tab,
+                          textvariable=self.device_label),
                          
-                         tk.Label(self.info_tab, text="Device Model"),
-                         tk.Label(self.info_tab, textvariable=self.device_model),
-                         tk.Label(self.info_tab, text="will be entry box"),
+                        tk.Label(self.info_tab, text="Device Model"),
+                        tk.Label(self.info_tab,
+                          textvariable=self.device_model),
+                        tk.Checkbutton(self.info_tab, 
+                          text = "Factory Defaults", 
+                          variable = self.factory_defaults),
                          
-                         tk.Label(self.info_tab, text="Product Category"),
-                         tk.Label(self.info_tab, textvariable=self.product_category),
-                         tk.Button(self.info_tab, text="reset"),
+                        tk.Label(self.info_tab, text="Product Category"),
+                        tk.Label(self.info_tab,
+                          textvariable=self.product_category),
+                        tk.Label(self.info_tab, textvariable=self.real_time),
                          
-                         tk.Label(self.info_tab, text="Manufacturer"),
-                         tk.Label(self.info_tab, textvariable=self.manufacturer),
-                         tk.Label(self.info_tab, text=""),
+                        tk.Label(self.info_tab, text="Software Version"),
+                        tk.Label(self.info_tab, 
+                          textvariable=self.software_version),
+                        tk.Button(self.info_tab, text="Update Clock"),
                          
-                         tk.Label(self.info_tab, text="Current Language"),
-                         tk.Label(self.info_tab, textvariable=self.language),
-                         tk.OptionMenu(self.info_tab, self.language, 
-                           *self.languages),
+                        tk.Label(self.info_tab, text="Sub-Device Count"),
+                        tk.Label(self.info_tab,
+                          textvariable=self.sub_device_count),
+                        tk.Button(self.info_tab, text="Reset Device"),
                          
-                         tk.Label(self.info_tab, text="Software Version"),
-                         tk.Label(self.info_tab, 
-                           textvariable=self.software_version_val),
-                         tk.Label(self.info_tab, text=""),
+                        tk.Label(self.info_tab, text="Product IDs"),
+                        tk.Label(self.info_tab, 
+                          textvariable=self.product_ids),
+                        tk.Label(self.info_tab, text=""),
                          
-                         tk.Label(self.info_tab, text=""),
-                         tk.Label(self.info_tab, 
-                           textvariable=self.software_version_lab),
-                         tk.Label(self.info_tab, text=""),
+                        tk.Label(self.info_tab, text="Manufacturer"),
+                        tk.Label(self.info_tab, 
+                          textvariable=self.manufacturer),
+                        tk.Label(self.info_tab, text=""),
                          
-                         tk.Label(self.info_tab, text="Boot Software Version"),
-                         tk.Label(self.info_tab, 
-                           textvariable=self.boot_software_val),
-                         tk.Label(self.info_tab, text=""),
+                        tk.Label(self.info_tab, text="Boot Software"),
+                        tk.Label(self.info_tab, 
+                          textvariable=self.boot_software),
+                        tk.Label(self.info_tab, text=""),
                          
-                         tk.Label(self.info_tab, text=""),
-                         tk.Label(self.info_tab, textvariable=self.boot_software_lab),
-                         tk.Label(self.info_tab, text=""),
+                        tk.Label(self.info_tab, text="Language"),
+                        tk.OptionMenu(self.info_tab, self.language, 
+                          *self.languages),
+                        tk.Label(self.info_tab, text=""),
                          
-                         tk.Label(self.info_tab, text="Device Hours"),
-                         tk.Label(self.info_tab, textvariable=self.device_hours),
-                         tk.OptionMenu(self.info_tab, self.lamp_on_mode,
-                           *self.lamp_on_modes),
+                        tk.Checkbutton(self.info_tab, text="Tilt Invert", 
+                          variable = self.tilt_invert),
+                        tk.Checkbutton(self.info_tab, text="Pan Invert", 
+                          variable = self.pan_invert),
+                        tk.Checkbutton(self.info_tab, text="Pan Tilt Swap", 
+                          variable = self.pan_tilt_swap),
+
+                        tk.Label(self.info_tab, text="Lamp State"),
+                        tk.OptionMenu(self.info_tab, self.lamp_state,
+                          *self.lamp_states),
+                        tk.Label(self.info_tab, 
+                          textvariable=self.device_hours),
+
+                        tk.Label(self.info_tab, text="Lamp on Mode"),
+                        tk.OptionMenu(self.info_tab, self.lamp_on_mode,
+                          *self.lamp_on_modes),
+                        tk.Label(self.info_tab, textvariable=self.lamp_hours),
                          
-                         tk.Label(self.info_tab, text="Lamp Hours"),
-                         tk.Label(self.info_tab, textvariable=self.lamp_hours),
-                         tk.Label(self.info_tab, text=""),
+                        tk.Label(self.info_tab, text="Device Power Cycles"),
+                        tk.Label(self.info_tab, 
+                          textvariable=self.device_power_cycles),
+                        tk.Label(self.info_tab, 
+                          textvariable=self.lamp_strikes),
                          
-                         tk.Label(self.info_tab, text="Lamp Strikes"),
-                         tk.Label(self.info_tab, textvariable=self.lamp_strikes),
-                         tk.OptionMenu(self.info_tab, self.power_state, 
-                           *self.power_states),
-                         
-                         tk.Label(self.info_tab, text="Lamp State"),
-                         tk.Label(self.info_tab, textvariable=self.lamp_state),
-                         tk.Label(self.info_tab, text=""),
-                         
-                         tk.Label(self.info_tab, text="Device Power Cycles"),
-                         tk.Label(self.info_tab, textvariable=self.device_power_cycles),
-                         tk.Label(self.info_tab, 
-                           text="Will be set widget for device power cycles"),
-                         ]
+                        tk.Label(self.info_tab, text="Display Invert"),
+                        tk.OptionMenu(self.info_tab, self.display_invert, 
+                          *self.display_inverts),
+                        tk.Label(self.info_tab, text=""),
+
+                        tk.Label(self.info_tab, text="Display Level"),
+                        tk.Label(self.info_tab, 
+                          textvariable=self.display_level),
+                        tk.Label(self.info_tab, text=""),
+
+                        tk.Label(self.info_tab, text="Power State"),
+                        tk.OptionMenu(self.info_tab, self.power_state, 
+                          *self.power_states),
+                        tk.Label(self.info_tab, text=""),
+
+                        tk.Button(self.info_tab, text="Preform Self-Test"),
+                        tk.OptionMenu(self.info_tab, self.self_test_val, 
+                          *self.self_test_vals),
+                        tk.Label(self.info_tab, 
+                          textvariable=self.self_test_desc),
+
+                        tk.Label(self.info_tab, text=""),
+                        tk.OptionMenu(self.info_tab, self.preset_playback, 
+                          *self.preset_playbacks),
+                        tk.Button(self.info_tab, text="Capture Preset")
+                       ]
     for widget in self.info_objects:
         self.objects.append(widget)
     self._grid_info(self.info_objects)
 
   def _init_dmx(self):
     """ Initializes the parameters that will be in the dmx dictionary. """
+    self.dmx_start_address = tk.StringVar(self.dmx_tab)
+    self.dmx_footprint = tk.StringVar(self.dmx_tab)
     self.dmx_personality = tk.StringVar(self.dmx_tab)
     self.dmx_personalities = ["dmx personalities"]
-    self.personality_des = tk.StringVar(self.dmx_tab)
-    self.dmx_start_address = tk.IntVar(self.dmx_tab)
-    self.dmx_objects = [tk.Label(self.dmx_tab, text="DMX Personality"),
-                        tk.Label(self.dmx_tab, textvariable=self.dmx_personality),
-                        tk.OptionMenu(self.dmx_tab, self.dmx_personality,
-                          *self.dmx_personalities),
-
+    self.personality_name = tk.StringVar(self.dmx_tab)
+    self.slots_required = tk.StringVar(self.dmx_tab)
+    self.dmx_slot = tk.StringVar(self.dmx_tab)
+    self.dmx_slots = ["dmx slots"]
+    self.offset = tk.StringVar(self.dmx_tab)
+    self.slot_type = tk.StringVar(self.dmx_tab)
+    self.slot_label_id = tk.StringVar(self.dmx_tab)
+    self.slot_number = tk.StringVar(self.dmx_tab)
+    self.slot_name = tk.StringVar(self.dmx_tab)
+    self.default_slot_offset = tk.StringVar(self.dmx_tab)
+    self.default_slot_value = tk.StringVar(self.dmx_tab)
+    self.dmx_objects = [
+                        tk.Label(self.dmx_tab, text="Start Address:"),
+                        tk.Entry(self.dmx_tab, 
+                          textvariable=self.dmx_start_address),
                         tk.Label(self.dmx_tab, text=""),
-                        tk.Label(self.dmx_tab, textvariable=self.personality_des),
+
+                        tk.Label(self.dmx_tab, text="DMX Footprint:"),
+                        tk.Label(self.dmx_tab, 
+                          textvariable=self.dmx_footprint),
                         tk.Label(self.dmx_tab, text=""),
                         
-                        tk.Label(self.dmx_tab, text="DMX Start Address"),
-                        tk.Label(self.dmx_tab, textvariable=self.dmx_start_address),
+                        tk.Label(self.dmx_tab, text="Current Personality:"),
+                        tk.OptionMenu(self.dmx_tab, self.dmx_personality,
+                          *self.dmx_personalities),
                         tk.Label(self.dmx_tab, text=""),
+
+                        tk.Label(self.dmx_tab, text=""),
+                        tk.Label(self.dmx_tab, text="Personality Name:"),
+                        tk.Label(self.dmx_tab,
+                          textvariable=self.personality_name),
+
+                        tk.Label(self.dmx_tab, text=""),
+                        tk.Label(self.dmx_tab, text="Slots Required:"),
+                        tk.Label(self.dmx_tab,
+                          textvariable=self.slots_required),
+
+                        tk.Label(self.dmx_tab, text="Slot Info:"),
+                        tk.Label(self.dmx_tab, text="Choose Slot"),
+                        tk.OptionMenu(self.dmx_tab, self.dmx_slot, 
+                          *self.dmx_slots),
+
+                        tk.Label(self.dmx_tab, text=""),
+                        tk.Label(self.dmx_tab, text="Offset:"),
+                        tk.Label(self.dmx_tab, textvariable=self.offset),
+
+                        tk.Label(self.dmx_tab, text=""),
+                        tk.Label(self.dmx_tab, text="Slot Type:"),
+                        tk.Label(self.dmx_tab, textvariable=self.slot_type),
+
+                        tk.Label(self.dmx_tab, text=""),
+                        tk.Label(self.dmx_tab, text="Slot Label ID:"),
+                        tk.Label(self.dmx_tab, textvariable=self.slot_label_id),
+
+                        tk.Label(self.dmx_tab, text=""),
+                        tk.Label(self.dmx_tab, text="Slot Number:"),
+                        tk.Label(self.dmx_tab, textvariable=self.slot_number),
+
+                        tk.Label(self.dmx_tab, text=""),
+                        tk.Label(self.dmx_tab, text="Slot Name:"),
+                        tk.Label(self.dmx_tab, textvariable=self.slot_name),
+
+                        tk.Label(self.dmx_tab, text="Default Slot:"),
+                        tk.Label(self.dmx_tab, text="Offset:"),
+                        tk.Label(self.dmx_tab,
+                          textvariable=self.default_slot_offset),
+
+                        tk.Label(self.dmx_tab, text=""),
+                        tk.Label(self.dmx_tab, text="Slot Value"),
+                        tk.Label(self.dmx_tab,
+                          textvariable=self.default_slot_value)
                        ]
     for widget in self.dmx_objects:
         self.objects.append(widget)
@@ -210,25 +331,101 @@ class RDMNotebook:
     """ Initializes the paramters that will be in the device monitoring 
         dictionary.
     """
-    self.sensor_number = tk.IntVar(self.sensor_tab)
+    self.sensor_count = tk.StringVar(self.sensor_tab)
+    self.sensor_info = tk.StringVar(self.dmx_tab)
     self.sensors = ["sensors"]
-    self.sensor_type = tk.IntVar(self.sensor_tab)
-    self.sensor_prefix = tk.IntVar(self.sensor_tab)
-    self.sensor_objects = [ tk.Label(self.sensor_tab, text="Sensor Number"),
-                            tk.Label(self.sensor_tab, 
-                              textvariable=self.sensor_number),
-                            tk.OptionMenu(self.sensor_tab, self.sensor_number,
-                              self.sensors),
+    self.present_value = tk.StringVar(self.dmx_tab)
+    self.lowest_value = tk.StringVar(self.dmx_tab)
+    self.highest_value = tk.StringVar(self.dmx_tab)
+    self.recorded_value = tk.StringVar(self.dmx_tab)
+    self.sensor_desc = tk.StringVar(self.dmx_tab)
+    self.sensor_type = tk.StringVar(self.dmx_tab)
+    self.sensor_unit = tk.StringVar(self.dmx_tab)
+    self.sensor_prefix = tk.StringVar(self.dmx_tab)
+    self.range_min = tk.StringVar(self.dmx_tab)
+    self.range_max = tk.StringVar(self.dmx_tab)
+    self.norm_min = tk.StringVar(self.dmx_tab)
+    self.norm_max = tk.StringVar(self.dmx_tab)
+    self.recording = tk.StringVar(self.dmx_tab)
+    self.sensor_name = tk.StringVar(self.dmx_tab)
+    self.sensor_objects = [ 
+                          tk.Label(self.sensor_tab, text="Sensor Count:"),
+                          tk.Label(self.dmx_tab,
+                            textvariable=self.sensor_count),
+                          tk.Button(self.sensor_tab, text="Record Sensors"),
 
-                            tk.Label(self.sensor_tab, text="Sensor Type"),
-                            tk.Label(self.sensor_tab, 
-                              textvariable=self.sensor_type),
-                            tk.Label(self.sensor_tab, text=""),
+                          tk.Label(self.sensor_tab, text="Choose Sensor:"),
+                          tk.OptionMenu(self.sensor_tab, self.sensor_info,
+                            *self.sensors),
+                          tk.Label(self.sensor_tab, text=""),
 
-                            tk.Label(self.sensor_tab, text="Prefix"),
-                            tk.Label(self.sensor_tab, 
-                              textvariable=self.sensor_prefix),
-                            tk.Label(self.sensor_tab, text="")
+                          tk.Label(self.sensor_tab, text=""),
+                          tk.Label(self.sensor_tab, text="Present Value:"),
+                          tk.Label(self.sensor_tab,
+                            textvariable=self.present_value),
+
+                          tk.Label(self.sensor_tab, text=""),
+                          tk.Label(self.sensor_tab, text="Lowest Value:"),
+                          tk.Label(self.sensor_tab,
+                            textvariable=self.lowest_value),
+
+                          tk.Label(self.sensor_tab, text=""),
+                          tk.Label(self.sensor_tab, text="Highest Value:"),
+                          tk.Label(self.sensor_tab,
+                            textvariable=self.highest_value),
+
+                          tk.Label(self.sensor_tab, text=""),
+                          tk.Label(self.sensor_tab, text="Recorded Value:"),
+                          tk.Label(self.sensor_tab,
+                            textvariable=self.recorded_value),
+
+                          tk.Label(self.sensor_tab, text="Choose Sensor:"),
+                          tk.OptionMenu(self.sensor_tab, self.sensor_desc, 
+                            *self.sensors),
+                          tk.Label(self.sensor_tab, text=""),
+
+                          tk.Label(self.sensor_tab, text=""),
+                          tk.Label(self.sensor_tab, text="Sensor Type:"),
+                          tk.Label(self.sensor_tab,
+                            textvariable=self.sensor_type),
+
+                          tk.Label(self.sensor_tab, text=""),
+                          tk.Label(self.sensor_tab, text="Sensor Unit:"),
+                          tk.Label(self.sensor_tab,
+                            textvariable=self.sensor_unit),
+
+                          tk.Label(self.sensor_tab, text=""),
+                          tk.Label(self.sensor_tab, text="Sensor Prefix:"),
+                          tk.Label(self.sensor_tab,
+                            textvariable=self.sensor_prefix),
+
+                          tk.Label(self.sensor_tab, text=""),
+                          tk.Label(self.sensor_tab, text="Range Minimum:"),
+                          tk.Label(self.sensor_tab,
+                            textvariable=self.range_min),
+
+                          tk.Label(self.sensor_tab, text=""),
+                          tk.Label(self.sensor_tab, text="Range Maximum"),
+                          tk.Label(self.sensor_tab,
+                            textvariable=self.range_max),
+
+                          tk.Label(self.sensor_tab, text=""),
+                          tk.Label(self.sensor_tab, text="Normal Minimum:"),
+                          tk.Label(self.sensor_tab, textvariable=self.norm_min),
+
+                          tk.Label(self.sensor_tab, text=""),
+                          tk.Label(self.sensor_tab, text="Normal Maximum:"),
+                          tk.Label(self.sensor_tab, textvariable=self.norm_max),
+
+                          tk.Label(self.sensor_tab, text=""),
+                          tk.Label(self.sensor_tab, text="Supports Recording:"),
+                          tk.Label(self.sensor_tab,
+                            textvariable=self.recording),
+
+                          tk.Label(self.sensor_tab, text=""),
+                          tk.Label(self.sensor_tab, text="Sensor Name:"),
+                          tk.Label(self.sensor_tab,
+                            textvariable=self.sensor_name)
                           ]
     for widget in self.sensor_objects:
       self.objects.append(widget)
@@ -238,7 +435,6 @@ class RDMNotebook:
     """
     """
     for i in range(len(obj_list)):
-      obj_list[i].config(height=1)
       if i%3 == 1:
         obj_list[i].config(width=35)
       else:
@@ -270,19 +466,32 @@ class RDMNotebook:
     """
     print "updating"
 
-    if "MANUFACTURER_LABEL" in supported_pids:
-      self.manufacturer.set(value["label"])
-    elif "LAMP_STRIKES" in supported_pids:
-      self.lamp_strikes.set(value["strikes"])
-    elif "DEVICE_INFO" in supported_pids:
+    if "DEVICE_INFO" in supported_pids:
       self.protocol_version.set("%d.%d" % 
                                 (value["protocol_major"], 
                                  value["protocol_minor"]))
       self.device_model.set(value["device_model"])
       self.product_category.set(value["product_category"])
-      self.software_version_val.set(value["software_version"])
+      self.software_version.set(value["software_version"])
+    elif "PRODUCT_DETAIL_ID_LIST" in supported_pids:
+      id_list = []
+      for d in value["detail_ids"]:
+        id_list.append(d["detail_id"])
+      self.product_ids.set(id_list)
+    elif "DEVICE_MODEL_DESCRIPTION" in supported_pids:
+      self.device_model.set("%s (%s)" % (value["description"],
+                            self.device_model.get()))
+    elif "MANUFACTURER_LABEL" in supported_pids:
+      self.manufacturer.set(value["label"])
+    elif "DEVICE_LABEL" in supported_pids:
+      self.device_label.set(value["label"])
     elif "FACTORY_DEFAULTS" in supported_pids:
       self.factory_defaults.set(value["using_defaults"])
+    elif "LANGUAGE_CAPABILITIES" in supported_pids:
+      for d in value["languages"]:
+        self.languages.append(d["language"])
+    elif "LAMP_STRIKES" in supported_pids:
+      self.lamp_strikes.set(value["strikes"])
     elif "SOFTWARE_VERSION_LABEL" in supported_pids:
       self.software_version_lab.set(value["label"])
     elif "LANGUAGE" in supported_pids:
@@ -314,7 +523,7 @@ class RDMNotebook:
         self.dmx_personalities.append(i)
       self.dmx_start_address.set(value["dmx_start_address"])
     elif "DMX_PERSONALITY_DESCRIPTION" in supported_pids:
-      self.personality_des.set(value["name"])
+      self.personality_name.set(value["name"])
     #sets:
     # elif "DMX_PERSONALITY" in supported_pids:
     # elif "DMX_START_ADDRESS" in supported_pids:

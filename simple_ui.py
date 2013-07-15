@@ -179,6 +179,11 @@ class DisplayApp:
     pid_list = params["params"]
         # the following code was copy and pasted from simple_ui and has not yet been
     # edited to work within the notebook class.
+    data = []
+    for pid in ["DEVICE_INFO"]: # list of required pids
+      self._uid_dict[uid]["supported_pids"].append(pid)
+      self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
+             lambda b, s, pid = pid:self._get_value_complete(pid, b, s), data)
     for item in pid_list:
       try:
         pid = self._pid_store.GetPid(item["param_id"], uid.manufacturer_id).name
@@ -207,16 +212,11 @@ class DisplayApp:
           data = [1]
         elif pid == "SENSOR_VALUE":
           data = [1]
-        else:
-          data = []
         self._uid_dict[uid]["supported_pids"].append(pid)
         self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
                lambda b, s, pid = pid:self._get_value_complete(pid, b, s), data)
       print "pid: %s" % pid
-    for pid in ["DEVICE_INFO"]: # list of required pids
-      self._uid_dict[uid]["supported_pids"].append(pid)
-      self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
-             lambda b, s, pid = pid:self._get_value_complete(pid, b, s), data)
+
     self.rdm_notebook.act_objects(self._uid_dict[uid]["supported_pids"])
 
   def _get_value_complete(self, pid, succeeded, value):
@@ -234,7 +234,7 @@ class DisplayApp:
 
         Sets the checkbox"s state to that of the currently selected device
     """
-    if succeeded:
+    if succeeded: 
       self.id_state.set(value["identify_state"])
 
   def _set_identify_complete(self, uid, succeded, value):
