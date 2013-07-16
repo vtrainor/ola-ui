@@ -1,6 +1,7 @@
 import Tkinter as tk
 import simple_ui
 import ttk
+import ola.RDMConstants as RDMConstants
 
 class RDMNotebook:
   def __init__(self, root, width=800, height=500,side=tk.TOP,callback_dict={}):
@@ -13,6 +14,7 @@ class RDMNotebook:
     self.pid_index_dict = {}
     self._notebook = ttk.Notebook(self.root, name="nb", height=height,
                                   width=width)
+    self.callback_dict = {}
     self.populate_defaults()
     # self.update_info_tab()
     self._notebook.pack(side=side)
@@ -32,8 +34,8 @@ class RDMNotebook:
                            "PRODUCT_DETAIL_ID_LIST": [15,16],
                            "DEVICE_MODEL_DESCRIPTION": [4],
                            "MANUFACTURER_LABEL": [18,19],
-                           "DEVICE_LABEL": [2],
-                           "FACTORY_DEFAULTS": [5],
+                           "DEVICE_LABEL": [2,5],
+                           "FACTORY_DEFAULTS": [],
                            "LANGUAGE_CAPABILITIES": [25],
                            "LANGUAGE": [24,25],
                            "SOFTWARE_VERSION_LABEL": [10],
@@ -69,11 +71,6 @@ class RDMNotebook:
                            "SELF_TEST_DESCRIPTION": [50],
                            "CAPTURE_PRESET": [53],
                            "PRESET_PLAYBACK": [51,52] }
-    self.callback_dict = {}
-    # for i in [100,103,106,109,115,118,121,124,127,130,133,136,139]:
-    #   self.objects[i].config(anchor=tk.E)
-    # for i in [101,104,107,110,116,119,122,125,128,131,134,137,140]:
-    #   self.objects[i].config(anchor=tk.W)
 
   def create_tab(self, tab_name, tab_label=None):
     """ Creates a tab. 
@@ -156,19 +153,22 @@ class RDMNotebook:
     self.self_test_desc = tk.StringVar(self.info_tab)
     self.preset_playback = tk.StringVar(self.info_tab)
     self.preset_playbacks = ["preset playbacks"]
+
+    self.device_label_entry = tk.Entry(self.info_tab,
+                                      textvariable=self.device_label)
+    self.device_label_button = tk.Button(self.info_tab,
+                                          text="Set Device Label")
+
     self.info_objects = [
                         tk.Label(self.info_tab, text="Protocol Version"),
                         tk.Label(self.info_tab,
                           textvariable=self.protocol_version),
-                        tk.Entry(self.info_tab,
-                          textvariable=self.device_label),
+                        self.device_label_entry,
                          
                         tk.Label(self.info_tab, text="Device Model"),
                         tk.Label(self.info_tab,
                           textvariable=self.device_model),
-                        tk.Checkbutton(self.info_tab, 
-                          text = "Factory Defaults", 
-                          variable = self.factory_defaults),
+                        self.device_label_button,
                          
                         tk.Label(self.info_tab, text="Product Category"),
                         tk.Label(self.info_tab,
@@ -363,10 +363,10 @@ class RDMNotebook:
     self.supports_recording = tk.StringVar(self.dmx_tab)
     self.sensor_name = tk.StringVar(self.dmx_tab)
     self.sensor_objects = [ 
-                          tk.Label(self.sensor_tab, text="Sensor Count:"),
-                          tk.Label(self.sensor_tab,
-                            textvariable=self.sensor_count),
+                          tk.Label(self.sensor_tab, text=""),
                           tk.Button(self.sensor_tab, text="Record Sensors"),
+                          tk.Label(self.sensor_tab, text=""),
+                          
 
                           tk.Label(self.sensor_tab, text="Choose Sensor"),
                           tk.OptionMenu(self.sensor_tab, self.sensor_info,
@@ -425,11 +425,13 @@ class RDMNotebook:
 
                           tk.Label(self.sensor_tab, text=""),
                           tk.Label(self.sensor_tab, text="Normal Minimum"),
-                          tk.Label(self.sensor_tab, textvariable=self.normal_min),
+                          tk.Label(self.sensor_tab,
+                            textvariable=self.normal_min),
 
                           tk.Label(self.sensor_tab, text=""),
                           tk.Label(self.sensor_tab, text="Normal Maximum"),
-                          tk.Label(self.sensor_tab, textvariable=self.normal_max),
+                          tk.Label(self.sensor_tab,
+                            textvariable=self.normal_max),
 
                           tk.Label(self.sensor_tab, text=""),
                           tk.Label(self.sensor_tab, text="Supports Recording"),
@@ -522,11 +524,12 @@ class RDMNotebook:
     elif "LAMP_STRIKES" in supported_pids:
       self.lamp_strikes.set("%d Lamp Strikes" % value["strikes"])
     elif "POWER_STATE" in supported_pids:
-      self.power_state.set(value["state"])
+      self.power_state.set(value["power_state"])
     elif "LAMP_STATE" in supported_pids:
       self.lamp_state.set(value["state"])
     elif "LAMP_ON_MODE" in supported_pids:
-      self.lamp_on_mode.set(value["label"][value["mode"]])
+
+      self.lamp_on_mode.set([value["mode"]])
     elif "DEVICE_POWER_CYCLE" in supported_pids:
       self.device_power_cycles.set(value["power_cycles"])
     elif "DISPLAY_INVERT" in supported_pids:
@@ -592,7 +595,7 @@ class RDMNotebook:
       #             command = callback)
     elif "SENSOR_DEFINITION" in supported_pids:
       self.sensor_desc.set(value["sensor_number"])
-      self.sensor_type.set(value["type"])
+      self.sensor_type.set(RDMConstants.SENSOR_TYPE_TO_NAME[value["type"]])
       self.sensor_prefix.set(value["prefix"])
       self.range_min.set(value["range_min"])
       self.range_max.set(value["range_max"])
@@ -611,9 +614,11 @@ class RDMNotebook:
       self.highest_value.set(value["highest"])
       self.recorded_value.set(value["recorded"])
 
-  def _set_value(self, pid, value):
+  def _add_callback(self, pid, value):
     """
     """
+    if pid == "DEVICE_LABEL":
+      self.device_label_button.config(command=value)
 
   def main(self):
     """ Main method for Notebook class. """

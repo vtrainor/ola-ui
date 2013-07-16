@@ -47,6 +47,7 @@ class DisplayApp:
     self.build_frames()
     self.build_cntrl()
     self.rdm_notebook = notebook.RDMNotebook(self.root)
+    self._assign_callbacks()
     self.auto_disc.set(False)
     self.discover() 
 
@@ -136,17 +137,25 @@ class DisplayApp:
     if self.cur_uid is None:
       return
     self.ola_thread.rdm_set(self.universe.get(), self.cur_uid, 0, 
-         "IDENTIFY_DEVICE", 
-         lambda b, s, uid = self.cur_uid:self._set_identify_complete(uid, b, s), 
-         [self.id_state.get()])
+              "IDENTIFY_DEVICE", 
+              lambda b, s, uid = self.cur_uid:self._rdm_set_complete(uid, b, s), 
+              [self.id_state.get()])
 
-  # def get_request_data(self, pid, data):
-  #   """ Called in rdm notebook to get new response with different rmd get 
-  #       request data.
-  #   """
-  #   self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid, 
-  #              lambda b, s, pid = pid:self._get_value_complete(pid, b, s), 
-  #              [data])
+  def device_label_callback(self):
+    uid = self.cur_uid
+    self.device_menu["menu"].delete(self._uid_dict[uid]["index"])
+    label = self.rdm_notebook.device_label.get()
+    self.ola_thread.rdm_set(self.universe.get(), uid, 0, "DEVICE_LABEL", 
+              lambda b, s, uid = uid:self._rdm_set_complete(uid, b, s),
+              [label])
+    time.sleep(1)
+    self._uid_dict[uid]["DEVICE_LABEL"] = label
+    self.device_menu["menu"].insert_command(self._uid_dict[uid]["index"], 
+              label = "%s (%s)"%(self._uid_dict[uid]["DEVICE_LABEL"], uid), 
+              command = lambda:self.device_selected(uid))
+    print "label %s" % label
+    self.device_menu.update()
+
 
   def _upon_discover(self, status, uids):
     """ callback for client.RunRDMDiscovery. """
@@ -174,6 +183,8 @@ class DisplayApp:
                   self._uid_dict[uid]["DEVICE_LABEL"], uid), 
                   command = lambda:self.device_selected(uid))
       self._uid_dict[uid]["supported_pids"] = ["DEVICE_LABEL"]
+      self._uid_dict[uid]["index"]=self.device_menu["menu"].index(tk.END)
+      print "index: %d" % self._uid_dict[uid]["index"]
 
   def _get_pids_complete(self, uid, succeeded, params):
     """ Callback for get_supported_pids.
@@ -245,14 +256,14 @@ class DisplayApp:
     if succeeded: 
       self.id_state.set(value["identify_state"])
 
-  def _set_identify_complete(self, uid, succeded, value):
+  def _rdm_set_complete(self, uid, succeded, value):
     """ callback for the rdm_set in identify. """
     print "rdm set complete"
 
   def _assign_callbacks(self):
     """
     """
-    self.rdm_notebook._add_callback()
+    self.rdm_notebook._add_callback("DEVICE_LABEL", self.device_label_callback)
 
   def main(self):
     print "Entering main loop"
