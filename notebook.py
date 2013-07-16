@@ -3,7 +3,7 @@ import simple_ui
 import ttk
 
 class RDMNotebook:
-  def __init__(self, root, width=800, height=500,side=tk.TOP):
+  def __init__(self, root, width=800, height=500,side=tk.TOP,callback_dict={}):
     """ Builds the ttk.Notebook """
     self.root = root
     self.cur_uid = None
@@ -11,7 +11,8 @@ class RDMNotebook:
     self.init_dy = height
     self.objects = []
     self.pid_index_dict = {}
-    self._notebook = ttk.Notebook(self.root, name="nb", height=height, width=width)
+    self._notebook = ttk.Notebook(self.root, name="nb", height=height,
+                                  width=width)
     self.populate_defaults()
     # self.update_info_tab()
     self._notebook.pack(side=side)
@@ -64,10 +65,15 @@ class RDMNotebook:
                            "REAL_TIME_CLOCK": [8,11],
                            "RESET_DEVICE": [14],
                            "POWER_STATE": [45,46],
-                           "PERFORM_SELFTEST": [48,49],
+                           "PERFORM_SELF_TEST": [48,49],
                            "SELF_TEST_DESCRIPTION": [50],
                            "CAPTURE_PRESET": [53],
                            "PRESET_PLAYBACK": [51,52] }
+    self.callback_dict = {}
+    # for i in [100,103,106,109,115,118,121,124,127,130,133,136,139]:
+    #   self.objects[i].config(anchor=tk.E)
+    # for i in [101,104,107,110,116,119,122,125,128,131,134,137,140]:
+    #   self.objects[i].config(anchor=tk.W)
 
   def create_tab(self, tab_name, tab_label=None):
     """ Creates a tab. 
@@ -103,8 +109,16 @@ class RDMNotebook:
     for widget in self.objects:
       widget.config(state = tk.DISABLED)
     for pid in supported_pids:
-      for i in self.pid_index_dict[pid]:
-        self.objects[i].config(state = tk.NORMAL)
+      if pid == "QUEUED_MESSAGE":
+        pass
+      else:
+        for i in self.pid_index_dict[pid]:
+          self.objects[i].config(state = tk.NORMAL)
+
+  def add_callback (self, pid, callback):
+    """
+    """
+    self.callback_dict[pid] = callback
 
   def _init_info(self):
     """ Initializes the parameters that will be in the info dictionary. """
@@ -331,7 +345,7 @@ class RDMNotebook:
     """ Initializes the paramters that will be in the device monitoring 
         dictionary.
     """
-    self.sensor_count = tk.StringVar(self.sensor_tab)
+    self.sensor_count = tk.IntVar(self.sensor_tab)
     self.sensor_info = tk.StringVar(self.dmx_tab)
     self.sensors = ["sensors"]
     self.present_value = tk.StringVar(self.dmx_tab)
@@ -344,28 +358,28 @@ class RDMNotebook:
     self.sensor_prefix = tk.StringVar(self.dmx_tab)
     self.range_min = tk.StringVar(self.dmx_tab)
     self.range_max = tk.StringVar(self.dmx_tab)
-    self.norm_min = tk.StringVar(self.dmx_tab)
-    self.norm_max = tk.StringVar(self.dmx_tab)
-    self.recording = tk.StringVar(self.dmx_tab)
+    self.normal_min = tk.StringVar(self.dmx_tab)
+    self.normal_max = tk.StringVar(self.dmx_tab)
+    self.supports_recording = tk.StringVar(self.dmx_tab)
     self.sensor_name = tk.StringVar(self.dmx_tab)
     self.sensor_objects = [ 
                           tk.Label(self.sensor_tab, text="Sensor Count:"),
-                          tk.Label(self.dmx_tab,
+                          tk.Label(self.sensor_tab,
                             textvariable=self.sensor_count),
                           tk.Button(self.sensor_tab, text="Record Sensors"),
 
-                          tk.Label(self.sensor_tab, text="Choose Sensor:"),
+                          tk.Label(self.sensor_tab, text="Choose Sensor"),
                           tk.OptionMenu(self.sensor_tab, self.sensor_info,
                             *self.sensors),
                           tk.Label(self.sensor_tab, text=""),
 
                           tk.Label(self.sensor_tab, text=""),
-                          tk.Label(self.sensor_tab, text="Present Value:"),
+                          tk.Label(self.sensor_tab, text="Present Value"),
                           tk.Label(self.sensor_tab,
                             textvariable=self.present_value),
 
                           tk.Label(self.sensor_tab, text=""),
-                          tk.Label(self.sensor_tab, text="Lowest Value:"),
+                          tk.Label(self.sensor_tab, text="Lowest Value"),
                           tk.Label(self.sensor_tab,
                             textvariable=self.lowest_value),
 
@@ -375,32 +389,32 @@ class RDMNotebook:
                             textvariable=self.highest_value),
 
                           tk.Label(self.sensor_tab, text=""),
-                          tk.Label(self.sensor_tab, text="Recorded Value:"),
+                          tk.Label(self.sensor_tab, text="Recorded Value"),
                           tk.Label(self.sensor_tab,
                             textvariable=self.recorded_value),
 
-                          tk.Label(self.sensor_tab, text="Choose Sensor:"),
+                          tk.Label(self.sensor_tab, text="Choose Sensor"),
                           tk.OptionMenu(self.sensor_tab, self.sensor_desc, 
                             *self.sensors),
                           tk.Label(self.sensor_tab, text=""),
 
                           tk.Label(self.sensor_tab, text=""),
-                          tk.Label(self.sensor_tab, text="Sensor Type:"),
+                          tk.Label(self.sensor_tab, text="Sensor Type"),
                           tk.Label(self.sensor_tab,
                             textvariable=self.sensor_type),
 
                           tk.Label(self.sensor_tab, text=""),
-                          tk.Label(self.sensor_tab, text="Sensor Unit:"),
+                          tk.Label(self.sensor_tab, text="Sensor Unit"),
                           tk.Label(self.sensor_tab,
                             textvariable=self.sensor_unit),
 
                           tk.Label(self.sensor_tab, text=""),
-                          tk.Label(self.sensor_tab, text="Sensor Prefix:"),
+                          tk.Label(self.sensor_tab, text="Sensor Prefix"),
                           tk.Label(self.sensor_tab,
                             textvariable=self.sensor_prefix),
 
                           tk.Label(self.sensor_tab, text=""),
-                          tk.Label(self.sensor_tab, text="Range Minimum:"),
+                          tk.Label(self.sensor_tab, text="Range Minimum"),
                           tk.Label(self.sensor_tab,
                             textvariable=self.range_min),
 
@@ -410,20 +424,20 @@ class RDMNotebook:
                             textvariable=self.range_max),
 
                           tk.Label(self.sensor_tab, text=""),
-                          tk.Label(self.sensor_tab, text="Normal Minimum:"),
-                          tk.Label(self.sensor_tab, textvariable=self.norm_min),
+                          tk.Label(self.sensor_tab, text="Normal Minimum"),
+                          tk.Label(self.sensor_tab, textvariable=self.normal_min),
 
                           tk.Label(self.sensor_tab, text=""),
-                          tk.Label(self.sensor_tab, text="Normal Maximum:"),
-                          tk.Label(self.sensor_tab, textvariable=self.norm_max),
+                          tk.Label(self.sensor_tab, text="Normal Maximum"),
+                          tk.Label(self.sensor_tab, textvariable=self.normal_max),
 
                           tk.Label(self.sensor_tab, text=""),
-                          tk.Label(self.sensor_tab, text="Supports Recording:"),
-                          tk.Label(self.sensor_tab,
-                            textvariable=self.recording),
+                          tk.Label(self.sensor_tab, text="Supports Recording"),
+                          tk.Label(self.sensor_tab, 
+                            textvariable=self.supports_recording),
 
                           tk.Label(self.sensor_tab, text=""),
-                          tk.Label(self.sensor_tab, text="Sensor Name:"),
+                          tk.Label(self.sensor_tab, text="Sensor Name"),
                           tk.Label(self.sensor_tab,
                             textvariable=self.sensor_name)
                           ]
@@ -464,7 +478,7 @@ class RDMNotebook:
           param_dict: dictionary, from the ui class, keys are supported 
             parameters and values are obtian from RDM get of key
     """
-    print "updating"
+    print "updating info"
 
     if "DEVICE_INFO" in supported_pids:
       self.protocol_version.set("%d.%d" % 
@@ -473,6 +487,7 @@ class RDMNotebook:
       self.device_model.set(value["device_model"])
       self.product_category.set(value["product_category"])
       self.software_version.set(value["software_version"])
+      self.sub_device_count.set(value["sub_device_count"])
     elif "PRODUCT_DETAIL_ID_LIST" in supported_pids:
       id_list = []
       for d in value["detail_ids"]:
@@ -490,40 +505,79 @@ class RDMNotebook:
     elif "LANGUAGE_CAPABILITIES" in supported_pids:
       for d in value["languages"]:
         self.languages.append(d["language"])
-    elif "LAMP_STRIKES" in supported_pids:
-      self.lamp_strikes.set(value["strikes"])
-    elif "SOFTWARE_VERSION_LABEL" in supported_pids:
-      self.software_version_lab.set(value["label"])
     elif "LANGUAGE" in supported_pids:
       self.language.set(value["language"])
-    elif "BOOT_SOFTWARE_VERSION" in supported_pids:
-      self.boot_software_val.set(value["version"])
+    elif "SOFTWARE_VERSION_LABEL" in supported_pids:
+      self.software_version.set("%s (%s)" % (value["label"], 
+                                self.software_version.get()))
+    elif "BOOT_SOFTWARE_VERSION_ID" in supported_pids:
+      self.boot_software.set(value["version"])
     elif "BOOT_SOFTWARE_LABEL" in supported_pids:
-      self.boot_software_lab.set(value["label"])
+      self.boot_software.set("%s (%s)" % (value["label"],
+                                self.boot_software.get()))
     elif "DEVICE_HOURS" in supported_pids:
-      self.device_hours.set(value["hours"])
+      self.device_hours.set("%d Device Hours" % value["hours"])
+    elif "LAMP_HOURS" in supported_pids:
+      self.lamp_hours.set("%d Lamp Hours" % value["hours"])
+    elif "LAMP_STRIKES" in supported_pids:
+      self.lamp_strikes.set("%d Lamp Strikes" % value["strikes"])
     elif "POWER_STATE" in supported_pids:
       self.power_state.set(value["state"])
     elif "LAMP_STATE" in supported_pids:
       self.lamp_state.set(value["state"])
+    elif "LAMP_ON_MODE" in supported_pids:
+      self.lamp_on_mode.set(value["label"][value["mode"]])
     elif "DEVICE_POWER_CYCLE" in supported_pids:
       self.device_power_cycles.set(value["power_cycles"])
-    # # sets:
-    # self.factory_default_callback = None
-    # self.languages = ["languages"] 
-    # self.lamp_on_modes = ["lamp on modes"]
-    # self.powerstates = ["power states"]
+    elif "DISPLAY_INVERT" in supported_pids:
+      print "display invert: %s" % value
+    elif "DISPLAY_LEVEL" in supported_pids:
+      self.display_level.set(value["level"])
+    elif "PAN_INVERT" in supported_pids:
+      self.pan_invert.set(value["invert"])
+    elif "TILT_INVERT" in supported_pids:
+      self.tilt_invert.set(value["invert"])
+    elif "PAN_TILT_SWAP" in supported_pids:
+      self.pan_tilt_swap.set(value["swap"])
+    elif "REAL_TIME_CLOCK" in supported_pids:
+      self.real_time.set("%d/%d/%d at %d:%d:%d" % (value["month"], value["day"],
+                        value["year"], value["hour"], value["minute"],
+                        value["second"]))
+    elif "POWER_STATE" in supported_pids:
+      self.power_state.set(value["power_state"])
+    elif "SELF_TEST_DESCRIPTION" in supported_pids:
+      self.self_test_val.set(value["test_number"])
+      self.self_test_desc.set(value["description"])
+    elif "PRESET_PLAYBACK" in supported_pids:
+      self.preset_playback.set("%s (%d)" % (value[label][value["mode"]],
+                              value["mode"]))
 
   def _update_dmx(self, value, supported_pids):
     """ update tab """
+    print "updating dmx"
     if "DEVICE_INFO" in supported_pids:
+      self.dmx_start_address.set(value["dmx_start_address"])
       self.dmx_personality.set(value["current_personality"])
       self.dmx_personalities = []
       for i in range(value["personality_count"]):
         self.dmx_personalities.append(i)
-      self.dmx_start_address.set(value["dmx_start_address"])
+    elif "DMX_PERSONALITY" in supported_pids:
+      self.dmx_personality.set(value["current_personality"])
     elif "DMX_PERSONALITY_DESCRIPTION" in supported_pids:
       self.personality_name.set(value["name"])
+      self.slots_required.set(value["slots_required"])
+    elif "DMX_START_ADDRESS" in supported_pids:
+      self.dmx_start_address.set(value["dmx_address"])
+    elif "SLOT_INFO" in supported_pids:
+      self.offset.set(value["slot_offset"])
+      self.slot_type.set(value["slot_type"])
+      self.slot_label_id.set(value["slot_label_id"])
+    elif "SLOT_DESCRIPTION" in supported_pids:
+      self.slot_number.set(value["slot_number"])
+      self.slot_name.set(value["name"])
+    elif "DEFAULT_SLOT_VALUE" in supported_pids:
+      self.default_slot_offset.set(value["slot_offset"])
+      self.default_slot_value.set(value["default_slot_value"])
     #sets:
     # elif "DMX_PERSONALITY" in supported_pids:
     # elif "DMX_START_ADDRESS" in supported_pids:
@@ -531,10 +585,35 @@ class RDMNotebook:
   def _update_sensor(self, value, supported_pids):
     """
     """
-    if "SENSOR_DEFINITION" in supported_pids:
-        self.sensor_number.set(value["sensor_number"])
-        self.sensor_type.set(value["type"])
-        self.sensor_prefix.set(value["prefix"])
+    if "DEVICE_INFO" in supported_pids:
+      self.sensor_count.set(value["sensor_count"])
+      # for i in range(self.sensor_count.get()):
+      #   self.objects[97]["menu"].add_command( label = "sensor number %d" % i, 
+      #             command = callback)
+    elif "SENSOR_DEFINITION" in supported_pids:
+      self.sensor_desc.set(value["sensor_number"])
+      self.sensor_type.set(value["type"])
+      self.sensor_prefix.set(value["prefix"])
+      self.range_min.set(value["range_min"])
+      self.range_max.set(value["range_max"])
+      self.normal_min.set(value["normal_min"])
+      self.normal_max.set(value["normal_max"])
+      if value["supports_recording"]:
+        self.supports_recording.set("Supported.")
+      else:
+        self.supports_recording.set("Not Supported")
+      self.sensor_name.set(value["name"])
+      self.sensor_unit.set(value["unit"])
+    elif "SENSOR_VALUE" in supported_pids:
+      self.sensor_info.set(value["sensor_number"])
+      self.present_value.set(value["present_value"])
+      self.lowest_value.set(value["lowest"])
+      self.highest_value.set(value["highest"])
+      self.recorded_value.set(value["recorded"])
+
+  def _set_value(self, pid, value):
+    """
+    """
 
   def main(self):
     """ Main method for Notebook class. """

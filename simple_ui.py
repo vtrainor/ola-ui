@@ -140,6 +140,14 @@ class DisplayApp:
          lambda b, s, uid = self.cur_uid:self._set_identify_complete(uid, b, s), 
          [self.id_state.get()])
 
+  # def get_request_data(self, pid, data):
+  #   """ Called in rdm notebook to get new response with different rmd get 
+  #       request data.
+  #   """
+  #   self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid, 
+  #              lambda b, s, pid = pid:self._get_value_complete(pid, b, s), 
+  #              [data])
+
   def _upon_discover(self, status, uids):
     """ callback for client.RunRDMDiscovery. """
     print "discovered"
@@ -240,6 +248,11 @@ class DisplayApp:
   def _set_identify_complete(self, uid, succeded, value):
     """ callback for the rdm_set in identify. """
     print "rdm set complete"
+
+  def _assign_callbacks(self):
+    """
+    """
+    self.rdm_notebook._add_callback()
 
   def main(self):
     print "Entering main loop"
