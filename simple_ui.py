@@ -115,6 +115,8 @@ class DisplayApp:
                       lambda b, l, uid = uid:self._get_pids_complete(uid, b, l),
                       [])
     self.cur_uid = uid
+    # init callbacks
+    self.rdm_notebook._
 
   def set_universe(self, i):
     """ sets the int var self.universe to the value of i """
@@ -149,13 +151,22 @@ class DisplayApp:
               lambda b, s, uid = uid:self._rdm_set_complete(uid, b, s),
               [label])
     time.sleep(1)
-    self._uid_dict[uid]["DEVICE_LABEL"] = label
-    self.device_menu["menu"].insert_command(self._uid_dict[uid]["index"], 
-              label = "%s (%s)"%(self._uid_dict[uid]["DEVICE_LABEL"], uid), 
-              command = lambda:self.device_selected(uid))
-    print "label %s" % label
-    self.device_menu.update()
+    # self._uid_dict[uid]["DEVICE_LABEL"] = label
+    # self.device_menu["menu"].insert_command(self._uid_dict[uid]["index"], 
+    #           label = "%s (%s)"%(self._uid_dict[uid]["DEVICE_LABEL"], uid), 
+    #           command = lambda:self.device_selected(uid))
+    # print "label %s" % label
+    # self.device_menu.update()
 
+  def dmx_personality_callback(self):
+    """
+    """
+    uid = self.cur_uid
+    personality = self.rdm_notebook.dmx_personality.get()
+    print "personality: %s" % personality
+    self.ola_thread.rdm_set(self.universe.get(), uid, 0, "DEVICE_PERSONALITY", 
+              lambda b, s, uid = uid:self._rdm_set_complete(uid, b, s),
+              [personality])
 
   def _upon_discover(self, status, uids):
     """ callback for client.RunRDMDiscovery. """
@@ -258,12 +269,16 @@ class DisplayApp:
 
   def _rdm_set_complete(self, uid, succeded, value):
     """ callback for the rdm_set in identify. """
+    print "value: %s" % (succeded, value)
     print "rdm set complete"
 
   def _assign_callbacks(self):
     """
     """
-    self.rdm_notebook._add_callback("DEVICE_LABEL", self.device_label_callback)
+    print "assigning callbacks"
+    self.rdm_notebook.add_callback("DEVICE_LABEL", self.device_label_callback)
+    self.rdm_notebook.add_callback("DMX_PERSONALITY", 
+          self.dmx_personality_callback)
 
   def main(self):
     print "Entering main loop"
