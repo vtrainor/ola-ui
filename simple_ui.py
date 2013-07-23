@@ -39,6 +39,7 @@ class DisplayApp:
     self.id_state.set(0)
 #     self.state  =  0
     self._uid_dict = {}
+    self.pid_data_dict = {}
     
     # Call initialing functions
     self._pid_store = PidStore.GetStore()
@@ -47,7 +48,6 @@ class DisplayApp:
     self.build_frames()
     self.build_cntrl()
     self.rdm_notebook = notebook.RDMNotebook(self.root)
-    self._assign_callbacks()
     self.auto_disc.set(False)
     self.discover() 
 
@@ -116,7 +116,6 @@ class DisplayApp:
                       [])
     self.cur_uid = uid
     # init callbacks
-    self.rdm_notebook._
 
   def set_universe(self, i):
     """ sets the int var self.universe to the value of i """
@@ -246,7 +245,6 @@ class DisplayApp:
         self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
                lambda b, s, pid = pid:self._get_value_complete(pid, b, s), data)
       print "pid: %s" % pid
-
     self.rdm_notebook.act_objects(self._uid_dict[uid]["supported_pids"])
 
   def _get_value_complete(self, pid, succeeded, value):
@@ -257,6 +255,8 @@ class DisplayApp:
       print "did not succeed"
       return
     print "pid: %s value recieved." % pid
+    self.pid_data_dict[pid] = value
+    print self.pid_data_dict[pid]
     self.rdm_notebook.update_tabs(value, [pid])
 
   def _get_identify_complete(self, uid, succeeded, value):

@@ -24,51 +24,52 @@ class RDMNotebook:
     # create and populate the three default tabs
     self.info_tab = self.create_tab("info_tab", "Device Information")
     self._init_info()
-    self.dmx_tab = self.create_tab("dmx_tab", "DMX")
+    self.dmx_tab = self.create_tab("dmx_tab", "DMX512 Setup")
     self._init_dmx()
     self.sensor_tab = self.create_tab("sensor_tab", "Sensors")
     self._init_sensor()
     self.setting_tab = self.create_tab("setting_tab", "Power and Lamp Settings")
     self._init_setting()
     self.config_tab = self.create_tab("config_tab", "Configuration")
-    self.pid_location_dict = {"PRODUCT_INFO": {"DEVICE_INFO": [], 
-                                      "PRODUCT_DETAIL_ID_LIST": [],
-                                      "DEVICE_MODEL_DESCRIPTION": [],
-                                      "MANUFACTURER_LABEL": [],
-                                      "DEVICE_LABEL": [],
-                                      "FACTORY_DEFAULTS": [],
-                                      "SOFTWARE_VERSION_LABEL": [],
-                                      "BOOT_SOFTWARE_VERSION_ID": [],
-                                      "BOOT_SOFTWARE_VERSION_LABEL": []
+    self._init_config()
+    self.pid_location_dict = {"PRODUCT_INFO": {"DEVICE_INFO": [0], 
+                                      "PRODUCT_DETAIL_ID_LIST": [0],
+                                      "DEVICE_MODEL_DESCRIPTION": [0],
+                                      "MANUFACTURER_LABEL": [0],
+                                      "DEVICE_LABEL": [0],
+                                      "FACTORY_DEFAULTS": [0],
+                                      "SOFTWARE_VERSION_LABEL": [0],
+                                      "BOOT_SOFTWARE_VERSION_ID": [0],
+                                      "BOOT_SOFTWARE_VERSION_LABEL": [0]
                               },
-                              "DMX512_SETUP": {"DEVICE_INFO": [],
-                                      "DMX_PERSONALITY": [],
-                                      "DMX_PERSONALITY_DESCRIPTION": [],
-                                      "DMX_START_ADDRESS": [],
-                                      "SLOT_INFO": [],
-                                      "SLOT_DESCRIPTION": [],
-                                      "DEFAULT_SLOT_VALUE": []
+                              "DMX512_SETUP": {"DEVICE_INFO": [0],
+                                      "DMX_PERSONALITY": [0],
+                                      "DMX_PERSONALITY_DESCRIPTION": [0],
+                                      "DMX_START_ADDRESS": [0],
+                                      "SLOT_INFO": [0],
+                                      "SLOT_DESCRIPTION": [0],
+                                      "DEFAULT_SLOT_VALUE": [0]
                               },
-                              "SENSORS": {"SENSOR_DEFINITION": [],
-                                      "SENSOR_VALUE": [],
-                                      "RECORD_SENSORS": []
+                              "SENSORS": {"SENSOR_DEFINITION": [0],
+                                      "SENSOR_VALUE": [0],
+                                      "RECORD_SENSORS": [0]
                               },
-                              "POWER_LAMP_SETTINGS": {"DEVICE_HOURS": [],
-                                      "LAMP_HOURS": [],
-                                      "LAMP_STRIKES": [],
-                                      "LAMP_STATE": [],
-                                      "LAMP_ON_MODE": [],
-                                      "DEVICE_POWER_CYCLES": [],
-                                      "POWER_STATE": []
+                              "POWER_LAMP_SETTINGS": {"DEVICE_HOURS": [0],
+                                      "LAMP_HOURS": [0],
+                                      "LAMP_STRIKES": [0],
+                                      "LAMP_STATE": [0],
+                                      "LAMP_ON_MODE": [0],
+                                      "DEVICE_POWER_CYCLES": [0],
+                                      "POWER_STATE": [0]
                               },
-                              "CONFIGURATION": {"LANGUAGE_CAPABILITIES": [],
-                                      "LANGUAGE": [],
-                                      "DISPLAY_INVERT": [],
-                                      "DISPLAY_LEVEL": [],
-                                      "PAN_INVERT": [],
-                                      "TILT_INVERT": [],
-                                      "PAN_TILT_SWAP": [],
-                                      "REAL_TIME_CLOCK": []
+                              "CONFIGURATION": {"LANGUAGE_CAPABILITIES": [0],
+                                      "LANGUAGE": [0],
+                                      "DISPLAY_INVERT": [0],
+                                      "DISPLAY_LEVEL": [0],
+                                      "PAN_INVERT": [0],
+                                      "TILT_INVERT": [0],
+                                      "PAN_TILT_SWAP": [0],
+                                      "REAL_TIME_CLOCK": [0]
                               }}
     for key in self.pid_location_dict.keys():
         self._grid_info(self.objects[key])
@@ -115,14 +116,31 @@ class RDMNotebook:
   def act_objects(self, supported_pids):
     """
     """
-    for widget in self.objects:
-      widget.config(state = tk.DISABLED)
-    for pid in supported_pids:
-      if pid == "QUEUED_MESSAGE":
-        pass
-      else:
-        for i in self.pid_location_dict[pid]:
-          self.objects[i].config(state = tk.NORMAL)
+    pass
+    # print "suppoerted_pids: %s" % supported_pids
+    # print "self.protocol_version: %s" % self.protocol_version.get()
+    # for key in self.objects.keys():
+    #   for widget in self.objects[key]:
+    #     widget.config(state = tk.DISABLED)
+    # for pid in supported_pids:
+    #   if pid == "QUEUED_MESSAGE":
+    #     pass
+    #   elif pid in self.pid_location_dict["PRODUCT_INFO"].keys():
+    #     for i in self.pid_location_dict["PRODUCT_INFO"][pid]:
+    #       self.objects["PRODUCT_INFO"][i].config(state = tk.NORMAL)
+    #   elif pid in self.pid_location_dict["DMX512_SETUP"].keys():
+    #     for i in self.pid_location_dict["DMX512_SETUP"][pid]:
+    #       self.objects["DMX512_SETUP"][i].config(state = tk.NORMAL)
+    #   elif pid in self.pid_location_dict["SENSORS"].keys():
+    #     for i in self.pid_location_dict["SENSORS"][pid]:
+    #       self.objects["SENSORS"][i].config(state = tk.NORMAL)
+    #   elif pid in self.pid_location_dict["POWER_LAMP_SETTINGS"].keys():
+    #     for i in self.pid_location_dict["POWER_LAMP_SETTINGS"][pid]:
+    #       self.objects["POWER_LAMP_SETTINGS"][i].config(state = tk.NORMAL)
+    #   elif pid in self.pid_location_dict["CONFIGURATION"].keys():
+    #     for i in self.pid_location_dict["CONFIGURATION"][pid]:
+    #       self.objects["CONFIGURATION"][i].config(state = tk.NORMAL)
+
 
   def add_callback(self, pid, value):
     """
@@ -186,6 +204,7 @@ class RDMNotebook:
     self.dmx_personality = tk.StringVar(self.dmx_tab)
     self.slot_required = tk.StringVar(self.dmx_tab)
     self.personality_name = tk.StringVar(self.dmx_tab)
+    self.slot_number = tk.StringVar(self.dmx_tab)
     self.slot_name = tk.StringVar(self.dmx_tab)
     self.slot_offset = tk.StringVar(self.dmx_tab)
     self.slot_type = tk.StringVar(self.dmx_tab)
@@ -196,9 +215,9 @@ class RDMNotebook:
     # Widgets
     self.start_address_entry = tk.Entry(self.dmx_tab,
                                           textvariable = self.dmx_start_address)
-    self.dmx_personality_menu = tk.OptionMenu(self.dmx_tab)
-    self.personality_description_menu = tk.OptionMenu(self.dmx_tab)
-    self.slot_menu = tk.OptionMenu(self.dmx_tab)
+    self.dmx_personality_menu = tk.OptionMenu(self.dmx_tab, 
+                                                      self.dmx_personality.get(), "")
+    self.slot_menu = tk.OptionMenu(self.dmx_tab, self.slot_number.get(), "")
 
     self.objects["DMX512_SETUP"] = [tk.Label(self.dmx_tab,
                                                       text = "DMX Footprint:"),
@@ -212,10 +231,6 @@ class RDMNotebook:
                                   tk.Label(self.dmx_tab,
                                                 text = "Current Personality:"),
                                   self.dmx_personality_menu,
-
-                                  tk.Label(self.dmx_tab, 
-                                        text = "DMX Personality Description:"),
-                                  self.personality_description_menu,
 
                                   tk.Label(self.dmx_tab, text = ""),
                                   tk.Label(self.dmx_tab,
@@ -276,8 +291,8 @@ class RDMNotebook:
     self.recorded = tk.StringVar(self.sensor_tab)
 
     # Widgets
-    self.sensor_def = tk,OptionMenu(self.sensor_tab)
-    self.sensor_value = tk.OptionMenu(self.sensor_tab)
+    self.sensor_def = tk.OptionMenu(self.sensor_tab, self.sensor_number.get(), "")
+    self.sensor_value = tk.OptionMenu(self.sensor_tab, self.sensor_number.get(), "")
 
     self.objects["SENSORS"] = [tk.Label(self.sensor_tab,
                                 text = "Choose Sensor"),
@@ -341,12 +356,19 @@ class RDMNotebook:
     self.device_hours = tk.StringVar(self.setting_tab)
     self.lamp_hours = tk.StringVar(self.setting_tab)
     self.lamp_strikes = tk.StringVar(self.setting_tab)
+    self.lamp_state = tk.StringVar(self.setting_tab)
+    self.lamp_on_mode = tk.StringVar(self.setting_tab)
+    self.device_power_cycles = tk.StringVar(self.setting_tab)
+    self.power_state = tk.StringVar(self.setting_tab)
 
     # Widgets
-    self.lamp_state = tk.OptionMenu(self.setting_tab)
-    self.lamp_on_mode = tk.OptionMenu(self.setting_tab)
-    self.device_power_cycles = tk.OptionMenu(self.setting_tab)
-    self.power_state = tk.OptionMenu(self.setting_tab)
+    self.lamp_state_menu = tk.OptionMenu(self.setting_tab, self.lamp_state.get(), "")
+    self.lamp_on_mode_menu = tk.OptionMenu(self.setting_tab,
+                                                          self.lamp_on_mode.get(), "")
+    self.device_power_cycles_menu = tk.OptionMenu(self.setting_tab,
+                                                  self.device_power_cycles.get(), "")
+    self.power_state_menu = tk.OptionMenu(self.setting_tab,
+                                                          self.power_state.get(), "")
 
     self.objects["POWER_LAMP_SETTINGS"] = [tk.Label(self.setting_tab,
                                             text = "Device Hours:"),
@@ -365,56 +387,69 @@ class RDMNotebook:
 
                                           tk.Label(self.setting_tab,
                                             text = "Lamp State:"),
-                                          self.lamp_state,
+                                          self.lamp_state_menu,
 
                                            tk.Label(self.setting_tab,
                                             text = "Lamp On Mode:"),
-                                          self.lamp_on_mode,
+                                          self.lamp_on_mode_menu,
 
                                            tk.Label(self.setting_tab,
                                             text = "Device Power Cycles:"),
-                                          self.device_power_cycles,
+                                          self.device_power_cycles_menu,
 
                                            tk.Label(self.setting_tab,
                                             text = "Power State:"),
-                                          self.power_state
+                                          self.power_state_menu
                                           ]
 
   def _init_config(self):
     """
     """
-    # Widgets
-    self.display_invert = tk.OptionMenu(self.config_tab)
-    self.display_level = tk.OptionMenu(self.config_tab)
-    self.pan_invert = tk.Checkbutton(self.config_tab)
-    self.tilt_invert = tk.Checkbutton(self.config_tab)
-    self.pan_tilt_swap = tk.Checkbutton(self.config_tab)
+    # Variables
+    self.display_invert = tk.StringVar(self.config_tab)
+    self.display_level = tk.StringVar(self.config_tab)
+    self.pan_invert = tk.BooleanVar(self.config_tab)
+    self.tilt_invert = tk.BooleanVar(self.config_tab)
+    self.pan_tilt_swap = tk.BooleanVar(self.config_tab)
     self.real_time_clock = tk.StringVar(self.config_tab)
 
+    # Widgets
+    self.display_invert_menu = tk.OptionMenu(self.config_tab,
+                                                        self.display_invert.get(), "")
+    self.display_level_menu = tk.OptionMenu(self.config_tab,
+                                                        self.display_level.get(), "")
+    self.pan_invert_button = tk.Checkbutton(self.config_tab,
+                          variable = self.pan_invert, 
+                          text = "(what it means for the\nbutton to be checked")
+    self.tilt_invert_button = tk.Checkbutton(self.config_tab)
+    self.pan_tilt_swap_button = tk.Checkbutton(self.config_tab)
+
+
     self.objects["CONFIGURATION"] = [tk.Label(self.config_tab,
-                                      text = "Display Invert:"),
-                                    self.display_invert,
+                                                      text = "Display Invert:"),
+                                    self.display_invert_menu,
 
                                     tk.Label(self.config_tab, 
-                                      text = "Display Level:"),
-                                    self.display_level,
+                                                      text = "Display Level:"),
+                                    self.display_level_menu,
 
                                     tk.Label(self.config_tab,
-                                      text = "Pan Invert:"),
-                                    self.pan_invert,
+                                                          text = "Pan Invert:"),
+                                    self.pan_invert_button,
 
                                     tk.Label(self.config_tab,
-                                      text = "Tilt Invert:"),
-                                    self.display_invert,
+                                                        text = "Tilt Invert:"),
+                                    self.display_invert_menu,
 
                                     tk.Label(self.config_tab,
-                                      text = "Pan Tilt Swap"),
-                                    self.pan_tilt_swap,
+                                                        text = "Pan Tilt Swap"),
+                                    self.pan_tilt_swap_button,
 
                                     tk.Label(self.config_tab,
-                                      text = "Real Time Clock"),
-                                    self.real_time_clock   
-                                    ]
+                                                      text = "Real Time Clock"),
+                                    tk.Label(self.config_tab,
+                                            textvariable = self.real_time_clock) 
+                                   ]
 
   def _grid_info(self, obj_list):
     """
