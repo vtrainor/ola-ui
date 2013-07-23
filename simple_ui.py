@@ -272,13 +272,32 @@ class DisplayApp:
     print "value: %s" % (succeded, value)
     print "rdm set complete"
 
-  def _assign_callbacks(self):
+  def notebook_rdm_get(self, pid, callback):
     """
     """
-    print "assigning callbacks"
-    self.rdm_notebook.add_callback("DEVICE_LABEL", self.device_label_callback)
-    self.rdm_notebook.add_callback("DMX_PERSONALITY", 
-          self.dmx_personality_callback)
+    data = [self.pid_data_dict[pid]]
+    self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
+               lambda b, s, pid = pid:self.rdm_get_complete(pid, b, s), data)
+
+  def notebook_rdm_set(self):
+    """
+    """
+    pass
+
+  def notebook_rdm_get_complete(self, pid, succeeded, value):
+    """
+    """
+    if succeeded:
+      self.pid_data_dict[pid] = value
+      self.rdm_notebook.update_tabs(pid, value)
+    else:
+      print "!!failed message!!\npid: %s\nvalue: %s" % (pid, value)
+
+
+  def notebook_rdm_set_complete(self):
+    """
+    """
+    pass
 
   def main(self):
     print "Entering main loop"
