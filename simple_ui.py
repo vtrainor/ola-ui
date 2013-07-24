@@ -48,9 +48,9 @@ class DisplayApp:
     self.ola_thread.start()
     self.build_frames()
     self.build_cntrl()
-    self.rdm_notebook = notebook.RDMNotebook(self.root, callback_list = [
-                    lambda pid, callback: self.notebook_rdm_get(pid, callback),
-                    lambda pid, data: self.notebook_rdm_set(pid, data)])
+    #self.rdm_notebook = notebook.RDMNotebook(self.root, callback_list = [
+    #                lambda pid, callback: self.notebook_rdm_get(pid, callback),
+    #                lambda pid, data: self.notebook_rdm_set(pid, data)])
     self.auto_disc.set(False)
     self.discover() 
 
@@ -113,6 +113,8 @@ class DisplayApp:
                   lambda b, s, uid = uid:self._get_identify_complete(uid, b, s),
                   [])
     # TODO: 4: I'm not sure what this check is for, why the < 4?
+    # this should fetch the SUPPORTED_PARAMETERS if it doesn't already exist in
+    # the UID dict
     if len(self._uid_dict[uid]) <= 4:
       self.ola_thread.rdm_get(self.universe.get(), uid, 0, 
                       "SUPPORTED_PARAMETERS", 
@@ -225,8 +227,9 @@ class DisplayApp:
 
     # TODO: 5: first add the list of supported parameters to the uid dict:
     # device = self._uid_dict[uid]
-    # device['SUPPORTED_PARAMETERS'] = ....
+    # device['SUPPORTED_PARAMETERS'] = set( .... )
 
+    return
 
     pid_list = params["params"]
         # the following code was copy and pasted from simple_ui and has not yet been
