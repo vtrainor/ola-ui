@@ -278,7 +278,7 @@ class DisplayApp:
       print "did not succeed"
       return
     print "pid: %s value recieved." % pid
-    self.pid_data_dict[pid] = value
+    self._uid_dict[self.cur_uid][pid] = value
     print self.pid_data_dict[pid]
     self.rdm_notebook.update_tabs(value, [pid])
 
@@ -306,7 +306,7 @@ class DisplayApp:
     """
     """
     self.pid_data_dict[pid] = data
-    data = [self.pid_data_dict[pid]]
+    data = self._uid_dict[self.cur_uid][pid]
     self.ola_thread.rdm_set(self.universe.get(), self.cur_uid, 0, pid, 
                lambda b, s, pid = pid:self.rdm_get_complete(pid, b, s), [data])
 
