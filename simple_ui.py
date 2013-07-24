@@ -47,7 +47,9 @@ class DisplayApp:
     self.ola_thread.start()
     self.build_frames()
     self.build_cntrl()
-    self.rdm_notebook = notebook.RDMNotebook(self.root)
+    self.rdm_notebook = notebook.RDMNotebook(self.root, callback_list = [
+                    lambda pid, callback: self.notebook_rdm_get(pid, callback),
+                    lambda pid, data: self.notebook_rdm_set(pid, data)])
     self.auto_disc.set(False)
     self.discover() 
 
@@ -196,6 +198,15 @@ class DisplayApp:
       self._uid_dict[uid]["index"]=self.device_menu["menu"].index(tk.END)
       print "index: %d" % self._uid_dict[uid]["index"]
 
+  def _assign_callbacks(self):
+    """
+    """
+    self.rdm_notebook._add_callback("DEVICE_LABEL", self.device_label_callback)
+    print "assigning callbacks"
+    self.rdm_notebook.add_callback("DEVICE_LABEL", self.device_label_callback)
+    self.rdm_notebook.add_callback("DMX_PERSONALITY", 
+          self.dmx_personality_callback)
+
   def _get_pids_complete(self, uid, succeeded, params):
     """ Callback for get_supported_pids.
 
@@ -245,7 +256,7 @@ class DisplayApp:
         self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
                lambda b, s, pid = pid:self._get_value_complete(pid, b, s), data)
       print "pid: %s" % pid
-    self.rdm_notebook.act_objects(self._uid_dict[uid]["supported_pids"])
+    # self.rdm_notebook.act_objects(self._uid_dict[uid]["supported_pids"])
 
   def _get_value_complete(self, pid, succeeded, value):
     """ Callback for get_pid_value. """
@@ -276,13 +287,16 @@ class DisplayApp:
     """
     """
     data = [self.pid_data_dict[pid]]
-    self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
+    self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid, 
                lambda b, s, pid = pid:self.rdm_get_complete(pid, b, s), data)
 
-  def notebook_rdm_set(self):
+  def notebook_rdm_set(self, pid, data):
     """
     """
-    pass
+    self.pid_data_dict[pid] = data
+    data = [self.pid_data_dict[pid]]
+    self.ola_thread.rdm_set(self.universe.get(), self.cur_uid, 0, pid, 
+               lambda b, s, pid = pid:self.rdm_get_complete(pid, b, s), [data])
 
   def notebook_rdm_get_complete(self, pid, succeeded, value):
     """

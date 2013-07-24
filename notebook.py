@@ -4,9 +4,11 @@ import ttk
 import ola.RDMConstants as RDMConstants
 
 class RDMNotebook:
-  def __init__(self, root, width=800, height=500,side=tk.TOP, callback_list=[]):
+  def __init__(self, root, width=800, height=500, side=tk.TOP,callback_list=[]):
     """ Builds the ttk.Notebook """
     self.root = root
+    self.rdm_get = callback_list[0]
+    self.rdm_set = callback_list[1]
     self.cur_uid = None
     self.init_dx = width
     self.init_dy = height
@@ -17,6 +19,7 @@ class RDMNotebook:
     self.callback_dict = {}
     self.populate_defaults()
     self._notebook.pack(side=side)
+
 
   def populate_defaults(self):
     """ creates the default frames. """
@@ -74,6 +77,38 @@ class RDMNotebook:
                                       "PAN_TILT_SWAP": [10,11],
                                       "REAL_TIME_CLOCK": [12,13]
                               }}
+    self.factory_defaults_button.config(command = self.rdm_set(
+                              "FACTORY_DEFAULTS", self.factory_defaults.get()))
+    self.start_address_entry.config(validatecommand = self.rdm_set(
+                            "DMX_START_ADDRESS", self.dmx_start_address.get()))
+    self.dmx_personality_menu.config(command = self.rdm_set(
+                                "DMX_PERSONALITY", self.dmx_personality.get()))
+    self.slot_menu.config(command = self.rdm_set(
+                                            "SLOT_INFO",self.slot_number.get()))
+    self.sensor_def.config(command = self.rdm_get(
+                                "SENSOR_DEFINITION", self.sensor_number.get()))
+    self.sensor_value.config(command = self.rdm_get(
+                                      "SENSOR_VALUE", self.sensor_number.get()))
+    self.lamp_state_menu.config(command = self.rdm_set(
+                                            "LAMP_STATE",self.lamp_state.get()))
+    self.lamp_on_mode_menu.config(command = self.rdm_set(
+                                      "LAMP_ON_MODE", self.lamp_on_mode.get()))
+    self.device_power_cycles_menu.config(command = self.rdm_set(
+                        "DEVICE_POWER_CYCLES", self.device_power_cycles.get()))
+    self.power_state_menu.config(command = self.rdm_set(
+                                        "POWER_STATE", self.power_state.get()))
+    self.language_menu.config(command = self.rdm_set(
+                                              "LANGUAGE", self.language.get()))
+    self.display_invert_menu.config(command = self.rdm_set(
+                                  "DISAPLAY_INVERT",self.display_invert.get()))
+    self.display_level_menu.config(command = self.rdm_set(
+                                    "DISPLAY_LEVEL", self.display_level.get()))
+    self.pan_invert_button.config(command = self.rdm_set(
+                                          "PAN_INVERT", self.pan_invert.get()))
+    self.tilt_invert_button.config(command = self.rdm_set(
+                                        "TILT_INVERT", self.tilt_invert.get()))
+    self.pan_tilt_swap_button.config(command = self.rdm_set(
+                                    "PAN_TILT_SWAP", self.pan_tilt_swap.get()))
     for key in self.pid_location_dict.keys():
         self._grid_info(self.objects[key])
 
@@ -119,34 +154,34 @@ class RDMNotebook:
   def act_objects(self, supported_pids):
     """
     """
-    pass
-    # print "suppoerted_pids: %s" % supported_pids
-    # print "self.protocol_version: %s" % self.protocol_version.get()
-    # for key in self.objects.keys():
-    #   for widget in self.objects[key]:
-    #     widget.config(state = tk.DISABLED)
-    # for pid in supported_pids:
-    #   if pid == "QUEUED_MESSAGE":
-    #     pass
-    #   elif pid in self.pid_location_dict["PRODUCT_INFO"].keys():
-    #     print "objects: %s" % self.objects["PRODUCT_INFO"]
-    #     for i in self.pid_location_dict["PRODUCT_INFO"][pid]:
-    #       self.objects["PRODUCT_INFO"][i].config(state = tk.NORMAL)
-    #   elif pid in self.pid_location_dict["DMX512_SETUP"].keys():
-    #     for i in self.pid_location_dict["DMX512_SETUP"][pid]:
-    #       self.objects["DMX512_SETUP"][i].config(state = tk.NORMAL)
-    #   elif pid in self.pid_location_dict["SENSORS"].keys():
-    #     for i in self.pid_location_dict["SENSORS"][pid]:
-    #       self.objects["SENSORS"][i].config(state = tk.NORMAL)
-    #   elif pid in self.pid_location_dict["POWER_LAMP_SETTINGS"].keys():
-    #     for i in self.pid_location_dict["POWER_LAMP_SETTINGS"][pid]:
-    #       self.objects["POWER_LAMP_SETTINGS"][i].config(state = tk.NORMAL)
-    #   elif pid in self.pid_location_dict["CONFIGURATION"].keys():
-    #     for i in self.pid_location_dict["CONFIGURATION"][pid]:
-    #       self.objects["CONFIGURATION"][i].config(state = tk.NORMAL)
+    # pass
+    print "suppoerted_pids: %s" % supported_pids
+    print "self.protocol_version: %s" % self.protocol_version.get()
+    for key in self.objects.keys():
+      for widget in self.objects[key]:
+        widget.config(state = tk.DISABLED)
+    for pid in supported_pids:
+      if pid == "QUEUED_MESSAGE":
+        pass
+      elif pid in self.pid_location_dict["PRODUCT_INFO"].keys():
+        print "objects: %s" % self.objects["PRODUCT_INFO"]
+        for i in self.pid_location_dict["PRODUCT_INFO"][pid]:
+          self.objects["PRODUCT_INFO"][i].config(state = tk.NORMAL)
+      elif pid in self.pid_location_dict["DMX512_SETUP"].keys():
+        for i in self.pid_location_dict["DMX512_SETUP"][pid]:
+          self.objects["DMX512_SETUP"][i].config(state = tk.NORMAL)
+      elif pid in self.pid_location_dict["SENSORS"].keys():
+        for i in self.pid_location_dict["SENSORS"][pid]:
+          self.objects["SENSORS"][i].config(state = tk.NORMAL)
+      elif pid in self.pid_location_dict["POWER_LAMP_SETTINGS"].keys():
+        for i in self.pid_location_dict["POWER_LAMP_SETTINGS"][pid]:
+          self.objects["POWER_LAMP_SETTINGS"][i].config(state = tk.NORMAL)
+      elif pid in self.pid_location_dict["CONFIGURATION"].keys():
+        for i in self.pid_location_dict["CONFIGURATION"][pid]:
+          self.objects["CONFIGURATION"][i].config(state = tk.NORMAL)
 
 
-  def add_callback(self, pid, value):
+  def assign_callback(self, pid, value):
     """
     """  
 
@@ -166,6 +201,8 @@ class RDMNotebook:
 
     # Widgets:
     self.factory_defaults = tk.BooleanVar(self.info_tab)
+    self.factory_defaults_button = tk.Checkbutton(self.info_tab,
+                                              variable = self.factory_defaults)
 
     self.objects["PRODUCT_INFO"] = [tk.Label(self.info_tab,
                                                      text = "Protocol Version"),
@@ -235,10 +272,6 @@ class RDMNotebook:
                                   tk.Label(self.dmx_tab,
                                                 text = "Current Personality:"),
                                   self.dmx_personality_menu,
-
-                                  tk.Label(self.dmx_tab, text = ""),
-                                  tk.Label(self.dmx_tab,
-                                          textvariable = self.dmx_personality),
 
                                   tk.Label(self.dmx_tab, text = ""),
                                   tk.Label(self.dmx_tab,
@@ -452,7 +485,7 @@ class RDMNotebook:
 
                                     tk.Label(self.config_tab,
                                                         text = "Tilt Invert:"),
-                                    self.display_invert_menu,
+                                    self.tilt_invert_button,
 
                                     tk.Label(self.config_tab,
                                                         text = "Pan Tilt Swap"),
