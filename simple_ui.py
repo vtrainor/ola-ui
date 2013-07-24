@@ -103,6 +103,7 @@ class DisplayApp:
       return
     print "uid: %s\ncur_uid: %s\nid_state: %d"%(uid, self.cur_uid, 
                                                 self.id_state.get())
+    # This line is going to return "DEVICE_LABEL" so you may as well skip it
     pid_key = self._pid_store.GetName("DEVICE_LABEL", uid.manufacturer_id).name
     self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key], uid))
     self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
@@ -164,6 +165,7 @@ class DisplayApp:
         populates self.device_menu
     """
     # self._uid_dict[uid]  =  {"label": "", "supported_params": [], ...}
+    # TODO: If this fails, we should still add the device, just use the UID
     if succeeded:
       self._uid_dict.setdefault(uid, {})["DEVICE_LABEL"] = data["label"]
       self.device_menu["menu"].add_command( label = "%s (%s)"%(
@@ -173,10 +175,10 @@ class DisplayApp:
       print "index: %d" % self._uid_dict[uid]["index"]
       if self.cur_uid is None:
         self.cur_uid = uid
-        self.rdm_notebook.set_callbacks(
-                    lambda pid, callback: self.notebook_rdm_get(pid, callback),
-                    lambda pid, data: self.notebook_rdm_set(pid, data))
-        self.rdm_notebook.populate_defaults()
+        #self.rdm_notebook.set_callbacks(
+        #            lambda pid, callback: self.notebook_rdm_get(pid, callback),
+        #            lambda pid, data: self.notebook_rdm_set(pid, data))
+        #self.rdm_notebook.populate_defaults()
 
   def _get_pids_complete(self, uid, succeeded, params):
     """ Callback for get_supported_pids.
@@ -215,6 +217,7 @@ class DisplayApp:
 
     # at this point we now have the list of supported parameters & the device
     # info for the pid selected.
+    pass
 
   def _get_value_complete(self, pid, succeeded, value):
     """ Callback for get_pid_value. """
