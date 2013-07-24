@@ -229,6 +229,9 @@ class DisplayApp:
     # device = self._uid_dict[uid]
     # device['SUPPORTED_PARAMETERS'] = set( .... )
 
+    # TODO: 6 fetch DEVICE_INFO and a call _get_device_info_complete (added
+    # below)
+
     return
 
     pid_list = params["params"]
@@ -272,6 +275,12 @@ class DisplayApp:
                lambda b, s, pid = pid:self._get_value_complete(pid, b, s), data)
       print "pid: %s" % pid
     # self.rdm_notebook.act_objects(self._uid_dict[uid]["supported_pids"])
+
+  def _get_device_info_complete(self, uid, succeeded, params) :
+    # TODO: 7 add this information to the _uid_dict
+
+    # at this point we now have the list of supported parameters & the device
+    # info for the pid selected.
 
   def _get_value_complete(self, pid, succeeded, value):
     """ Callback for get_pid_value. """
