@@ -109,7 +109,7 @@ class DisplayApp:
     self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
                   lambda b, s, uid = uid:self._get_identify_complete(uid, b, s),
                   [])
-    if self._uid_dict[uid]["SUPPORTED_PARAMETERS"] == []:
+    if "SUPPORTED_PARAMETERS" not in self._uid_dict[uid]:
       self.ola_thread.rdm_get(self.universe.get(), uid, 0, 
                       "SUPPORTED_PARAMETERS", 
                       lambda b, l, uid = uid:self._get_pids_complete(uid, b, l),
@@ -151,11 +151,6 @@ class DisplayApp:
       if uid not in self._uid_dict.keys():
         print "adding device..."
         self._uid_dict[uid] = {}
-        self._uid_dict[uid]["supported_pids"] = []
-        self.ola_thread.rdm_get(self.universe.get(), uid, 0, 
-                      "SUPPORTED_PARAMETERS", 
-                      lambda b, l, uid = uid:self._get_pids_complete(uid, b, l),
-                      [])
         self.ola_thread.rdm_get(self.universe.get(), uid, 0, "DEVICE_LABEL", 
                              lambda b, s, uid = uid:self._add_device(uid, b, s),
                              [])
@@ -186,6 +181,7 @@ class DisplayApp:
           succeeded: bool,  whether or not the get was a success
           params: packed list of 16-bit pids
     """
+    self._uid_dict["SUPPORTED_PARAMETERS"] = params
     if not succeeded:
         return
     pid_list = params["params"]
