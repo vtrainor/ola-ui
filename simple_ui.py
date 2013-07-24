@@ -221,7 +221,13 @@ class DisplayApp:
           params: packed list of 16-bit pids
     """
     if not succeeded:
-        return
+      return
+
+    # TODO: 5: first add the list of supported parameters to the uid dict:
+    # device = self._uid_dict[uid]
+    # device['SUPPORTED_PARAMETERS'] = ....
+
+
     pid_list = params["params"]
         # the following code was copy and pasted from simple_ui and has not yet been
     # edited to work within the notebook class.
