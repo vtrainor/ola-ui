@@ -4,10 +4,10 @@ import ttk
 import ola.RDMConstants as RDMConstants
 
 class RDMNotebook:
-  def __init__(self, root, width=800, height=500, side=tk.TOP):
+  def __init__(self, root, controller, width=800, height=500, side=tk.TOP):
     """ Builds the ttk.Notebook """
     self.root = root
-    self.cur_uid = None
+    self.controller = controller
     self.init_dx = width
     self.init_dy = height
     self.objects = {}

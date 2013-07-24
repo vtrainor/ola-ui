@@ -9,6 +9,68 @@ from ola import PidStore
 import ttk
 import notebook
 
+"""
+ General control flow:
+
+ On startup:
+   - fetch the list of UIDS
+   - for each UID, fetch the DEVICE_LABEL
+   - add each UID & add UID (+ optional label) to the drop down
+
+ When a UID is selected:
+  - fetch supported params if we don't already have it
+  - fetch device info if we don't already have it
+  - call notebook.Update()
+  - notebook.Update looks at the current selected tab, and then calls one of:
+    - GetBasicInformation()
+    - GetDmxInformation()
+    - GetSensorInformation()
+
+ Each of these send the necessary to build a dictionary (pid_info) for the tab.
+ For example, GetBasicInformation() would do:
+    GET PRODUCT_DETAIL_ID_LIST
+    GET DEVICE_MODEL_DESCRIPTION
+    GET MANUFACTURER_LABEL
+    GET SOFTWARE_VERSION_LABEL
+    GET BOOT_SOFTWARE_VERSION_ID
+    GET BOOT_SOFTWARE_VERSION_LABEL
+
+  Once the dict is built, we call notebook.RenderBasicInformation(pid_info)
+  which then updates all the widgets.
+"""
+
+class Controller(object):
+  """The controller will act as the glue between the notebook (display) the the
+     DisplayApp (data). This keeps us honest by not leaking RDM information
+     into the notebook.
+  """
+  def __init__(self):
+    pass
+
+  def GetBasicInformation(self):
+    print 'Getting basic info'
+
+    # TODO: 8 Call info DisplayApp and fetch each of the following PIDs, adding
+    # them to the uid_dict. When you have a response for all pids print out the
+    # uid_dict
+
+  def GetDmxInformation(self):
+    pass
+
+  def GetSensorInformation(self):
+    pass
+
+  def SetDeviceLabel(self, index):
+    pass
+
+  def SetSetStartAddress(self, index):
+    pass
+
+  def SetPersonality(self, index):
+    pass
+
+  # Additional methods will be added later
+
 class DisplayApp:
   """ Creates the GUI for sending and receiving RDM messages through the
       ola thread. 
@@ -21,6 +83,7 @@ class DisplayApp:
       height: the int value of the height of the tkinter window
     """
     # Initialize the tk root window
+    self._controller = Controller()
     self.root = tk.Tk()
     self.init_dx = width
     self.init_dy = height
@@ -46,7 +109,7 @@ class DisplayApp:
     self.ola_thread.start()
     self.build_frames()
     self.build_cntrl()
-    #self.rdm_notebook = notebook.RDMNotebook(self.root)
+    #self.rdm_notebook = notebook.RDMNotebook(self.root, self._controller)
     self.discover()
     self.auto_disc.set(False)
 
@@ -217,6 +280,13 @@ class DisplayApp:
 
     # at this point we now have the list of supported parameters & the device
     # info for the pid selected.
+
+    # TODO: 8 print the uid dict here
+
+    # Now for testing purposes, we skip the call though the notebook and just
+    # proceed straight to getting the Basic Info
+    self._controller.GetBasicInformation()
+
     pass
 
   def _get_value_complete(self, pid, succeeded, value):
