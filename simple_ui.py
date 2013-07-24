@@ -39,6 +39,7 @@ class DisplayApp:
     self.id_state.set(0)
 #     self.state  =  0
     self._uid_dict = {}
+    # TODO: 1: delete this, it'll be stored in the UID dict
     self.pid_data_dict = {}
     
     # Call initialing functions
@@ -111,6 +112,7 @@ class DisplayApp:
     self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
                   lambda b, s, uid = uid:self._get_identify_complete(uid, b, s),
                   [])
+    # TODO: 4: I'm not sure what this check is for, why the < 4?
     if len(self._uid_dict[uid]) <= 4:
       self.ola_thread.rdm_get(self.universe.get(), uid, 0, 
                       "SUPPORTED_PARAMETERS", 
@@ -176,10 +178,12 @@ class DisplayApp:
       self.device_menu["menu"].delete(0, "end")
     for uid in uids:
       if uid in self._uid_dict.keys():
+        # TODO: 2: this will stop the update if only one of the uids has been
+        # seen before. Use continue instead.
         return
       else:
         print "adding device..."
-        self._uid_dict[uid]  =  {}
+        self._uid_dict[uid] = {}
         self.ola_thread.rdm_get(self.universe.get(), uid, 0, "DEVICE_LABEL", 
                              lambda b, s, uid = uid:self._add_device(uid, b, s),
                              [])
@@ -194,8 +198,10 @@ class DisplayApp:
       self.device_menu["menu"].add_command( label = "%s (%s)"%(
                   self._uid_dict[uid]["DEVICE_LABEL"], uid), 
                   command = lambda:self.device_selected(uid))
+      # TODO: 3: I'd only add to supported_pids if the pid is reported in
+      # SUPPORTED_PARAMETERS
       self._uid_dict[uid]["supported_pids"] = ["DEVICE_LABEL"]
-      self._uid_dict[uid]["index"]=self.device_menu["menu"].index(tk.END)
+      self._uid_dict[uid]["index"] = self.device_menu["menu"].index(tk.END)
       print "index: %d" % self._uid_dict[uid]["index"]
 
   def _assign_callbacks(self):
