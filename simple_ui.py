@@ -39,8 +39,6 @@ class DisplayApp:
     self.id_state.set(0)
 #     self.state  =  0
     self._uid_dict = {}
-    # TODO: 1: delete this, it'll be stored in the UID dict
-    self.pid_data_dict = {}
     
     # Call initialing functions
     self._pid_store = PidStore.GetStore()
@@ -48,11 +46,9 @@ class DisplayApp:
     self.ola_thread.start()
     self.build_frames()
     self.build_cntrl()
-    #self.rdm_notebook = notebook.RDMNotebook(self.root, callback_list = [
-    #                lambda pid, callback: self.notebook_rdm_get(pid, callback),
-    #                lambda pid, data: self.notebook_rdm_set(pid, data)])
+    #self.rdm_notebook = notebook.RDMNotebook(self.root)
+    self.discover()
     self.auto_disc.set(False)
-    self.discover() 
 
     print "currently in thread: %d"%threading.currentThread().ident
     time.sleep(1)
@@ -112,10 +108,7 @@ class DisplayApp:
     self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
                   lambda b, s, uid = uid:self._get_identify_complete(uid, b, s),
                   [])
-    # TODO: 4: I'm not sure what this check is for, why the < 4?
-    # this should fetch the SUPPORTED_PARAMETERS if it doesn't already exist in
-    # the UID dict
-    if len(self._uid_dict[uid]) <= 4:
+    if self._uid_dict[uid]["SUPPORTED_PARAMETERS"] == []:
       self.ola_thread.rdm_get(self.universe.get(), uid, 0, 
                       "SUPPORTED_PARAMETERS", 
                       lambda b, l, uid = uid:self._get_pids_complete(uid, b, l),
@@ -148,44 +141,20 @@ class DisplayApp:
               lambda b, s, uid = self.cur_uid:self._rdm_set_complete(uid, b, s), 
               [self.id_state.get()])
 
-  def device_label_callback(self):
-    uid = self.cur_uid
-    self.device_menu["menu"].delete(self._uid_dict[uid]["index"])
-    label = self.rdm_notebook.device_label.get()
-    self.ola_thread.rdm_set(self.universe.get(), uid, 0, "DEVICE_LABEL", 
-              lambda b, s, uid = uid:self._rdm_set_complete(uid, b, s),
-              [label])
-    time.sleep(1)
-    # self._uid_dict[uid]["DEVICE_LABEL"] = label
-    # self.device_menu["menu"].insert_command(self._uid_dict[uid]["index"], 
-    #           label = "%s (%s)"%(self._uid_dict[uid]["DEVICE_LABEL"], uid), 
-    #           command = lambda:self.device_selected(uid))
-    # print "label %s" % label
-    # self.device_menu.update()
-
-  def dmx_personality_callback(self):
-    """
-    """
-    uid = self.cur_uid
-    personality = self.rdm_notebook.dmx_personality.get()
-    print "personality: %s" % personality
-    self.ola_thread.rdm_set(self.universe.get(), uid, 0, "DEVICE_PERSONALITY", 
-              lambda b, s, uid = uid:self._rdm_set_complete(uid, b, s),
-              [personality])
-
   def _upon_discover(self, status, uids):
     """ callback for client.RunRDMDiscovery. """
     print "discovered"
-    if len(self._uid_dict.keys()) < 1:
+    if len(self._uid_dict.keys()) == 0:
       self.device_menu["menu"].delete(0, "end")
     for uid in uids:
-      if uid in self._uid_dict.keys():
-        # TODO: 2: this will stop the update if only one of the uids has been
-        # seen before. Use continue instead.
-        return
-      else:
+      if uid not in self._uid_dict.keys():
         print "adding device..."
         self._uid_dict[uid] = {}
+        self._uid_dict[uid]["supported_pids"] = []
+        self.ola_thread.rdm_get(self.universe.get(), uid, 0, 
+                      "SUPPORTED_PARAMETERS", 
+                      lambda b, l, uid = uid:self._get_pids_complete(uid, b, l),
+                      [])
         self.ola_thread.rdm_get(self.universe.get(), uid, 0, "DEVICE_LABEL", 
                              lambda b, s, uid = uid:self._add_device(uid, b, s),
                              [])
@@ -200,20 +169,14 @@ class DisplayApp:
       self.device_menu["menu"].add_command( label = "%s (%s)"%(
                   self._uid_dict[uid]["DEVICE_LABEL"], uid), 
                   command = lambda:self.device_selected(uid))
-      # TODO: 3: I'd only add to supported_pids if the pid is reported in
-      # SUPPORTED_PARAMETERS
-      self._uid_dict[uid]["supported_pids"] = ["DEVICE_LABEL"]
       self._uid_dict[uid]["index"] = self.device_menu["menu"].index(tk.END)
       print "index: %d" % self._uid_dict[uid]["index"]
-
-  def _assign_callbacks(self):
-    """
-    """
-    self.rdm_notebook._add_callback("DEVICE_LABEL", self.device_label_callback)
-    print "assigning callbacks"
-    self.rdm_notebook.add_callback("DEVICE_LABEL", self.device_label_callback)
-    self.rdm_notebook.add_callback("DMX_PERSONALITY", 
-          self.dmx_personality_callback)
+      if self.cur_uid is None:
+        self.cur_uid = uid
+        self.rdm_notebook.set_callbacks(
+                    lambda pid, callback: self.notebook_rdm_get(pid, callback),
+                    lambda pid, data: self.notebook_rdm_set(pid, data))
+        self.rdm_notebook.populate_defaults()
 
   def _get_pids_complete(self, uid, succeeded, params):
     """ Callback for get_supported_pids.
@@ -235,46 +198,17 @@ class DisplayApp:
     return
 
     pid_list = params["params"]
-        # the following code was copy and pasted from simple_ui and has not yet been
-    # edited to work within the notebook class.
-    data = []
     for pid in ["DEVICE_INFO"]: # list of required pids
-      self._uid_dict[uid]["supported_pids"].append(pid)
-      self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
-             lambda b, s, pid = pid:self._get_value_complete(pid, b, s), data)
+      self._uid_dict[uid][pid] = []
     for item in pid_list:
       try:
         pid = self._pid_store.GetPid(item["param_id"], uid.manufacturer_id).name
-
-        # will either have to make a series of elifs here for pids that take pds
-        # or will have to come up with a different system for dealing with this
-        # kind of pid
       except:
-        # look up how to handle manufactuer pids
-        # need to be able to:
-        #   1. get the value for the pid
-        #   2. figure out what kind of widget I need to display this information
         print "manufactuer pid"
       if pid in ["RECORD_SENSORS", "RESET_DEVICE", "CAPTURE_PRESET"]:
         pass
       else: 
-        if pid == "DMX_PERSONALITY_DESCRIPTION":
-          data = [1]
-        elif pid == "SLOT_DESCRIPTION":
-          data = [1]
-        elif pid == "SELF_TEST_DESCRIPTION":
-          data = [1]
-        elif pid == "QUEUED_MESSAGE":
-          data = [0x01]
-        elif pid == "SENSOR_DEFINITION":
-          data = [1]
-        elif pid == "SENSOR_VALUE":
-          data = [1]
-        self._uid_dict[uid]["supported_pids"].append(pid)
-        self.ola_thread.rdm_get(self.universe.get(), uid, 0, pid, 
-               lambda b, s, pid = pid:self._get_value_complete(pid, b, s), data)
-      print "pid: %s" % pid
-    # self.rdm_notebook.act_objects(self._uid_dict[uid]["supported_pids"])
+        self._uid_dict[uid][pid] = []
 
   def _get_device_info_complete(self, uid, succeeded, params) :
     # TODO: 7 add this information to the _uid_dict
@@ -284,15 +218,15 @@ class DisplayApp:
 
   def _get_value_complete(self, pid, succeeded, value):
     """ Callback for get_pid_value. """
-    print "pid: %s"%pid
-    print "value: %s"%value
     if not succeeded:
       print "did not succeed"
       return
-    print "pid: %s value recieved." % pid
-    self._uid_dict[self.cur_uid][pid] = value
-    print self.pid_data_dict[pid]
-    self.rdm_notebook.update_tabs(value, [pid])
+    elif succeeded:
+      print "pid: %s" % pid
+      print "value: %s" % value
+      self._uid_dict[self.cur_uid][pid] = value
+      print self._uid_dict[self.cur_uid][pid]
+      self.rdm_notebook.update_tabs(value, [pid])
 
   def _get_identify_complete(self, uid, succeeded, value):
     """ Callback for rdm_get in device_selected.
@@ -310,14 +244,15 @@ class DisplayApp:
   def notebook_rdm_get(self, pid, callback):
     """
     """
-    data = [self.pid_data_dict[pid]]
+    data = self._uid_dict[self.cur_uid][pid]
     self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid, 
-               lambda b, s, pid = pid:self.rdm_get_complete(pid, b, s), data)
+               lambda b, s, pid = pid:self.rdm_get_complete(pid, b, s), [data])
 
   def notebook_rdm_set(self, pid, data):
     """
     """
-    self.pid_data_dict[pid] = data
+    print "current uid: %s\npid: %s" % (self.cur_uid, pid)
+    self._uid_dict[self.cur_uid][pid] = data
     data = self._uid_dict[self.cur_uid][pid]
     self.ola_thread.rdm_set(self.universe.get(), self.cur_uid, 0, pid, 
                lambda b, s, pid = pid:self.rdm_get_complete(pid, b, s), [data])
@@ -326,7 +261,7 @@ class DisplayApp:
     """
     """
     if succeeded:
-      self.pid_data_dict[pid] = value
+      self.self._uid_dict[self.cur_uid][pid] = value
       self.rdm_notebook.update_tabs(pid, value)
     else:
       print "!!failed message!!\npid: %s\nvalue: %s" % (pid, value)

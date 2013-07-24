@@ -4,11 +4,9 @@ import ttk
 import ola.RDMConstants as RDMConstants
 
 class RDMNotebook:
-  def __init__(self, root, width=800, height=500, side=tk.TOP,callback_list=[]):
+  def __init__(self, root, width=800, height=500, side=tk.TOP):
     """ Builds the ttk.Notebook """
     self.root = root
-    self.rdm_get = callback_list[0]
-    self.rdm_set = callback_list[1]
     self.cur_uid = None
     self.init_dx = width
     self.init_dy = height
@@ -16,10 +14,6 @@ class RDMNotebook:
     self.pid_location_dict = {}
     self._notebook = ttk.Notebook(self.root, name="nb", height=height,
                                   width=width)
-    self.callback_dict = {}
-    self.populate_defaults()
-    self._notebook.pack(side=side)
-
 
   def populate_defaults(self):
     """ creates the default frames. """
@@ -111,6 +105,7 @@ class RDMNotebook:
                                     "PAN_TILT_SWAP", self.pan_tilt_swap.get()))
     for key in self.pid_location_dict.keys():
         self._grid_info(self.objects[key])
+    self._notebook.pack(side=side)
 
   def create_tab(self, tab_name, tab_label=None):
     """ Creates a tab. 
@@ -132,6 +127,12 @@ class RDMNotebook:
     tab = tk.Frame(self._notebook, name = tab_name)
     self._notebook.add(tab, text = tab_label)
     return tab
+
+  def set_callbacks(self, callback_get, callback_set):
+    """
+    """
+    self.rdm_get = callback_get
+    self.rdm_set = callback_set
 
   def update_tabs(self, value, pid):
     """ calls the update functions for the tab that the 
@@ -179,11 +180,6 @@ class RDMNotebook:
       elif pid in self.pid_location_dict["CONFIGURATION"].keys():
         for i in self.pid_location_dict["CONFIGURATION"][pid]:
           self.objects["CONFIGURATION"][i].config(state = tk.NORMAL)
-
-
-  def assign_callback(self, pid, value):
-    """
-    """  
 
   def _init_info(self):
     """
