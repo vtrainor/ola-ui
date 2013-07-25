@@ -653,14 +653,28 @@ class RDMNotebook:
       self.preset_playback.set("%s (%d)" % (value[label][value["mode"]],
                               value["mode"]))
 
-  def update_config(self):
-    """
-    """
-    pass
-
   def main(self):
     """ Main method for Notebook class. """
     self.root.mainloop()
+
+  def Update(self):
+    # TODO 9: based on the current selected tab, call one of:
+    # GetBasicInformation()
+    # GetDmxInformation()
+    # GetSensorInformation()
+    pass
+
+  def RenderBasicInformation(self, params):
+    # Given a dict with the device label, manufacturer label etc.
+    # update the widgets on the info tab
+    pass
+
+  def RenderDmxInformation(self, params):
+    pass
+
+  def RenderSensorInformation(self, params):
+    pass
+
 
 if __name__ == "__main__":
   ui = simple_ui.DisplayApp()
