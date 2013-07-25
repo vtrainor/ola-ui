@@ -29,7 +29,7 @@ import notebook
  Each of these send the necessary to build a dictionary (pid_info) for the tab.
  For example, GetBasicInformation() would do:
     GET PRODUCT_DETAIL_ID_LIST
-    GET DEVICE_MODEL_DESCRIPTION
+    GET -PRODUCT_DETAIL_ID_LIST
     GET MANUFACTURER_LABEL
     GET SOFTWARE_VERSION_LABEL
     GET BOOT_SOFTWARE_VERSION_ID
@@ -44,14 +44,14 @@ class Controller(object):
      DisplayApp (data). This keeps us honest by not leaking RDM information
      into the notebook.
   """
-  def __init__(self):
-    pass
+  def __init__(self, ui):
+    sel.ui = ui
 
   def GetBasicInformation(self):
     print 'Getting basic info'
 
     # TODO: 8 Call info DisplayApp and fetch each of the following PIDs, adding
-    # them to the uid_dict. When you have a response for all pids print out the
+    # them to the ]uid_dict. When you have a response for all pids print out the
     # uid_dict
 
   def GetDmxInformation(self):
