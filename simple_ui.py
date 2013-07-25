@@ -53,6 +53,7 @@ class Controller(object):
     # TODO: 8 Call info DisplayApp and fetch each of the following PIDs, adding
     # them to the ]uid_dict. When you have a response for all pids print out the
     # uid_dict
+    # self._app.GetBasicInformation()
 
   def GetDmxInformation(self):
     pass
@@ -343,6 +344,35 @@ class DisplayApp:
     """
     """
     pass
+
+  def GetBasicInformation(self):
+    """
+    We want the following
+      GET PRODUCT_DETAIL_ID_LIST
+      GET DEVICE_MODEL_DESCRIPTION
+      GET MANUFACTURER_LABEL
+      GET SOFTWARE_VERSION_LABEL
+      GET BOOT_SOFTWARE_VERSION_ID
+      GET BOOT_SOFTWARE_VERSION_LABEL
+    """
+    self._get_product_detail_id()
+
+  def _get_product_detail_id(self):
+    pid_key = self._pid_store.GetName("PRODUCT_DETAIL_ID_LIST")
+    if pid_key.value in self._uid_dict[uid]['SUPPORTED_PARAMETERS']:
+      # fetch the pid 
+    else:
+      self._get_device_model_description(self):
+
+  def _get_product_detail_id_complete(self,....):
+    # store the results in the uid dict
+    self._get_device_model_description()
+
+  def _get_device_model_description(self):
+    # similar to _get_product_detail_id above
+
+
+
 
   def main(self):
     print "Entering main loop"
