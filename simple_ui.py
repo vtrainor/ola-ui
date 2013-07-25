@@ -237,6 +237,19 @@ class DisplayApp:
         #            lambda pid, callback: self.notebook_rdm_get(pid, callback),
         #            lambda pid, data: self.notebook_rdm_set(pid, data))
         #self.rdm_notebook.populate_defaults()
+    if not succeeded:
+      self._uid_dict.setdefault(uid, {})["DEVICE_LABEL"] = data["label"]
+      self.device_menu["menu"].add_command( label = "%s (%s)"%(
+                  self._uid_dict[uid]["DEVICE_LABEL"], uid), 
+                  command = lambda:self.device_selected(uid))
+      self._uid_dict[uid]["index"] = self.device_menu["menu"].index(tk.END)
+      print "index: %d" % self._uid_dict[uid]["index"]
+      if self.cur_uid is None:
+        self.cur_uid = uid
+        #self.rdm_notebook.set_callbacks(
+        #            lambda pid, callback: self.notebook_rdm_get(pid, callback),
+        #            lambda pid, data: self.notebook_rdm_set(pid, data))
+        #self.rdm_notebook.populate_defaults()
 
   def _get_pids_complete(self, uid, succeeded, params):
     """ Callback for get_supported_pids.
@@ -245,40 +258,30 @@ class DisplayApp:
           succeeded: bool,  whether or not the get was a success
           params: packed list of 16-bit pids
     """
-    self._uid_dict["SUPPORTED_PARAMETERS"] = params
     if not succeeded:
       return
+    else:
+      # TODO: 5: 
+      device = self._uid_dict[uid]
+      device['SUPPORTED_PARAMETERS'] = set(params)
 
-    # TODO: 5: first add the list of supported parameters to the uid dict:
-    # device = self._uid_dict[uid]
-    # device['SUPPORTED_PARAMETERS'] = set( .... )
+      # TODO: 6 fetch DEVICE_INFO and a call _get_device_info_complete (added
+      # below)
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, 
+                "DEVICE_INFO", 
+                lambda b, s, uid = 
+                self.cur_uid:self._get_device_info_complete(uid, b, s, params), 
+                [])
+      
 
-    # TODO: 6 fetch DEVICE_INFO and a call _get_device_info_complete (added
-    # below)
-
-    return
-
-    pid_list = params["params"]
-    for pid in ["DEVICE_INFO"]: # list of required pids
-      self._uid_dict[uid][pid] = []
-    for item in pid_list:
-      try:
-        pid = self._pid_store.GetPid(item["param_id"], uid.manufacturer_id).name
-      except:
-        print "manufactuer pid"
-      if pid in ["RECORD_SENSORS", "RESET_DEVICE", "CAPTURE_PRESET"]:
-        pass
-      else: 
-        self._uid_dict[uid][pid] = []
-
-  def _get_device_info_complete(self, uid, succeeded, params) :
+  def _get_device_info_complete(self, uid, succeeded, value, params) :
     # TODO: 7 add this information to the _uid_dict
-
+    self._uid_dict[uid]["DEVICE_INFO"] = value
     # at this point we now have the list of supported parameters & the device
     # info for the pid selected.
 
     # TODO: 8 print the uid dict here
-
+    print "uid_dict: %s" % self._uid_dict
     # Now for testing purposes, we skip the call though the notebook and just
     # proceed straight to getting the Basic Info
     self._controller.GetBasicInformation()
@@ -307,7 +310,7 @@ class DisplayApp:
 
   def _rdm_set_complete(self, uid, succeded, value):
     """ callback for the rdm_set in identify. """
-    print "value: %s" % (succeded, value)
+    print "value: %s" % value
     print "rdm set complete"
 
   def notebook_rdm_get(self, pid, callback):
