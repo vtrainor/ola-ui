@@ -267,9 +267,8 @@ class DisplayApp:
     else:
       # TODO: 5: 
       device = self._uid_dict[uid]
-      device['SUPPORTED_PARAMETERS'] = set()
-      for param_id in params["params"]:
-        device["SUPPORTED_PARAMETERS"].add(param_id["param_id"])
+      device['SUPPORTED_PARAMETERS'] = set(p['param_id']
+                                                     for p in params['params'])
 
       # TODO: 6 fetch DEVICE_INFO and a call _get_device_info_complete (added
       # below)
@@ -336,8 +335,6 @@ class DisplayApp:
 
   def _get_product_detail_id(self):
     pid_key = self._pid_store.GetName("PRODUCT_DETAIL_ID_LIST")
-    print "pid: %s" % pid_key.name
-    print "current uid: %s" % self.cur_uid
     if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self.rdm_product_detail_id_complete(b, s))
