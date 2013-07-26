@@ -66,13 +66,18 @@ class Controller(object):
     # self._app.GetBasicInformation()
     self._app.GetBasicInformation()
 
-  def RenderBasicInformation(self):
-    """
-    """
-    print "rendering basic information"
-
   def GetDmxInformation(self):
-    pass
+    """
+    "DEVICE_INFO"
+    "DMX_PERSONALITY"
+    "DMX_PERSONALITY_DESCRIPTION"
+    "DMX_START_ADDRESS"
+    "SLOT_INFO"
+    "SLOT_DESCRIPTION"
+    "DEFAULT_SLOT_VALUE"
+    """
+    print "getting DMX information..."
+    self._app.GetDmxInformation()
 
   def GetSensorInformation(self):
     pass
@@ -485,6 +490,74 @@ class DisplayApp:
       print "failed"
     # store the results in the uid dict
     self._notebook.RenderBasicInformation(self._uid_dict[self.cur_uid])
+
+  def GetDMXInformation(self):
+    """
+    // "DEVICE_INFO"
+    "DMX_PERSONALITY"
+    "DMX_PERSONALITY_DESCRIPTION"
+    "DMX_START_ADDRESS"
+    "SLOT_INFO"
+    "SLOT_DESCRIPTION"
+    "DEFAULT_SLOT_VALUE"
+    """
+    self._get_dmx_personality()
+
+  def _get_dmx_personality(self):
+    pid_key = self._pid_store.GetName("DMX_PERSONALITY")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_dmx_personality_complete(b, s))
+    else:
+      self._get_personality_decription()
+
+  def _get_dmx_personality_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["BOOT_SOFTWARE_LABEL"] = (
+                        data["current_personality"], data["personality_count"])
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_personality_description()
+
+  def _get_personality_description(self):
+    data = [self._uid_dict[self.cur_uid]["DMX_PERSONALITY"]["personality"]]
+    pid_key = self._pid_store.GetName("DMX_PERSONALITY_DESCRIPTION")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_personality_description_complete(b, s), data)
+    else:
+      self._get_start_address()
+
+  def _get__complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["DMX_PERSONALITY_DESCRIPTION"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_start_address()
+
+  def _get_start_address(self):
+    """
+    """
+    print "getting start address..."
+    # pid_key = self._pid_store.GetName(meow)
+    # if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    #   self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+    #         lambda b, s: self._get_meow_complete(b, s))
+    # else:
+    #   self._get_meow()
+
+  def _get__complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["meow"] = data["meow"]
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_meow()
 
 
   def main(self):

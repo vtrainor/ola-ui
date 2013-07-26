@@ -10,10 +10,12 @@ class RDMNotebook:
     self.controller = controller
     self.init_dx = width
     self.init_dy = height
+    self.side = side
     self.objects = {}
     self.pid_location_dict = {}
     self._notebook = ttk.Notebook(self.root, name="nb", height=height,
                                   width=width)
+    self.populate_defaults()
 
   def populate_defaults(self):
     """ creates the default frames. """
@@ -71,41 +73,41 @@ class RDMNotebook:
                                       "PAN_TILT_SWAP": [10,11],
                                       "REAL_TIME_CLOCK": [12,13]
                               }}
-    self.factory_defaults_button.config(command = self.rdm_set(
-                              "FACTORY_DEFAULTS", self.factory_defaults.get()))
-    self.start_address_entry.config(validatecommand = self.rdm_set(
-                            "DMX_START_ADDRESS", self.dmx_start_address.get()))
-    self.dmx_personality_menu.config(command = self.rdm_set(
-                                "DMX_PERSONALITY", self.dmx_personality.get()))
-    self.slot_menu.config(command = self.rdm_set(
-                                            "SLOT_INFO",self.slot_number.get()))
-    self.sensor_def.config(command = self.rdm_get(
-                                "SENSOR_DEFINITION", self.sensor_number.get()))
-    self.sensor_value.config(command = self.rdm_get(
-                                      "SENSOR_VALUE", self.sensor_number.get()))
-    self.lamp_state_menu.config(command = self.rdm_set(
-                                            "LAMP_STATE",self.lamp_state.get()))
-    self.lamp_on_mode_menu.config(command = self.rdm_set(
-                                      "LAMP_ON_MODE", self.lamp_on_mode.get()))
-    self.device_power_cycles_menu.config(command = self.rdm_set(
-                        "DEVICE_POWER_CYCLES", self.device_power_cycles.get()))
-    self.power_state_menu.config(command = self.rdm_set(
-                                        "POWER_STATE", self.power_state.get()))
-    self.language_menu.config(command = self.rdm_set(
-                                              "LANGUAGE", self.language.get()))
-    self.display_invert_menu.config(command = self.rdm_set(
-                                  "DISAPLAY_INVERT",self.display_invert.get()))
-    self.display_level_menu.config(command = self.rdm_set(
-                                    "DISPLAY_LEVEL", self.display_level.get()))
-    self.pan_invert_button.config(command = self.rdm_set(
-                                          "PAN_INVERT", self.pan_invert.get()))
-    self.tilt_invert_button.config(command = self.rdm_set(
-                                        "TILT_INVERT", self.tilt_invert.get()))
-    self.pan_tilt_swap_button.config(command = self.rdm_set(
-                                    "PAN_TILT_SWAP", self.pan_tilt_swap.get()))
+    # self.factory_defaults_button.config(command = self.rdm_set(
+    #                           "FACTORY_DEFAULTS", self.factory_defaults.get()))
+    # self.start_address_entry.config(validatecommand = self.rdm_set(
+    #                         "DMX_START_ADDRESS", self.dmx_start_address.get()))
+    # self.dmx_personality_menu.config(command = self.rdm_set(
+    #                             "DMX_PERSONALITY", self.dmx_personality.get()))
+    # self.slot_menu.config(command = self.rdm_set(
+    #                                         "SLOT_INFO",self.slot_number.get()))
+    # self.sensor_def.config(command = self.rdm_get(
+    #                             "SENSOR_DEFINITION", self.sensor_number.get()))
+    # self.sensor_value.config(command = self.rdm_get(
+    #                                   "SENSOR_VALUE", self.sensor_number.get()))
+    # self.lamp_state_menu.config(command = self.rdm_set(
+    #                                         "LAMP_STATE",self.lamp_state.get()))
+    # self.lamp_on_mode_menu.config(command = self.rdm_set(
+    #                                   "LAMP_ON_MODE", self.lamp_on_mode.get()))
+    # self.device_power_cycles_menu.config(command = self.rdm_set(
+    #                     "DEVICE_POWER_CYCLES", self.device_power_cycles.get()))
+    # self.power_state_menu.config(command = self.rdm_set(
+    #                                     "POWER_STATE", self.power_state.get()))
+    # self.language_menu.config(command = self.rdm_set(
+    #                                           "LANGUAGE", self.language.get()))
+    # self.display_invert_menu.config(command = self.rdm_set(
+    #                               "DISAPLAY_INVERT",self.display_invert.get()))
+    # self.display_level_menu.config(command = self.rdm_set(
+    #                                 "DISPLAY_LEVEL", self.display_level.get()))
+    # self.pan_invert_button.config(command = self.rdm_set(
+    #                                       "PAN_INVERT", self.pan_invert.get()))
+    # self.tilt_invert_button.config(command = self.rdm_set(
+    #                                     "TILT_INVERT", self.tilt_invert.get()))
+    # self.pan_tilt_swap_button.config(command = self.rdm_set(
+    #                                 "PAN_TILT_SWAP", self.pan_tilt_swap.get()))
     for key in self.pid_location_dict.keys():
         self._grid_info(self.objects[key])
-    self._notebook.pack(side=side)
+    self._notebook.pack(side = self.side)
 
   def create_tab(self, tab_name, tab_label=None):
     """ Creates a tab. 
@@ -506,153 +508,6 @@ class RDMNotebook:
       for c in range(2):
         obj_list.pop().grid(row=r, column=c)
 
-  def _update_info(self, value, supported_pids):
-    """
-    """
-    print "updating info"
-
-    if "DEVICE_INFO" in supported_pids:
-      self.protocol_version.set("%d.%d" % 
-                                (value["protocol_major"], 
-                                 value["protocol_minor"]))
-      self.device_model.set(value["device_model"])
-      self.product_category.set(value["product_category"])
-      self.software_version.set(value["software_version"])
-      self.sub_device_count.set(value["sub_device_count"])
-    elif "PRODUCT_DETAIL_ID_LIST" in supported_pids:
-      self.product_dealtail_ids.set(None)
-      for d in value["detail_ids"]:
-        if self.product_dealtail_ids.get() is None:
-          self.product_dealtail_ids.set(d["detail_id"])
-        else:
-          self.product_dealtail_ids.set("%s, %s" % (
-                                        self.product_dealtail_ids.get(),
-                                        d["detail_id"]))
-    elif "DEVICE_MODEL_DESCRIPTION" in supported_pids:
-      self.device_model.set("%s (%s)" % (value["description"],
-                            self.device_model.get()))
-    elif "MANUFACTURER_LABEL" in supported_pids:
-      self.manufacturer.set(value["label"])
-    elif "DEVICE_LABEL" in supported_pids:
-      self.device_label.set(value["label"])
-    elif "FACTORY_DEFAULTS" in supported_pids:
-      self.factory_defaults.set(value["using_defaults"])
-    elif "SOFTWARE_VERSION_LABEL" in supported_pids:
-      self.software_version.set("%s (%s)" % (value["label"], 
-                                self.software_version.get()))
-    elif "BOOT_SOFTWARE_VERSION_ID" in supported_pids:
-      self.boot_software.set(value["version"])
-    elif "BOOT_SOFTWARE_LABEL" in supported_pids:
-      self.boot_software.set("%s (%s)" % (value["label"],
-                                self.boot_software.get()))
-
-  def _update_dmx(self, value, supported_pids):
-    """
-    """
-    print "updating dmx"
-    if "DEVICE_INFO" in supported_pids:
-      self.dmx_footprint.set(value["dmx_footprint"])
-      self.dmx_start_address.set(value["dmx_start_address"])
-      self.dmx_personality.set("Personality %d of %d" % (
-                                value["current_personality"],
-                                value["personality_count"]))
-    elif "DMX_PERSONALITY" in supported_pids:
-      for i in range(value["personality_count"]):
-        self.dmx_personality_menu["menu"].add_command(label = 
-                      "Personality %d of %d" % (i, value["personality_count"]),
-                      command = self.callback_dict["DMX_PERSONALITY"])
-        self.personality_description_menu["menu"].add_command(label = 
-                  "Personality %d of %d" % (i, value["personality_count"]),
-                  command = self.callback_dict["DMX_PERSONALITY_DESCRIPTION"])
-    elif "DMX_PERSONALITY_DESCRIPTION" in supported_pids:
-      self.personality_name.set(value["name"])
-      self.slots_required.set(value["slots_required"])
-    elif "DMX_START_ADDRESS" in supported_pids:
-      self.star_address_entry.config(
-                      validatecommand = self.callback_dict["DMX_START_ADDRESS"])
-    elif "SLOT_INFO" in supported_pids:
-      print value
-      self.slot_offset.set(value["slot_offset"])
-      self.slot_type.set(value["slot_type"])
-      self.slot_label_id.set(value["slot_label_id"])
-    elif "SLOT_DESCRIPTION" in supported_pids:
-      self.slot_number.set(value["slot_number"])
-      self.slot_name.set(value["name"])
-    elif "DEFAULT_SLOT_VALUE" in supported_pids:
-      self.default_slot_offset.set(value["slot_offset"])
-      self.default_slot_value.set(value["default_slot_value"])
-
-  def _update_sensor(self, value, pid):
-    """
-    """
-    if "DEVICE_INFO" in supported_pids:
-      self.sensor_count.set(value["sensor_count"])
-      # for i in range(self.sensor_count.get()):
-      #   self.objects[97]["menu"].add_command( label = "sensor number %d" % i, 
-      #             command = callback)
-    elif "SENSOR_DEFINITION" in supported_pids:
-      self.sensor_desc.set(value["sensor_number"])
-      self.sensor_type.set(RDMConstants.SENSOR_TYPE_TO_NAME[value["type"]])
-      self.sensor_prefix.set(value["prefix"])
-      self.range_min.set(value["range_min"])
-      self.range_max.set(value["range_max"])
-      self.normal_min.set(value["normal_min"])
-      self.normal_max.set(value["normal_max"])
-      if value["supports_recording"]:
-        self.supports_recording.set("Supported.")
-      else:
-        self.supports_recording.set("Not Supported")
-      self.sensor_name.set(value["name"])
-      self.sensor_unit.set(value["unit"])
-    elif "SENSOR_VALUE" in supported_pids:
-      print "sensor_value: %s" % value
-      self.sensor_info.set(value["sensor_number"])
-      self.present_value.set(value["present_value"])
-      self.lowest_value.set(value["lowest"])
-      self.highest_value.set(value["highest"])
-      self.recorded_value.set(value["recorded"])
-
-  def update_setting(self, value, pid):
-    """
-    """
-    if "DEVICE_HOURS" in supported_pids:
-      self.device_hours.set("%d Device Hours" % value["hours"])
-    elif "LAMP_HOURS" in supported_pids:
-      self.lamp_hours.set("%d Lamp Hours" % value["hours"])
-    elif "LAMP_STRIKES" in supported_pids:
-      self.lamp_strikes.set("%d Lamp Strikes" % value["strikes"])
-    elif "POWER_STATE" in supported_pids:
-      self.power_state.set(value["power_state"])
-    elif "LAMP_STATE" in supported_pids:
-      self.lamp_state.set(value["state"])
-    elif "LAMP_ON_MODE" in supported_pids:
-
-      self.lamp_on_mode.set([value["mode"]])
-    elif "DEVICE_POWER_CYCLE" in supported_pids:
-      self.device_power_cycles.set(value["power_cycles"])
-    elif "DISPLAY_INVERT" in supported_pids:
-      print "display invert: %s" % value
-    elif "DISPLAY_LEVEL" in supported_pids:
-      self.display_level.set(value["level"])
-    elif "PAN_INVERT" in supported_pids:
-      self.pan_invert.set(value["invert"])
-    elif "TILT_INVERT" in supported_pids:
-      self.tilt_invert.set(value["invert"])
-    elif "PAN_TILT_SWAP" in supported_pids:
-      self.pan_tilt_swap.set(value["swap"])
-    elif "REAL_TIME_CLOCK" in supported_pids:
-      self.real_time.set("%d/%d/%d at %d:%d:%d" % (value["month"], value["day"],
-                        value["year"], value["hour"], value["minute"],
-                        value["second"]))
-    elif "POWER_STATE" in supported_pids:
-      self.power_state.set(value["power_state"])
-    elif "SELF_TEST_DESCRIPTION" in supported_pids:
-      self.self_test_val.set(value["test_number"])
-      self.self_test_desc.set(value["description"])
-    elif "PRESET_PLAYBACK" in supported_pids:
-      self.preset_playback.set("%s (%d)" % (value[label][value["mode"]],
-                              value["mode"]))
-
   def main(self):
     """ Main method for Notebook class. """
     self.root.mainloop()
@@ -667,7 +522,7 @@ class RDMNotebook:
   def RenderBasicInformation(self, param_dict):
     # Given a dict with the device label, manufacturer label etc.
     # update the widgets on the info tab
-    print "param_dict: %s" % param_dict
+    print "param_dict: %s" % param
     pass
 
   def RenderDmxInformation(self, params):
