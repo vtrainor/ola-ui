@@ -66,6 +66,11 @@ class Controller(object):
     # self._app.GetBasicInformation()
     self._app.GetBasicInformation()
 
+  def RenderBasicInformation(self):
+    """
+    """
+    print "rendering basic information"
+
   def GetDmxInformation(self):
     pass
 
@@ -331,11 +336,11 @@ class DisplayApp:
 
   def _get_product_detail_id(self):
     pid_key = self._pid_store.GetName("PRODUCT_DETAIL_ID_LIST")
-    print "pid: %s" % pid_key.value
+    print "pid: %s" % pid_key.name
     print "current uid: %s" % self.cur_uid
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.value, 
-            lambda b, s: self.rdm_product_detail_id_complete(b, s), [""])
+    if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self.rdm_product_detail_id_complete(b, s))
     else:
       self._get_device_model()
 
@@ -350,9 +355,9 @@ class DisplayApp:
 
   def _get_device_model (self):
     pid_key = self._pid_store.GetName("DEVICE_MODEL_DESCRIPTION")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.value, 
-            lambda b, s: self._get_device_model_complete(b, s), [""])
+    if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_device_model_complete(b, s))
     else:
       self._get_manufacturer_label()
 
@@ -367,9 +372,9 @@ class DisplayApp:
 
   def _get_manufacturer_label(self):
     pid_key = self._pid_store.GetName("MANUFACTURER_LABEL")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.value, 
-            lambda b, s: self._get_manufactuer_label_complete(b, s), [""])
+    if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_manufactuer_label_complete(b, s))
     else:
       self._get_factory_defaults()
 
@@ -384,9 +389,9 @@ class DisplayApp:
 
   def _get_factory_defaults(self):
     pid_key = self._pid_store.GetName("FACTORY_DEFAULTS")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.value, 
-            lambda b, s: self._get_factory_defaults_complete(b, s), [""])
+    if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_factory_defaults_complete(b, s))
     else:
       self._get_software_version()
 
@@ -401,8 +406,8 @@ class DisplayApp:
 
   # def _get_language_capabilities(self):
   #   pid_key = self._pid_store.GetName("LANGUAGE_CAPABILITIES")
-  #   if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-  #     self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.value, 
+  #   if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+  #     self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
   #           lambda b, s: self._get_language_capabilities_complete(b, s), [""])
   #   else:
   #     self._get_software_version()
@@ -418,8 +423,8 @@ class DisplayApp:
 
   # def _get_language(self):
   #   pid_key = self._pid_store.GetName("LANGUAGE")
-  #   if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-  #     self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.value, 
+  #   if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+  #     self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
   #           lambda b, s: self._get_language_complete(b, s), [""])
   #   else:
   #     self._get_software_version()
@@ -435,9 +440,9 @@ class DisplayApp:
 
   def _get_software_version(self):
     pid_key = self._pid_store.GetName("SOFTWARE_VERSION_LABEL")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.value, 
-            lambda b, s: self._get__complete(b, s), [""])
+    if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get__complete(b, s))
     else:
       self._get_boot_version()
 
@@ -452,9 +457,9 @@ class DisplayApp:
 
   def _get_boot_version(self):
     pid_key = self._pid_store.GetName("BOOT_SOFTWARE_VERSION")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.value, 
-            lambda b, s: self._get__complete(b, s), [""])
+    if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get__complete(b, s))
     else:
       self._get_boot_label()
 
@@ -469,11 +474,11 @@ class DisplayApp:
 
   def _get_boot_label(self):
     pid_key = self._pid_store.GetName("BOOT_SOFTWARE_LABEL")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.value, 
-            lambda b, s: self._get__complete(b, s), [""])
+    if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get__complete(b, s))
     else:
-      self.Controller.RenderBasicInformation()
+      self._controller.RenderBasicInformation()
 
   def _get_boot_label_complete(self, succeeded, data):
     if succeeded:
@@ -482,7 +487,7 @@ class DisplayApp:
     else:
       print "failed"
     # store the results in the uid dict
-    self.Controller.RenderBasicInformation()
+    self._controller.RenderBasicInformation()
 
 
   def main(self):
