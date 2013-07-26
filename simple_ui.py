@@ -126,7 +126,7 @@ class DisplayApp:
     self.ola_thread.start()
     self.build_frames()
     self.build_cntrl()
-    #self.rdm_notebook = notebook.RDMNotebook(self.root, self._controller)
+    self._notebook = notebook.RDMNotebook(self.root, self._controller)
     self.discover()
     self.auto_disc.set(False)
 
@@ -303,7 +303,7 @@ class DisplayApp:
       print "value: %s" % value
       self._uid_dict[self.cur_uid][pid] = value
       print self._uid_dict[self.cur_uid][pid]
-      self.rdm_notebook.update_tabs(value, [pid])
+      self._notebook.update_tabs(value, [pid])
 
   def _get_identify_complete(self, uid, succeeded, value):
     """ Callback for rdm_get in device_selected.
@@ -335,16 +335,16 @@ class DisplayApp:
 
   def _get_product_detail_id(self):
     pid_key = self._pid_store.GetName("PRODUCT_DETAIL_ID_LIST")
-    if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self.rdm_product_detail_id_complete(b, s))
+            lambda b, s: self._get_product_detail_id_complete(b, s))
     else:
       self._get_device_model()
 
   def _get_product_detail_id_complete(self, succeeded, data):
     if succeeded:
       print "got product detail ids"
-      self_uid_dict[self.cur_uid]["PRODUCT_DETAIL_ID_LIST"] = data["detail_ids"]
+      self._uid_dict[self.cur_uid]["PRODUCT_DETAIL_ID_LIST"] = data["detail_ids"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -352,7 +352,7 @@ class DisplayApp:
 
   def _get_device_model (self):
     pid_key = self._pid_store.GetName("DEVICE_MODEL_DESCRIPTION")
-    if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_device_model_complete(b, s))
     else:
@@ -361,7 +361,7 @@ class DisplayApp:
   def _get_device_model_complete(self, succeeded, data):
     if succeeded:
       print "got device model"
-      self_uid_dict[self.cur_uid]["DEVICE_MODEL_DESCRIPTION"] = data["description"]
+      self._uid_dict[self.cur_uid]["DEVICE_MODEL_DESCRIPTION"] = data["description"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -369,16 +369,16 @@ class DisplayApp:
 
   def _get_manufacturer_label(self):
     pid_key = self._pid_store.GetName("MANUFACTURER_LABEL")
-    if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_manufactuer_label_complete(b, s))
+            lambda b, s: self._get_manufacturer_label_complete(b, s))
     else:
       self._get_factory_defaults()
 
   def _get_manufacturer_label_complete(self, succeeded, data):
     if succeeded:
       print "got device model description"
-      self_uid_dict[self.cur_uid]["DEVICE_MODEL_DESCRIPTION"] = data["label"]
+      self._uid_dict[self.cur_uid]["DEVICE_MODEL_DESCRIPTION"] = data["label"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -386,7 +386,7 @@ class DisplayApp:
 
   def _get_factory_defaults(self):
     pid_key = self._pid_store.GetName("FACTORY_DEFAULTS")
-    if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_factory_defaults_complete(b, s))
     else:
@@ -395,7 +395,7 @@ class DisplayApp:
   def _get_factory_defaults_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self_uid_dict[self.cur_uid]["FACTORY_DEFAULTS"] = data["using_defaults"]
+      self._uid_dict[self.cur_uid]["FACTORY_DEFAULTS"] = data["using_defaults"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -437,7 +437,7 @@ class DisplayApp:
 
   def _get_software_version(self):
     pid_key = self._pid_store.GetName("SOFTWARE_VERSION_LABEL")
-    if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get__complete(b, s))
     else:
@@ -446,7 +446,7 @@ class DisplayApp:
   def _get_software_version_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self_uid_dict[self.cur_uid]["SOFTWARE_VERSION_LABEL"] = data["label"]
+      self._uid_dict[self.cur_uid]["SOFTWARE_VERSION_LABEL"] = data["label"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -454,7 +454,7 @@ class DisplayApp:
 
   def _get_boot_version(self):
     pid_key = self._pid_store.GetName("BOOT_SOFTWARE_VERSION")
-    if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get__complete(b, s))
     else:
@@ -463,7 +463,7 @@ class DisplayApp:
   def _get_boot_version_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self_uid_dict[self.cur_uid]["BOOT_SOFTWARE_VERSION"] = data["value"]
+      self._uid_dict[self.cur_uid]["BOOT_SOFTWARE_VERSION"] = data["value"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -471,20 +471,20 @@ class DisplayApp:
 
   def _get_boot_label(self):
     pid_key = self._pid_store.GetName("BOOT_SOFTWARE_LABEL")
-    if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get__complete(b, s))
     else:
-      self._controller.RenderBasicInformation()
+      self._notebook.RenderBasicInformation(self._uid_dict[self.cur_uid])
 
   def _get_boot_label_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self_uid_dict[self.cur_uid]["BOOT_SOFTWARE_LABEL"] = data["label"]
+      self._uid_dict[self.cur_uid]["BOOT_SOFTWARE_LABEL"] = data["label"]
     else:
       print "failed"
     # store the results in the uid dict
-    self._controller.RenderBasicInformation()
+    self._notebook.RenderBasicInformation(self._uid_dict[self.cur_uid])
 
 
   def main(self):
