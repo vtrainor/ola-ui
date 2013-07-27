@@ -130,12 +130,6 @@ class RDMNotebook:
     self._notebook.add(tab, text = tab_label)
     return tab
 
-  def set_callbacks(self, callback_get, callback_set):
-    """
-    """
-    self.rdm_get = callback_get
-    self.rdm_set = callback_set
-
   def update_tabs(self, value, pid):
     """ calls the update functions for the tab that the 
 
@@ -522,7 +516,7 @@ class RDMNotebook:
   def RenderBasicInformation(self, param_dict):
     # Given a dict with the device label, manufacturer label etc.
     # update the widgets on the info tab
-    print "param_dict: %s" % param
+    print "param_dict: %s" % param_dict
     pass
 
   def RenderDmxInformation(self, params):
