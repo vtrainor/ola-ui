@@ -106,6 +106,7 @@ class RDMNotebook:
     # self.pan_tilt_swap_button.config(command = self.rdm_set(
     #                                 "PAN_TILT_SWAP", self.pan_tilt_swap.get()))
     for key in self.pid_location_dict.keys():
+
         self._grid_info(self.objects[key])
     self._notebook.pack(side = self.side)
 
@@ -514,10 +515,89 @@ class RDMNotebook:
     pass
 
   def RenderBasicInformation(self, param_dict):
+    """
+    pids:
+      "DEVICE_INFO"
+      "PRODUCT_DETAIL_ID_LIST"
+      "DEVICE_MODEL_DESCRIPTION"
+      "MANUFACTURER_LABEL"
+      "DEVICE_LABEL"
+      "FACTORY_DEFAULTS"
+      "SOFTWARE_VERSION_LABEL"
+      "BOOT_SOFTWARE_VERSION_ID"
+      "BOOT_SOFTWARE_VERSION_LABEL"
+    widgets and variables:
+      text variables:
+        self.protocol_version
+        self.device_model
+        self.product_category
+        self.software_version
+        self.sub_device_count
+        self.product_dealtail_ids
+        self.manufacturer_label
+        self.device_label
+        self.boot_software
+      misc.:
+        self.factory_defaults(BooleanVar)
+        self.factory_defaults_button(Checkbutton)
+    """
     # Given a dict with the device label, manufacturer label etc.
     # update the widgets on the info tab
     print "param_dict: %s" % param_dict
-    pass
+    protocol_version = "Version %d.%d" % (
+                          param_dict["DEVICE_INFO"]["protocol_major"], 
+                          param_dict["DEVICE_INFO"]["protocol_minor"]
+                          )
+    device_model = param_dict["DEVICE_INFO"]["device_model"]
+    if "DEVICE_MODEL_DESCRIPTION" in param_dict:
+      device_model = "%s (%d)" % (
+                          param_dict["DEVICE_MODEL_DESCRIPTION"]["label"],
+                          param_dict["DEVICE_INFO"]["device_model"]
+                          )
+    product_category = param_dict["DEVICE_INFO"]["product_category"]
+    software_version = param_dict["DEVICE_INFO"]["software_version"]
+    if "SOFTWARE_VERSION_LABEL" in param_dict:
+      software_version = "%s (%d)" % (
+                          param_dict["SOFTWARE_VERSION_LABEL"]["label"],
+                          param_dict["DEVICE_INFO"]["software_version"]
+                          )
+    sub_device_count = param_dict["DEVICE_INFO"]["sub_device_count"]
+    self.protocol_version.set(protocol_version)
+    self.device_model.set(device_model)
+    self.product_category.set(product_category)
+    self.software_version.set(software_version)
+    self.sub_device_count.set(sub_device_count)
+
+    if "PRODUCT_DETAIL_ID_LIST" in param_dict:
+      product_dealtail_ids = param_dict["PRODUCT_DETAIL_ID_LIST"]["detail_ids"]
+      self.product_dealtail_ids.set(product_dealtail_ids)
+      # will need to form a better format for displaying these values...
+    if "MANUFACTURER_LABEL" in param_dict:
+      manufacturer_label = param_dict["MANUFACTURER_LABEL"]["label"]
+      self.manufacturer_label.set(manufacturer_label)
+    if "DEVICE_LABEL" in param_dict:
+      device_label = param_dict["DEVICE_LABEL"]
+      self.device_label.set(device_label)
+    if "FACTORY_DEFAULTS" in param_dict:
+      factory_defaults = param_dict["FACTORY_DEFAULTS"]["using_defaults"]
+      self.factory_defaults.set(factory_defaults)
+      # self.factory_defaults_button(Checkbutton)
+    if "BOOT_SOFTWARE_VERSION" in param_dict:
+      if "BOOT_SOFTWARE_LABEL" in param_dict:
+        boot_software = "%s (%d)" % (
+                          param_dict["BOOT_SOFTWARE_LABEL"]["label"],
+                          param_dict["BOOT_SOFTWARE_VERSION"]["version"]
+                          )
+        self.boot_software.set(boot_software)
+        return
+      else:
+        boot_software = param_dict["BOOT_SOFTWARE_VERSION"]["version"]
+        self.boot_software.set(boot_software)
+        return
+    if "BOOT_SOFTWARE_LABEL" in param_dict:
+        boot_software = param_dict["BOOT_SOFTWARE_LABEL"]["label"]
+        self.boot_software.set(boot_software)
+        return
 
   def RenderDmxInformation(self, params):
     pass
