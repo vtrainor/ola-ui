@@ -538,7 +538,9 @@ class RDMNotebook:
                           param_dict["DEVICE_MODEL_DESCRIPTION"]["label"],
                           param_dict["DEVICE_INFO"]["device_model"]
                           )
-    product_category = param_dict["DEVICE_INFO"]["product_category"]
+    index = param_dict["DEVICE_INFO"]["product_category"]
+    product_category = RDMConstants.PRODUCT_CATEGORY_TO_NAME.get(index, "")
+
     software_version = param_dict["DEVICE_INFO"]["software_version"]
     sub_device_count = param_dict["DEVICE_INFO"]["sub_device_count"]
     if "SOFTWARE_VERSION_LABEL" in param_dict:

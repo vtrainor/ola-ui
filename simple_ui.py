@@ -766,24 +766,151 @@ class DisplayApp:
 
   def GetConfigInformation(self):
     """
+    "LANGUAGE_CAPABILITIES"
+    "LANGUAGE"
+    "DISPLAY_INVERT"
+    "DISPLAY_LEVEL"
+    "PAN_INVERT"
+    "TILT_INVERT"
+    "PAN_TILT_SWAP"
+    "REAL_TIME_CLOCK"
     """
 
-  def _get_meow(self):
-    pid_key = self._pid_store.GetName(meow)
+  def _get_language_capabilities(self):
+    pid_key = self._pid_store.GetName("LANGUAGE_CAPABILITIES")
     if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_meow_complete(b, s))
+            lambda b, s: self._get_language_capabilities_complete(b, s))
     else:
-      self._get_meow()
+      self._get_language()
 
-  def _get_meow_complete(self, succeeded, data):
+  def _get_language_capabilities_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["meow"] = data
+      self._uid_dict[self.cur_uid]["LANGUAGE_CAPABILITIES"] = data
     else:
       print "failed"
     # store the results in the uid dict
-    self._get_meow()
+    self._get_language()
+
+  def _get_language(self):
+    pid_key = self._pid_store.GetName("LANGUAGE")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_language_complete(b, s))
+    else:
+      self._get_display_invert()
+
+  def _get_language_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["LANGUAGE"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_display_invert()
+
+  def _get_display_invert(self):
+    pid_key = self._pid_store.GetName("DISPLAY_INVERT")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_display_invert_complete(b, s))
+    else:
+      self._get_display_level()
+
+  def _get_display_invert_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["DISPLAY_INVERT"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_display_level()
+
+  def _get_display_level(self):
+    pid_key = self._pid_store.GetName("DISPLAY_LEVEL")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_display_level_complete(b, s))
+    else:
+      self._get_pan_invert()
+
+  def _get_display_level_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["DISPLAY_LEVEL"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_pan_invert()
+
+  def _get_pan_invert(self):
+    pid_key = self._pid_store.GetName("PAN_INVERT")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_pan_invert_complete(b, s))
+    else:
+      self._get_tilt_invert()
+
+  def _get_pan_invert_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["PAN_INVERT"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_tilt_invert()
+
+  def _get_tilt_invert(self):
+    pid_key = self._pid_store.GetName("TILT_INVERT")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_tilt_invert_complete(b, s))
+    else:
+      self._get_pan_tilt_swap()
+
+  def _get_tilt_invert_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["TILT_INVERT"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_pan_tilt_swap()
+
+  def _get_pan_tilt_swap(self):
+    pid_key = self._pid_store.GetName("PAN_TILT_SWAP")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_pan_tilt_swap_complete(b, s))
+    else:
+      self._get_real_time()
+
+  def _get_pan_tilt_swap_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["PAN_TILT_SWAP"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_real_time()
+
+  def _get_real_time(self):
+    pid_key = self._pid_store.GetName("REAL_TIME_CLOCK")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_real_time_complete(b, s))
+    else:
+      self._notebook.RenderConfigInformation()
+
+  def _get_real_time_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["REAL_TIME_CLOCK"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._notebook.RenderConfigInformation()
 
   def main(self):
     print "Entering main loop"
