@@ -768,6 +768,23 @@ class DisplayApp:
     """
     """
 
+  def _get_meow(self):
+    pid_key = self._pid_store.GetName(meow)
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_meow_complete(b, s))
+    else:
+      self._get_meow()
+
+  def _get_meow_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["meow"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_meow()
+
   def main(self):
     print "Entering main loop"
     self.root.mainloop()
