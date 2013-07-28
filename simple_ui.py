@@ -524,27 +524,249 @@ class DisplayApp:
     self._get_start_address()
 
   def _get_start_address(self):
+    pid_key = self._pid_store.GetName("DMX_START_ADDRESS")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_start_address_complete(b, s))
+    else:
+      self._get_slot_info()
+
+  def _get_start_address_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["DMX_START_ADDRESS"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_slot_info()
+
+  def _get_slot_info(self):
+    pid_key = self._pid_store.GetName("SLOT_INFO")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_slot_info_complete(b, s))
+    else:
+      self._get_slot_description()
+
+  def _get_slot_info_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["SLOT_DESCRIPTION"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_slot_description()
+
+  def _get_slot_description(self):
+    pid_key = self._pid_store.GetName("SLOT_DESCRIPTION")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_slot_description_complete(b, s))
+    else:
+      self._get_default_slot_value()
+
+  def _get_slot_description_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["SLOT_DESCRIPTION"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_defalut_slot_value()
+
+  def _get_defalut_slot_value(self):
+    pid_key = self._pid_store.GetName("DEFAULT_SLOT_VALUE")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_default_value_complete(b, s))
+    else:
+      self._notebook.RenderDMXInformation(self._uid_dict[self.cur_uid])
+
+  def _get_default_slot_value_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["DEFAULT_SLOT_VALUE"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._notebook.RenderDMXInformation(self._uid_dict[self.cur_uid])
+
+  def GetSensorsInformation():
+    """
+    "SENSOR_DEFINITION"
+    "SENSOR_VALUE"
+    "RECORD_SENSORS"
+    """
+
+  def _get_sensor_definition(self):
+    pid_key = self._pid_store.GetName("SENSOR_DEFINITION")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_sensor_definition_complete(b, s))
+    else:
+      self._get_sensor_value()
+
+  def _get_sensor_definition_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["SENSOR_DEFINITION"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_sensor_value()
+
+  def _get_sensor_value(self):
+    pid_key = self._pid_store.GetName("SENSOR_VALUE")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_sensor_value_complete(b, s))
+    else:
+      self._notebook.RenderSensorInformation()
+      # do I need to do anything with record sensors here?
+
+  def _get_sensor_value_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["SENSOR_VALUE"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._notebook.RenderSensorInformation()
+
+  def GetSettingInformation(self):
+    """
+    "DEVICE_HOURS"
+    "LAMP_HOURS"
+    "LAMP_STRIKES"
+    "LAMP_STATE"
+    "LAMP_ON_MODE"
+    "DEVICE_POWER_CYCLES"
+    "POWER_STATE"
+    """
+    pass
+
+  def _get_device_hours(self):
+    pid_key = self._pid_store.GetName("DEVICE_HOURS")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_device_hours_complete(b, s))
+    else:
+      self._get_lamp_hours()
+
+  def _get_device_hours_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["DEVICE_HOURS"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_lamp_hours()
+
+  def _get_lamp_hours(self):
+    pid_key = self._pid_store.GetName("LAMP_HOURS")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_lamp_hours_complete(b, s))
+    else:
+      self._get_lamp_strikes()
+
+  def _get_lamp_hours_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["LAMP_HOURS"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_lamp_strikes()
+
+  def _get_lamp_strikes(self):
+    pid_key = self._pid_store.GetName("LAMP_STRIKES")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_lamp_strikes_complete(b, s))
+    else:
+      self._get_lamp_state()
+
+  def _get_lamp_strikes_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["LAMP_STRIKES"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_lamp_state()
+
+  def _get_lamp_state(self):
+    pid_key = self._pid_store.GetName("LAMP_STATE")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_lamp_state_complete(b, s))
+    else:
+      self._get_lamp_on_mode()
+
+  def _get_lamp_state_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["LAMP_STATE"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_lamp_on_mode()
+
+  def _get_lamp_on_mode(self):
+    pid_key = self._pid_store.GetName("LAMP_ON_MODE")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_lamp_on_mode_complete(b, s))
+    else:
+      self._get_power_cycles()
+
+  def _get_lamp_on_mode_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["LAMP_ON_MODE"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_power_cycles()
+
+  def _get_power_cycles(self):
+    pid_key = self._pid_store.GetName("DEVICE_POWER_CYCLES")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_power_cycles_complete(b, s))
+    else:
+      self._get_power_state()
+
+  def _get_power_cycles_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["DEVICE_POWER_CYCLES"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._get_power_state()
+
+  def _get_power_state(self):
+    pid_key = self._pid_store.GetName("POWER_STATE")
+    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
+            lambda b, s: self._get_power_state_complete(b, s))
+    else:
+      self._notebook.RenderSettingInformation
+
+  def _get_power_state_complete(self, succeeded, data):
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["POWER_STATE"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._notebook.RenderSettingInformation()
+
+  def GetConfigInformation(self):
     """
     """
-    print "getting start address..."
-
-  # def _get_meow(self):
-  #   pid_key = self._pid_store.GetName(meow)
-  #   if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-  #     self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-  #           lambda b, s: self._get_meow_complete(b, s))
-  #   else:
-  #     self._get_meow()
-
-  # def _get__complete(self, succeeded, data):
-  #   if succeeded:
-  #     print ""
-  #     self._uid_dict[self.cur_uid]["meow"] = data
-  #   else:
-  #     print "failed"
-  #   # store the results in the uid dict
-  #   self._get_meow()
-
 
   def main(self):
     print "Entering main loop"

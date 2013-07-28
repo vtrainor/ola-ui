@@ -516,33 +516,7 @@ class RDMNotebook:
 
   def RenderBasicInformation(self, param_dict):
     """
-    pids:
-      "DEVICE_INFO"
-      "PRODUCT_DETAIL_ID_LIST"
-      "DEVICE_MODEL_DESCRIPTION"
-      "MANUFACTURER_LABEL"
-      "DEVICE_LABEL"
-      "FACTORY_DEFAULTS"
-      "SOFTWARE_VERSION_LABEL"
-      "BOOT_SOFTWARE_VERSION_ID"
-      "BOOT_SOFTWARE_VERSION_LABEL"
-    widgets and variables:
-      text variables:
-        self.protocol_version
-        self.device_model
-        self.product_category
-        self.software_version
-        self.sub_device_count
-        self.product_dealtail_ids
-        self.manufacturer_label
-        self.device_label
-        self.boot_software
-      misc.:
-        self.factory_defaults(BooleanVar)
-        self.factory_defaults_button(Checkbutton)
     """
-    # Given a dict with the device label, manufacturer label etc.
-    # update the widgets on the info tab
     print "param_dict: %s" % param_dict
     protocol_version = "Version %d.%d" % (
                           param_dict["DEVICE_INFO"]["protocol_major"], 
