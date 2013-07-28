@@ -15,7 +15,13 @@ class RDMNotebook:
     self.pid_location_dict = {}
     self._notebook = ttk.Notebook(self.root, name="nb", height=height,
                                   width=width)
+    self._notebook.bind('<<NotebookTabChanged>>', self.tab_changed)
     self.populate_defaults()
+
+  def tab_changed(self, event):
+    # Note that this will be called when the program starts
+    index = self._notebook.index('current')
+    print 'The selected tab changed to %d' % index
 
   def populate_defaults(self):
     """ creates the default frames. """
