@@ -206,9 +206,13 @@ class RDMNotebook:
                             tk.Label(self.info_tab,
                                               textvariable = self.device_model),
 
-                            tk.Label(self.info_tab, text = "Product Details:"),
+                            tk.Label(self.info_tab, text = "Product Category:"),
                             tk.Label(self.info_tab,
                                           textvariable = self.product_category),
+
+                            tk.Label(self.info_tab, text = "Sub-Device Count"),
+                            tk.Label(self.info_tab,
+                                          textvariable = self.sub_device_count),
 
                             tk.Label(self.info_tab, text = "Manufacturer:"),
                             tk.Label(self.info_tab,
@@ -530,6 +534,7 @@ class RDMNotebook:
                           )
     product_category = param_dict["DEVICE_INFO"]["product_category"]
     software_version = param_dict["DEVICE_INFO"]["software_version"]
+    sub_device_count = param_dict["DEVICE_INFO"]["sub_device_count"]
     if "SOFTWARE_VERSION_LABEL" in param_dict:
       software_version = "%s (%d)" % (
                           param_dict["SOFTWARE_VERSION_LABEL"]["label"],
