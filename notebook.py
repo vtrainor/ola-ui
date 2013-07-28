@@ -19,8 +19,9 @@ class RDMNotebook:
     self.populate_defaults()
 
   def tab_changed(self, event):
-    print 'the selected tab changed'
-    # We need to figure out how to get the current selected tab
+    # Note that this will be called when the program starts
+    index = self._notebook.index('current')
+    print 'The selected tab changed to %d' % index
 
   def populate_defaults(self):
     """ creates the default frames. """
