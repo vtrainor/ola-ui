@@ -202,6 +202,7 @@ class RDMNotebook:
     self.factory_defaults = tk.BooleanVar(self.info_tab)
     self.factory_defaults_button = tk.Checkbutton(self.info_tab,
                                               variable = self.factory_defaults)
+    self.device_label_button = tk.Button(self.info_tab, text = "Update Device Label")
 
     self.objects["PRODUCT_INFO"] = [tk.Label(self.info_tab,
                                                      text = "RDM Protocol Version"),
@@ -243,8 +244,12 @@ class RDMNotebook:
                             tk.Label(self.info_tab,
                                               text = "Boot Software Version:"),
                             tk.Label(self.info_tab,
-                                              textvariable = self.boot_software)
+                                              textvariable = self.boot_software),
+
+                            self.device_label_button,
+                            tk.Label(self.info_tab, text = "")
                             ]
+    self._notebook.bind(self.device_label_button, self.device_label_set)
 
   def _init_dmx(self):
     """
@@ -520,6 +525,11 @@ class RDMNotebook:
     for r in range((len(obj_list)+1)/2):
       for c in range(2):
         obj_list.pop().grid(row=r, column=c)
+
+  def device_label_set(self, event):
+    """
+    """
+    print self.device_label.get()
 
   def main(self):
     """ Main method for Notebook class. """
