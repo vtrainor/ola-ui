@@ -267,6 +267,10 @@ class DisplayApp:
                                     command = lambda:self.device_selected(uid))
     self._uid_dict[uid]["index"] = self.device_menu["menu"].index(tk.END)
     print "index: %d" % self._uid_dict[uid]["index"]
+    if "SUPPORTED_PARAMETERS" not in self._uid_dict[uid]:
+      self.ola_thread.rdm_get(self.universe.get(), uid, 0, 
+                      "SUPPORTED_PARAMETERS", 
+                    lambda b, l, uid = uid:self._get_pids_complete(uid, b, l),)
     if self.cur_uid is None:
       self.cur_uid = uid
 
