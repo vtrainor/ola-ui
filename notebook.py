@@ -192,7 +192,7 @@ class RDMNotebook:
     self.product_category = tk.StringVar(self.info_tab)
     self.software_version = tk.StringVar(self.info_tab)
     self.sub_device_count = tk.StringVar(self.info_tab)
-    self.product_detail_ids = tk.StringVar(self.info_tab)
+ 
     self.manufacturer_label = tk.StringVar(self.info_tab)
     self.device_label = tk.StringVar(self.info_tab)
     self.boot_software = tk.StringVar(self.info_tab)
@@ -201,6 +201,7 @@ class RDMNotebook:
     self.factory_defaults = tk.BooleanVar(self.info_tab)
     self.factory_defaults_button = tk.Checkbutton(self.info_tab,
                                               variable = self.factory_defaults)
+    self.product_detail_ids = tk.Listbox(self.info_tab)
     self.device_label_button = tk.Button(self.info_tab, text = "Update Device Label", command = self.device_label_set)
 
     self.objects["PRODUCT_INFO"] = [tk.Label(self.info_tab,
@@ -221,8 +222,7 @@ class RDMNotebook:
                                           textvariable = self.software_version),
 
                             tk.Label(self.info_tab, text = "Product Details:"),
-                            tk.Label(self.info_tab,
-                                          textvariable = self.product_detail_ids),
+                            self.product_detail_ids,
 
                             tk.Label(self.info_tab, text = "Sub-Device Count"),
                             tk.Label(self.info_tab,
@@ -538,6 +538,7 @@ class RDMNotebook:
     # GetBasicInformation()
     # GetDmxInformation()
     # GetSensorInformation()
+    self.product_detail_ids.delete(0, tk.END) 
     print "Updating tabs..."
 
   def RenderBasicInformation(self, param_dict):
@@ -573,14 +574,13 @@ class RDMNotebook:
     self.sub_device_count.set(sub_device_count)
 
     if "PRODUCT_DETAIL_ID_LIST" in param_dict:
-      product_detail_ids = param_dict["PRODUCT_DETAIL_ID_LIST"]["detail_ids"]
-      # detail_id_list = []
-      # for item in product_detail_ids:
-      #   index = item["detail_id"]
-      #   detail_id_list.append(RDMConstants.DETAIL_ID_TO_NAME.get(index, ""))
+      detail_id_list = []
+      for item in param_dict["PRODUCT_DETAIL_ID_LIST"]:
+        reverse_dict = RDMConstants._ReverseDict(RDMConstants.PRODUCT_DETAIL_IDS)
+        detail_id_list.append(reverse_dict[item])
+      for value in detail_id_list:
 
-      self.product_detail_ids.set(product_detail_ids)
-      # will need to form a better format for displaying these values...
+        self.product_detail_ids.insert(tk.END, value.replace("_", " "))
     if "MANUFACTURER_LABEL" in param_dict:
       manufacturer_label = param_dict["MANUFACTURER_LABEL"]["label"]
       self.manufacturer_label.set(manufacturer_label)

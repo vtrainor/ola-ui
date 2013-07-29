@@ -179,6 +179,7 @@ class DisplayApp:
     self.dev_label = tk.StringVar(self.root)
     self.dev_label.set("Devices")
     self.device_menu = tk.OptionMenu(self.cntrl_frame, self.dev_label, [])
+    # self.device_menu["menu"].config(tearoff = 0)
     self.device_menu.pack(side = tk.LEFT)
     self.id_box = tk.Checkbutton(self.cntrl_frame, text = "Identify", 
                                  variable = self.id_state, 
@@ -212,6 +213,7 @@ class DisplayApp:
                       "SUPPORTED_PARAMETERS", 
                       lambda b, l, uid = uid:self._get_pids_complete(uid, b, l),
                       [])
+    self._notebook.Update()
     self.cur_uid = uid
     # init callbacks
 
@@ -339,7 +341,8 @@ class DisplayApp:
 
   def _get_product_detail_id(self):
     pid_key = self._pid_store.GetName("PRODUCT_DETAIL_ID_LIST")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+      and "PRODUCT_DETAIL_ID_LIST" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_product_detail_id_complete(b, s))
     else:
@@ -348,7 +351,8 @@ class DisplayApp:
   def _get_product_detail_id_complete(self, succeeded, data):
     if succeeded:
       print "got product detail ids"
-      self._uid_dict[self.cur_uid]["PRODUCT_DETAIL_ID_LIST"] = data
+      self._uid_dict[self.cur_uid]["PRODUCT_DETAIL_ID_LIST"] = set(
+                            value['detail_id'] for value in data['detail_ids'])
     else:
       print "failed"
     # store the results in the uid dict
@@ -356,7 +360,8 @@ class DisplayApp:
 
   def _get_device_model (self):
     pid_key = self._pid_store.GetName("DEVICE_MODEL_DESCRIPTION")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+            and "DEVICE_MODEL_DESCRIPTION" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_device_model_complete(b, s))
     else:
@@ -373,9 +378,13 @@ class DisplayApp:
 
   def _get_manufacturer_label(self):
     pid_key = self._pid_store.GetName("MANUFACTURER_LABEL")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_manufacturer_label_complete(b, s))
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+      and "MANUFACTURER_LABEL" not in self._uid_dict[self.cur_uid]):
+      self.ola_thread.rdm_get(self.universe.get(),
+                      self.cur_uid, 
+                      0, 
+                      pid_key.name, 
+                      lambda b, s: self._get_manufacturer_label_complete(b, s))
     else:
       self._get_factory_defaults()
 
@@ -390,7 +399,8 @@ class DisplayApp:
 
   def _get_factory_defaults(self):
     pid_key = self._pid_store.GetName("FACTORY_DEFAULTS")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+                    and "FACTORY_DEFAULTS" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_factory_defaults_complete(b, s))
     else:
@@ -407,9 +417,14 @@ class DisplayApp:
 
   def _get_software_version(self):
     pid_key = self._pid_store.GetName("SOFTWARE_VERSION_LABEL")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get__complete(b, s))
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "SOFTWARE_VERSION_LABEL" not in self._uid_dict[self.cur_uid]):
+      self.ola_thread.rdm_get(self.universe.get(), 
+                          self.cur_uid, 
+                          0, 
+                          pid_key.name, 
+                          lambda b, s: self._get_software_version_complete(b, s)
+                          )
     else:
       self._get_boot_version()
 
@@ -424,9 +439,14 @@ class DisplayApp:
 
   def _get_boot_version(self):
     pid_key = self._pid_store.GetName("BOOT_SOFTWARE_VERSION")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get__complete(b, s))
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+              and "BOOT_SOFTWARE_VERSION" not in self._uid_dict[self.cur_uid]):
+      self.ola_thread.rdm_get(self.universe.get(), 
+                              self.cur_uid, 
+                              0, 
+                              pid_key.name, 
+                              lambda b, s: self._get_boot_version_complete(b, s)
+                              )
     else:
       self._get_boot_label()
 
@@ -441,9 +461,10 @@ class DisplayApp:
 
   def _get_boot_label(self):
     pid_key = self._pid_store.GetName("BOOT_SOFTWARE_LABEL")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+                and "BOOT_SOFTWARE_LABEL" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get__complete(b, s))
+            lambda b, s: self._get_boot_label_complete(b, s))
     else:
       self._notebook.RenderBasicInformation(self._uid_dict[self.cur_uid])
 
@@ -470,7 +491,8 @@ class DisplayApp:
 
   def _get_dmx_personality(self):
     pid_key = self._pid_store.GetName("DMX_PERSONALITY")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "DMX_PERSONALITY" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_dmx_personality_complete(b, s))
     else:
@@ -488,7 +510,8 @@ class DisplayApp:
   def _get_personality_description(self):
     data = [self._uid_dict[self.cur_uid]["DMX_PERSONALITY"]["personality"]]
     pid_key = self._pid_store.GetName("DMX_PERSONALITY_DESCRIPTION")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "DMX_PERSONALITY" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_personality_description_complete(b, s), data)
     else:
@@ -505,7 +528,8 @@ class DisplayApp:
 
   def _get_start_address(self):
     pid_key = self._pid_store.GetName("DMX_START_ADDRESS")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "DMX_START_ADDRESS" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_start_address_complete(b, s))
     else:
@@ -522,7 +546,8 @@ class DisplayApp:
 
   def _get_slot_info(self):
     pid_key = self._pid_store.GetName("SLOT_INFO")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "SLOT_INFO" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_slot_info_complete(b, s))
     else:
@@ -539,7 +564,8 @@ class DisplayApp:
 
   def _get_slot_description(self):
     pid_key = self._pid_store.GetName("SLOT_DESCRIPTION")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "SLOT_DESCRIPTION" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_slot_description_complete(b, s))
     else:
@@ -556,7 +582,8 @@ class DisplayApp:
 
   def _get_defalut_slot_value(self):
     pid_key = self._pid_store.GetName("DEFAULT_SLOT_VALUE")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "DEFAULT_SLOT_VALUE" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_default_value_complete(b, s))
     else:
@@ -580,7 +607,8 @@ class DisplayApp:
 
   def _get_sensor_definition(self):
     pid_key = self._pid_store.GetName("SENSOR_DEFINITION")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "SENSOR_DEFINITION" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_sensor_definition_complete(b, s))
     else:
@@ -597,7 +625,8 @@ class DisplayApp:
 
   def _get_sensor_value(self):
     pid_key = self._pid_store.GetName("SENSOR_VALUE")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "SENSOR_VALUE" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_sensor_value_complete(b, s))
     else:
@@ -627,7 +656,8 @@ class DisplayApp:
 
   def _get_device_hours(self):
     pid_key = self._pid_store.GetName("DEVICE_HOURS")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "DEVICE_HOURS" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_device_hours_complete(b, s))
     else:
@@ -644,7 +674,8 @@ class DisplayApp:
 
   def _get_lamp_hours(self):
     pid_key = self._pid_store.GetName("LAMP_HOURS")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "LAMP_HOURS" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_lamp_hours_complete(b, s))
     else:
@@ -661,7 +692,8 @@ class DisplayApp:
 
   def _get_lamp_strikes(self):
     pid_key = self._pid_store.GetName("LAMP_STRIKES")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "LAMP_STRIKES" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_lamp_strikes_complete(b, s))
     else:
@@ -678,7 +710,8 @@ class DisplayApp:
 
   def _get_lamp_state(self):
     pid_key = self._pid_store.GetName("LAMP_STATE")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "LAMP_STATE" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_lamp_state_complete(b, s))
     else:
@@ -695,7 +728,8 @@ class DisplayApp:
 
   def _get_lamp_on_mode(self):
     pid_key = self._pid_store.GetName("LAMP_ON_MODE")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "LAMP_ON_MODE" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_lamp_on_mode_complete(b, s))
     else:
@@ -712,7 +746,8 @@ class DisplayApp:
 
   def _get_power_cycles(self):
     pid_key = self._pid_store.GetName("DEVICE_POWER_CYCLES")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "DEVICE_POWER_CYCLES" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_power_cycles_complete(b, s))
     else:
@@ -729,7 +764,8 @@ class DisplayApp:
 
   def _get_power_state(self):
     pid_key = self._pid_store.GetName("POWER_STATE")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "POWER_STATE" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_power_state_complete(b, s))
     else:
@@ -758,7 +794,8 @@ class DisplayApp:
 
   def _get_language_capabilities(self):
     pid_key = self._pid_store.GetName("LANGUAGE_CAPABILITIES")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "LANGUAGE_CAPABILITIES" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_language_capabilities_complete(b, s))
     else:
@@ -775,7 +812,8 @@ class DisplayApp:
 
   def _get_language(self):
     pid_key = self._pid_store.GetName("LANGUAGE")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "LANGUAGE" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_language_complete(b, s))
     else:
@@ -792,7 +830,8 @@ class DisplayApp:
 
   def _get_display_invert(self):
     pid_key = self._pid_store.GetName("DISPLAY_INVERT")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "DISPLAY_INVERT" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_display_invert_complete(b, s))
     else:
@@ -809,7 +848,8 @@ class DisplayApp:
 
   def _get_display_level(self):
     pid_key = self._pid_store.GetName("DISPLAY_LEVEL")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "DISPLAY_LEVEL" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_display_level_complete(b, s))
     else:
@@ -826,7 +866,8 @@ class DisplayApp:
 
   def _get_pan_invert(self):
     pid_key = self._pid_store.GetName("PAN_INVERT")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "PAN_INVERT" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_pan_invert_complete(b, s))
     else:
@@ -843,7 +884,8 @@ class DisplayApp:
 
   def _get_tilt_invert(self):
     pid_key = self._pid_store.GetName("TILT_INVERT")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "TILT_INVERT" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_tilt_invert_complete(b, s))
     else:
@@ -860,7 +902,8 @@ class DisplayApp:
 
   def _get_pan_tilt_swap(self):
     pid_key = self._pid_store.GetName("PAN_TILT_SWAP")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "PAN_TILT_SWAP" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_pan_tilt_swap_complete(b, s))
     else:
@@ -877,7 +920,8 @@ class DisplayApp:
 
   def _get_real_time(self):
     pid_key = self._pid_store.GetName("REAL_TIME_CLOCK")
-    if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
+    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+          and "REAL_TIME_CLOCK" not in self._uid_dict[self.cur_uid]):
       self.ola_thread.rdm_get(self.universe.get(), 
                               self.cur_uid,
                               0, 
