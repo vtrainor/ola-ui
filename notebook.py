@@ -204,7 +204,7 @@ class RDMNotebook:
                                               variable = self.factory_defaults)
 
     self.objects["PRODUCT_INFO"] = [tk.Label(self.info_tab,
-                                                     text = "Protocol Version"),
+                                                     text = "RDM Protocol Version"),
                             tk.Label(self.info_tab,
                                           textvariable = self.protocol_version),
 
@@ -548,6 +548,7 @@ class RDMNotebook:
                           )
     index = param_dict["DEVICE_INFO"]["product_category"]
     product_category = RDMConstants.PRODUCT_CATEGORY_TO_NAME.get(index, "")
+    product_category = product_category.replace("_"," ")
 
     software_version = param_dict["DEVICE_INFO"]["software_version"]
     sub_device_count = param_dict["DEVICE_INFO"]["sub_device_count"]
