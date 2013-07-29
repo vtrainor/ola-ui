@@ -193,7 +193,7 @@ class RDMNotebook:
     self.product_category = tk.StringVar(self.info_tab)
     self.software_version = tk.StringVar(self.info_tab)
     self.sub_device_count = tk.StringVar(self.info_tab)
-    self.product_dealtail_ids = tk.StringVar(self.info_tab)
+    self.product_detail_ids = tk.StringVar(self.info_tab)
     self.manufacturer_label = tk.StringVar(self.info_tab)
     self.device_label = tk.StringVar(self.info_tab)
     self.boot_software = tk.StringVar(self.info_tab)
@@ -215,6 +215,14 @@ class RDMNotebook:
                             tk.Label(self.info_tab, text = "Product Category:"),
                             tk.Label(self.info_tab,
                                           textvariable = self.product_category),
+
+                            tk.Label(self.info_tab, text = "Software Version:"),
+                            tk.Label(self.info_tab,
+                                          textvariable = self.software_version),
+
+                            tk.Label(self.info_tab, text = "Product Details:"),
+                            tk.Label(self.info_tab,
+                                          textvariable = self.product_detail_ids),
 
                             tk.Label(self.info_tab, text = "Sub-Device Count"),
                             tk.Label(self.info_tab,
@@ -535,7 +543,7 @@ class RDMNotebook:
     device_model = param_dict["DEVICE_INFO"]["device_model"]
     if "DEVICE_MODEL_DESCRIPTION" in param_dict:
       device_model = "%s (%d)" % (
-                          param_dict["DEVICE_MODEL_DESCRIPTION"]["label"],
+                          param_dict["DEVICE_MODEL_DESCRIPTION"]["description"],
                           param_dict["DEVICE_INFO"]["device_model"]
                           )
     index = param_dict["DEVICE_INFO"]["product_category"]
@@ -556,8 +564,13 @@ class RDMNotebook:
     self.sub_device_count.set(sub_device_count)
 
     if "PRODUCT_DETAIL_ID_LIST" in param_dict:
-      product_dealtail_ids = param_dict["PRODUCT_DETAIL_ID_LIST"]["detail_ids"]
-      self.product_dealtail_ids.set(product_dealtail_ids)
+      product_detail_ids = param_dict["PRODUCT_DETAIL_ID_LIST"]["detail_ids"]
+      # detail_id_list = []
+      # for item in product_detail_ids:
+      #   index = item["detail_id"]
+      #   detail_id_list.append(RDMConstants.DETAIL_ID_TO_NAME.get(index, ""))
+
+      self.product_detail_ids.set(product_detail_ids)
       # will need to form a better format for displaying these values...
     if "MANUFACTURER_LABEL" in param_dict:
       manufacturer_label = param_dict["MANUFACTURER_LABEL"]["label"]

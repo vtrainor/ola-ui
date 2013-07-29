@@ -368,7 +368,7 @@ class DisplayApp:
   def _get_manufacturer_label_complete(self, succeeded, data):
     if succeeded:
       print "got device model description"
-      self._uid_dict[self.cur_uid]["DEVICE_MODEL_DESCRIPTION"] = data
+      self._uid_dict[self.cur_uid]["MANUFACTURER_LABEL"] = data
     else:
       print "failed"
     # store the results in the uid dict
