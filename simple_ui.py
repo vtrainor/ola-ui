@@ -83,15 +83,8 @@ class Controller(object):
     """
     """
     print "label: %s" % label
-    uid = self._app.cur_uid
-    callback = lambda b, s, label = label, uid = uid:self._app.set_device_label_complete(uid, label, b, s)
-    self._app.ola_thread.rdm_set(self._app.universe.get(), 
-                                  uid,
-                                  0, 
-                                  "DEVICE_LABEL", 
-                                  callback,
-                                  [label]
-                                  )
+    self._app.set_device_label(label)
+
   def GetSensorInformation(self):
     pass
 
@@ -203,7 +196,7 @@ class DisplayApp:
     print "uid: %s\ncur_uid: %s\nid_state: %d"%(uid, self.cur_uid, 
                                                 self.id_state.get())
     # This line is going to return "DEVICE_LABEL" so you may as well skip it
-    pid_key = self._pid_store.GetName("DEVICE_LABEL", uid.manufacturer_id).name
+    pid_key = "DEVICE_LABEL"
     self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key]["label"], uid))
     self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
                   lambda b, s, uid = uid:self._get_identify_complete(uid, b, s),
@@ -940,10 +933,22 @@ class DisplayApp:
     # store the results in the uid dict
     self._notebook.RenderConfigInformation()
 
+  def set_device_label(self, label):
+    """
+    """
+    uid = self.cur_uid
+    callback = lambda b, s, label = label, uid = uid:self.set_device_label_complete(uid, label, b, s)
+    self.ola_thread.rdm_set(self.universe.get(), 
+                                  uid,
+                                  0, 
+                                  "DEVICE_LABEL", 
+                                  callback,
+                                  [label]
+                                  )
+
   def set_device_label_complete(self, uid, label, succeeded, data):
     """
     """
-    
     if succeeded:
       index = self._uid_dict[self.cur_uid]["index"]
       self._uid_dict[self.cur_uid]["DEVICE_LABEL"]["label"] = label
