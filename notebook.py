@@ -112,7 +112,6 @@ class RDMNotebook:
     # self.pan_tilt_swap_button.config(command = self.rdm_set(
     #                                 "PAN_TILT_SWAP", self.pan_tilt_swap.get()))
     for key in self.pid_location_dict.keys():
-
         self._grid_info(self.objects[key])
     self._notebook.pack(side = self.side)
 
@@ -202,7 +201,7 @@ class RDMNotebook:
     self.factory_defaults = tk.BooleanVar(self.info_tab)
     self.factory_defaults_button = tk.Checkbutton(self.info_tab,
                                               variable = self.factory_defaults)
-    self.device_label_button = tk.Button(self.info_tab, text = "Update Device Label")
+    self.device_label_button = tk.Button(self.info_tab, text = "Update Device Label", command = self.device_label_set)
 
     self.objects["PRODUCT_INFO"] = [tk.Label(self.info_tab,
                                                      text = "RDM Protocol Version"),
@@ -249,7 +248,6 @@ class RDMNotebook:
                             self.device_label_button,
                             tk.Label(self.info_tab, text = "")
                             ]
-    self._notebook.bind(self.device_label_button, self.device_label_set)
 
   def _init_dmx(self):
     """
@@ -526,7 +524,7 @@ class RDMNotebook:
       for c in range(2):
         obj_list.pop().grid(row=r, column=c)
 
-  def device_label_set(self, event):
+  def device_label_set(self):
     """
     """
     print self.device_label.get()
