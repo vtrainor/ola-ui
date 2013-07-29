@@ -7,7 +7,7 @@ class RDMNotebook:
   def __init__(self, root, controller, width=800, height=500, side=tk.TOP):
     """ Builds the ttk.Notebook """
     self.root = root
-    self.controller = controller
+    self._controller = controller
     self.init_dx = width
     self.init_dy = height
     self.side = side
@@ -527,7 +527,7 @@ class RDMNotebook:
   def device_label_set(self):
     """
     """
-    print self.device_label.get()
+    self._controller.set_device_label
 
   def main(self):
     """ Main method for Notebook class. """

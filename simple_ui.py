@@ -79,6 +79,13 @@ class Controller(object):
     print "getting DMX information..."
     self._app.GetDmxInformation()
 
+  def set_device_label(self, label):
+    """
+    """
+    self.ola_thread.rdm_set(self.universe.get(), uid, 0, "DEVICE_LABEL", 
+                  lambda b, s, uid = uid:self._set_device_label_complete(uid, b, s),
+                  [{"label": label}])
+
   def GetSensorInformation(self):
     pass
 
@@ -911,6 +918,17 @@ class DisplayApp:
       print "failed"
     # store the results in the uid dict
     self._notebook.RenderConfigInformation()
+
+  def set_device_label_complete(self, succeeded, data):
+    """
+    """
+    if succeeded:
+      print ""
+      self._uid_dict[self.cur_uid]["DEVICE_LABEL"] = data
+    else:
+      print "failed"
+    # store the results in the uid dict
+    self._notebook.Update()
 
   def main(self):
     print "Entering main loop"
