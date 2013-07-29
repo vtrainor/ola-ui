@@ -527,7 +527,7 @@ class RDMNotebook:
   def device_label_set(self):
     """
     """
-    self._controller.set_device_label
+    self._controller.set_device_label(self.device_label.get())
 
   def main(self):
     """ Main method for Notebook class. """
@@ -538,7 +538,7 @@ class RDMNotebook:
     # GetBasicInformation()
     # GetDmxInformation()
     # GetSensorInformation()
-    pass
+    print "Updating tabs..."
 
   def RenderBasicInformation(self, param_dict):
     """
@@ -585,7 +585,7 @@ class RDMNotebook:
       manufacturer_label = param_dict["MANUFACTURER_LABEL"]["label"]
       self.manufacturer_label.set(manufacturer_label)
     if "DEVICE_LABEL" in param_dict:
-      device_label = param_dict["DEVICE_LABEL"]
+      device_label = param_dict["DEVICE_LABEL"]["label"]
       self.device_label.set(device_label)
     if "FACTORY_DEFAULTS" in param_dict:
       factory_defaults = param_dict["FACTORY_DEFAULTS"]["using_defaults"]

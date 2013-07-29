@@ -82,10 +82,16 @@ class Controller(object):
   def set_device_label(self, label):
     """
     """
-    self.ola_thread.rdm_set(self.universe.get(), uid, 0, "DEVICE_LABEL", 
-                  lambda b, s, uid = uid:self._set_device_label_complete(uid, b, s),
-                  [{"label": label}])
-
+    print "label: %s" % label
+    uid = self._app.cur_uid
+    callback = lambda b, s, label = label, uid = uid:self._app.set_device_label_complete(uid, label, b, s)
+    self._app.ola_thread.rdm_set(self._app.universe.get(), 
+                                  uid,
+                                  0, 
+                                  "DEVICE_LABEL", 
+                                  callback,
+                                  [label]
+                                  )
   def GetSensorInformation(self):
     pass
 
@@ -197,7 +203,7 @@ class DisplayApp:
                                                 self.id_state.get())
     # This line is going to return "DEVICE_LABEL" so you may as well skip it
     pid_key = self._pid_store.GetName("DEVICE_LABEL", uid.manufacturer_id).name
-    self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key], uid))
+    self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key]["label"], uid))
     self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
                   lambda b, s, uid = uid:self._get_identify_complete(uid, b, s),
                   [])
@@ -255,14 +261,15 @@ class DisplayApp:
     #       doesn't change and if you try to select the first device it tells 
     #       you that it is already selected
     if succeeded:
-      self._uid_dict.setdefault(uid, {})["DEVICE_LABEL"] = data["label"]
+      self._uid_dict.setdefault(uid, {})["DEVICE_LABEL"] = data
       self.device_menu["menu"].add_command( label = "%s (%s)"%(
-                  self._uid_dict[uid]["DEVICE_LABEL"], uid), 
+                  self._uid_dict[uid]["DEVICE_LABEL"]["label"], uid), 
                   command = lambda:self.device_selected(uid))
+      print self._uid_dict[uid]["DEVICE_LABEL"]["label"]
     else:
-      self._uid_dict.setdefault(uid, {})["DEVICE_LABEL"] = ""
+      self._uid_dict.setdefault(uid, {})["DEVICE_LABEL"] = {"label":""}
       self.device_menu["menu"].add_command( label = "%s" % uid, 
-                  command = lambda:self.device_selected(uid))
+                                    command = lambda:self.device_selected(uid))
     self._uid_dict[uid]["index"] = self.device_menu["menu"].index(tk.END)
     print "index: %d" % self._uid_dict[uid]["index"]
     if self.cur_uid is None:
@@ -397,40 +404,6 @@ class DisplayApp:
       print "failed"
     # store the results in the uid dict
     self._get_software_version()
-
-  # def _get_language_capabilities(self):
-  #   pid_key = self._pid_store.GetName("LANGUAGE_CAPABILITIES")
-  #   if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-  #     self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-  #           lambda b, s: self._get_language_capabilities_complete(b, s), [""])
-  #   else:
-  #     self._get_software_version()
-
-  # def _get_language_capabilities_complete(self, succeeded, data):
-  #   if succeeded:
-  #     print ""
-  #     self_uid_dict[self.cur_uid]["LANGUAGE_CAPABILITIES"] = data["languages"]
-  #   else:
-  #     print "failed"
-  #   # store the results in the uid dict
-  #   self._get_language()
-
-  # def _get_language(self):
-  #   pid_key = self._pid_store.GetName("LANGUAGE")
-  #   if pid_key.name in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-  #     self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-  #           lambda b, s: self._get_language_complete(b, s), [""])
-  #   else:
-  #     self._get_software_version()
-
-  # def _get_language_complete(self, succeeded, data):
-  #   if succeeded:
-  #     print ""
-  #     self_uid_dict[self.cur_uid]["SUPPORTED_PARAMETERS"] = data["language"]
-  #   else:
-  #     print "failed"
-  #   # store the results in the uid dict
-  #   self._get_software_version()
 
   def _get_software_version(self):
     pid_key = self._pid_store.GetName("SOFTWARE_VERSION_LABEL")
@@ -905,8 +878,12 @@ class DisplayApp:
   def _get_real_time(self):
     pid_key = self._pid_store.GetName("REAL_TIME_CLOCK")
     if pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_real_time_complete(b, s))
+      self.ola_thread.rdm_get(self.universe.get(), 
+                              self.cur_uid,
+                              0, 
+                              pid_key.name, 
+                              lambda b, s: self._get_real_time_complete(b, s)
+                              )
     else:
       self._notebook.RenderConfigInformation()
 
@@ -919,12 +896,15 @@ class DisplayApp:
     # store the results in the uid dict
     self._notebook.RenderConfigInformation()
 
-  def set_device_label_complete(self, succeeded, data):
+  def set_device_label_complete(self, uid, label, succeeded, data):
     """
     """
+    
     if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["DEVICE_LABEL"] = data
+      index = self._uid_dict[self.cur_uid]["index"]
+      self._uid_dict[self.cur_uid]["DEVICE_LABEL"]["label"] = label
+      self.device_menu["menu"].entryconfigure(index, label = "%s (%s)"%(
+                  self._uid_dict[uid]["DEVICE_LABEL"]["label"], uid))
     else:
       print "failed"
     # store the results in the uid dict
