@@ -171,8 +171,6 @@ class DisplayApp:
       Args: 
         uid: the uid of the newly selected device
     """
-    if self.cur_uid is None:
-      return
     if uid == self.cur_uid:
       return
     # This line is going to return "DEVICE_LABEL" so you may as well skip it
@@ -180,19 +178,14 @@ class DisplayApp:
     self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key]["label"], uid))
     self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
                   lambda b, s, uid = uid:self._get_identify_complete(uid, b, s))
-    if self.cur_uid is None:
-      self.cur_uid = uid
-      self._controller.GetBasicInformation()
-      return
+
     if "SUPPORTED_PARAMETERS" not in self._uid_dict[uid]:
-      print "error 4:"
-      return
-    if "DEVICE_INFO" not in self._uid_dict[uid]:
-      "error 3"
-      self.cur_uid = uid
-      self._controller.GetBasicInformation()
-      return
-    self._notebook.Update(self._uid_dict[uid], 0)
+      self.ola_thread.rdm_get(
+          self.universe.get(), uid, 0, "SUPPORTED_PARAMETERS",
+          lambda b, l, uid = uid:self._get_pids_complete(uid, b, l))
+
+    self.cur_uid = uid
+    self._controller.GetBasicInformation()
 
     # init callbacks
 
@@ -249,10 +242,6 @@ class DisplayApp:
       self.device_menu["menu"].add_command( label = "%s" % uid, 
                                     command = lambda:self.device_selected(uid))
     self._uid_dict[uid]["index"] = self.device_menu["menu"].index(tk.END)
-    if "SUPPORTED_PARAMETERS" not in self._uid_dict[uid]:
-      self.ola_thread.rdm_get(self.universe.get(), uid, 0, 
-                      "SUPPORTED_PARAMETERS", 
-                    lambda b, l, uid = uid:self._get_pids_complete(uid, b, l),)
     if self.cur_uid is None:
       self.cur_uid = uid
 
@@ -266,12 +255,8 @@ class DisplayApp:
     if not succeeded:
       return
     else:
-      # TODO: 5: 
-      if self.cur_uid is None:
-        self._controller.GetBasicInformation()
       device = self._uid_dict[uid]
-      device['SUPPORTED_PARAMETERS'] = set(p['param_id']
-                                                     for p in params['params'])
+      device['SUPPORTED_PARAMETERS'] = set(p['param_id'] for p in params['params'])
 
       # TODO: 6 fetch DEVICE_INFO and a call _get_device_info_complete (added
       # below)
@@ -289,8 +274,6 @@ class DisplayApp:
     # Now for testing purposes, we skip the call though the notebook and just
     # proceed straight to getting the Basic Info
     self._controller.GetBasicInformation()
-
-    pass
 
   def _get_identify_complete(self, uid, succeeded, value):
     """ Callback for rdm_get in device_selected.
