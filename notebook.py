@@ -22,7 +22,16 @@ class RDMNotebook:
     # Note that this will be called when the program starts
     index = self._notebook.index('current')
     print 'The selected tab changed to %d' % index
-    self._controller.ChangeTab(index)
+    if index == 0:
+      self._controller.GetBasicInformation()
+    elif index == 1:
+      self._controller.GetDMXInformation()
+    elif index == 2:
+      self._controller.GetSensorsInformation()
+    elif index == 3:
+      self._controller.GetSettingInformation()
+    elif index == 4:
+      self._controller.GetConfigInformation()
 
   def populate_defaults(self):
     """ creates the default frames. """

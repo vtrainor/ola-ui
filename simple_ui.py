@@ -47,22 +47,6 @@ class Controller(object):
   def __init__(self, app):
     self._app = app
 
-  def ChangeTab(self, index):
-    self._app.ChangeTab(index)
-
-  def GetIndex(self, index):
-    if index == 0:
-      self.GetBasicInformation()
-    elif index == 1:
-      self.GetDMXInformation()
-    elif index == 2:
-      self.GetSensorsInformation()
-    elif index == 3:
-      self.GetSettingInformation()
-    elif index == 4:
-      self.GetConfigInformation()
-    return
-
   def GetBasicInformation(self):
     """
     """
