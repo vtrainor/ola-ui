@@ -213,8 +213,16 @@ class DisplayApp:
     if self.cur_uid is None:
       self.cur_uid = uid
       self._controller.GetBasicInformation()
-    else:
-      self._notebook.Update(self._uid_dict[uid], 0)
+      return
+    if "SUPPORTED_PARAMETERS" not in self._uid_dict[uid]:
+      print "error 4:"
+      return
+    if "DEVICE_INFO" not in self._uid_dict[uid]:
+      "error 3"
+      self.cur_uid = uid
+      self._controller.GetBasicInformation()
+      return
+    self._notebook.Update(self._uid_dict[uid], 0)
 
     # init callbacks
 
