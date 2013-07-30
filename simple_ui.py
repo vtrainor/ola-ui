@@ -184,6 +184,8 @@ class DisplayApp:
       self.ola_thread.rdm_get(
           self.universe.get(), uid, 0, "SUPPORTED_PARAMETERS",
           lambda b, l, uid = uid:self._get_pids_complete(uid, b, l))
+    else:
+      self._notebook.Update()
     self.cur_uid = uid
 
   def set_universe(self, i):
@@ -329,7 +331,7 @@ class DisplayApp:
   def _get_device_model_complete(self, succeeded, data):
     if succeeded:
       print "got device model"
-      self._uid_dict[self.cur_uid]["DEVICE_MODEL_DESCRIPTION"] = data
+      self._uid_dict[self.cur_uid]["DEVICE_MODEL_DESCRIPTION"] = data["description"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -350,7 +352,7 @@ class DisplayApp:
   def _get_manufacturer_label_complete(self, succeeded, data):
     if succeeded:
       print "got device model description"
-      self._uid_dict[self.cur_uid]["MANUFACTURER_LABEL"] = data
+      self._uid_dict[self.cur_uid]["MANUFACTURER_LABEL"] = data["label"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -368,7 +370,7 @@ class DisplayApp:
   def _get_factory_defaults_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["FACTORY_DEFAULTS"] = data
+      self._uid_dict[self.cur_uid]["FACTORY_DEFAULTS"] = data["using_defaults"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -389,7 +391,7 @@ class DisplayApp:
   def _get_software_version_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["SOFTWARE_VERSION_LABEL"] = data
+      self._uid_dict[self.cur_uid]["SOFTWARE_VERSION_LABEL"] = data["label"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -411,7 +413,7 @@ class DisplayApp:
   def _get_boot_version_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["BOOT_SOFTWARE_VERSION"] = data
+      self._uid_dict[self.cur_uid]["BOOT_SOFTWARE_VERSION"] = data["version"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -429,7 +431,7 @@ class DisplayApp:
   def _get_boot_label_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["BOOT_SOFTWARE_LABEL"] = data
+      self._uid_dict[self.cur_uid]["BOOT_SOFTWARE_LABEL"] = data["label"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -461,7 +463,7 @@ class DisplayApp:
   def _get_dmx_personality_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["BOOT_SOFTWARE_LABEL"] = data
+      self._uid_dict[self.cur_uid]["DMX_PERSONALITY"] = data
     else:
       print "failed"
     # store the results in the uid dict
@@ -498,7 +500,7 @@ class DisplayApp:
   def _get_start_address_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["DMX_START_ADDRESS"] = data
+      self._uid_dict[self.cur_uid]["DMX_START_ADDRESS"] = data["dmx_address"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -516,7 +518,7 @@ class DisplayApp:
   def _get_slot_info_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["SLOT_DESCRIPTION"] = data
+      self._uid_dict[self.cur_uid]["SLOT_INFO"] = data
     else:
       print "failed"
     # store the results in the uid dict

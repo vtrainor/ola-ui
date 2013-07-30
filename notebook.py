@@ -529,65 +529,44 @@ class RDMNotebook:
   def RenderBasicInformation(self, param_dict):
     """
     """
-    protocol_version = "Version %d.%d" % (
+    self.protocol_version.set("Version %d.%d" % (
                           param_dict["DEVICE_INFO"]["protocol_major"], 
                           param_dict["DEVICE_INFO"]["protocol_minor"]
-                          )
-    device_model = param_dict["DEVICE_INFO"]["device_model"]
-    if "DEVICE_MODEL_DESCRIPTION" in param_dict:
-      device_model = "%s (%d)" % (
-                          param_dict["DEVICE_MODEL_DESCRIPTION"]["description"],
+                          ))
+    self.device_model.set(param_dict["DEVICE_INFO"]["device_model"])
+    self.device_model.set("%s (%d)" % (
+                          param_dict.get("DEVICE_MODEL_DESCRIPTION", 'N/A'),
                           param_dict["DEVICE_INFO"]["device_model"]
-                          )
+                          ))
     index = param_dict["DEVICE_INFO"]["product_category"]
-    product_category = RDMConstants.PRODUCT_CATEGORY_TO_NAME.get(index, "")
-    product_category = product_category.replace("_"," ")
-
-    software_version = param_dict["DEVICE_INFO"]["software_version"]
+    self.product_category.set(RDMConstants.PRODUCT_CATEGORY_TO_NAME.get(index, "").replace("_"," "))
     sub_device_count = param_dict["DEVICE_INFO"]["sub_device_count"]
     # if "SOFTWARE_VERSION_LABEL" in param_dict:
     software_version = "%s (%d)" % (
-                          param_dict["SOFTWARE_VERSION_LABEL"]["label"],
+                          param_dict["SOFTWARE_VERSION_LABEL"],
                           param_dict["DEVICE_INFO"]["software_version"]
                           )
     sub_device_count = param_dict["DEVICE_INFO"]["sub_device_count"]
-    self.protocol_version.set(protocol_version)
-    self.device_model.set(device_model)
-    self.product_category.set(product_category)
-    self.software_version.set(software_version)
-    self.sub_device_count.set(sub_device_count)
-
     if "PRODUCT_DETAIL_ID_LIST" in param_dict:
       ids = param_dict["PRODUCT_DETAIL_ID_LIST"]
       names = ', '.join(RDMConstants.PRODUCT_DETAIL_IDS_TO_NAME[id] for id in ids).replace("_", " ")
-
       self.product_detail_ids.set(names)
-    if "MANUFACTURER_LABEL" in param_dict:
-      manufacturer_label = param_dict["MANUFACTURER_LABEL"]["label"]
-      self.manufacturer_label.set(manufacturer_label)
-    if "DEVICE_LABEL" in param_dict:
-      device_label = param_dict["DEVICE_LABEL"]["label"]
-      self.device_label.set(device_label)
-    if "FACTORY_DEFAULTS" in param_dict:
-      factory_defaults = param_dict["FACTORY_DEFAULTS"]["using_defaults"]
-      self.factory_defaults.set(factory_defaults)
+    self.manufacturer_label.set(param_dict.get("MANUFACTURER_LABEL", "N/A"))
+    self.device_label.set(param_dict.get("DEVICE_LABEL", "N/A"))
+    self.factory_defaults.set(param_dict.get("FACTORY_DEFAULTS", "N/A"))
       # self.factory_defaults_button(Checkbutton)
-    if "BOOT_SOFTWARE_VERSION" in param_dict:
-      if "BOOT_SOFTWARE_LABEL" in param_dict:
-        boot_software = "%s (%d)" % (
-                          param_dict["BOOT_SOFTWARE_LABEL"]["label"],
-                          param_dict["BOOT_SOFTWARE_VERSION"]["version"]
-                          )
-        self.boot_software.set(boot_software)
-        return
-      else:
-        boot_software = param_dict["BOOT_SOFTWARE_VERSION"]["version"]
-        self.boot_software.set(boot_software)
-        return
-    if "BOOT_SOFTWARE_LABEL" in param_dict:
-        boot_software = param_dict["BOOT_SOFTWARE_LABEL"]["label"]
-        self.boot_software.set(boot_software)
-        return
+    boot_software = 'N/A'
+    boot_software_version = param_dict.get('BOOT_SOFTWARE_VERSION')
+    boot_software_label = param_dict.get('BOOT_SOFTWARE_LABEL')
+    if boot_software_version and boot_software_label:
+      boot_software = '%s (%d)' % (boot_software_label, boot_software_version)
+    elif boot_software_label:
+      boot_software =  boot_software_label
+    elif boot_software_version:
+      boot_software =  boot_software_version
+
+    self.boot_software.set(boot_software)                                                                                                                           
+    return
 
   def RenderDmxInformation(self, params):
     pass
