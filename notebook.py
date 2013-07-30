@@ -22,10 +22,10 @@ class RDMNotebook:
     # Note that this will be called when the program starts
     index = self._notebook.index('current')
     print 'The selected tab changed to %d' % index
+    self._controller.ChangeTab(index)
 
   def populate_defaults(self):
     """ creates the default frames. """
-    print "creating default tabs..."
     # create and populate the three default tabs
     self.info_tab = self.create_tab("info_tab", "Device Information")
     self._init_info()
@@ -136,30 +136,10 @@ class RDMNotebook:
     self._notebook.add(tab, text = tab_label)
     return tab
 
-  def update_tabs(self, value, pid):
-    """ calls the update functions for the tab that the 
-
-        Args:
-          value: 
-          pid:
-    """
-    if pid in self.pid_location_dict["PRODUCT_INFO"].keys():
-      self._update_info(value, pid)
-    elif pid in self.pid_location_dict["DMX512_SETUP"].keys():
-      self._update_dmx(value, pid)
-    elif pid in self.pid_location_dict["SENSORS"].keys():
-      self._update_sensor(value, pid)
-    elif pid in self.pid_location_dict["POWER_LAMP_SETTINGS"].keys():
-      self._update_settings(value, pid)
-    elif pid in self.pid_location_dict["CONFIGURATION"].keys():
-      self._update_config(value, pid)
-
   def act_objects(self, supported_pids):
     """
     """
     # pass
-    print "suppoerted_pids: %s" % supported_pids
-    print "self.protocol_version: %s" % self.protocol_version.get()
     for key in self.objects.keys():
       for widget in self.objects[key]:
         widget.config(state = tk.DISABLED)
@@ -167,7 +147,6 @@ class RDMNotebook:
       if pid == "QUEUED_MESSAGE":
         pass
       elif pid in self.pid_location_dict["PRODUCT_INFO"].keys():
-        print "objects: %s" % self.objects["PRODUCT_INFO"]
         for i in self.pid_location_dict["PRODUCT_INFO"][pid]:
           self.objects["PRODUCT_INFO"][i].config(state = tk.NORMAL)
       elif pid in self.pid_location_dict["DMX512_SETUP"].keys():
@@ -528,23 +507,28 @@ class RDMNotebook:
   def device_label_set(self):
     """
     """
-    self._controller.set_device_label(self.device_label.get())
+    self._controller.SetDeviceLabel(self.device_label.get())
 
   def main(self):
     """ Main method for Notebook class. """
     self.root.mainloop()
 
-  def Update(self):
-    # TODO 9: based on the current selected tab, call one of:
-    # GetBasicInformation()
-    # GetDmxInformation()
-    # GetSensorInformation()
+  def Update(self, param_dict, index):
     print "Updating tabs..."
+    if index == 0:
+      self.RenderBasicInformation(param_dict)
+    elif index == 1:
+      self.RenderDMXInformation(param_dict)
+    elif index == 2:
+      self.RenderSensorsInformation(param_dict)
+    elif index == 3:
+      self.RenderSettingInformation(param_dict)
+    elif index == 4:
+      self.RenderConfigInformation(param_dict)
 
   def RenderBasicInformation(self, param_dict):
     """
     """
-    print "param_dict: %s" % param_dict
     protocol_version = "Version %d.%d" % (
                           param_dict["DEVICE_INFO"]["protocol_major"], 
                           param_dict["DEVICE_INFO"]["protocol_minor"]
@@ -611,8 +595,22 @@ class RDMNotebook:
   def RenderSensorInformation(self, params):
     pass
 
-  def RenderSettingInformation(self, params):
-    pass
+  def RenderSettingInformation(self, param_dict):
+    if "DEVICE_HOURS" in param_dict:
+      self.device_hours.set(param_dict["DEVICE_HOURS"]["hours"])
+    if "LAMP_HOURS" in param_dict:
+      self.lamp_hours.set(param_dict["LAMP_HOURS"]["hours"])
+    if "LAMP_STRIKES" in param_dict:
+      self.lamp_strikes.set(param_dict["LAMP_STRIKES"["strikes"]])
+    print "rendered"
+    # if "LAMP_STATE" in param_dict:
+    #   self.lamp_state = tk.StringVar(self.setting_tab)
+    # if "LAMP_ON_MODE" in param_dict:
+    #   self.lamp_on_mode = tk.StringVar(self.setting_tab)
+    # if "DEVICE_POWER_CYCLES" in param_dict:
+    #   self.device_power_cycles = tk.StringVar(self.setting_tab)
+    # if "POWER_STATE" in param_dict:
+    #   self.power_state = tk.StringVar(self.setting_tab)
 
 if __name__ == "__main__":
   ui = simple_ui.DisplayApp()

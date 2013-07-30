@@ -47,19 +47,25 @@ class Controller(object):
   def __init__(self, app):
     self._app = app
 
+  def ChangeTab(self, index):
+    self._app.ChangeTab(index)
+
+  def GetIndex(self, index):
+    if index == 0:
+      self.GetBasicInformation()
+    elif index == 1:
+      self.GetDMXInformation()
+    elif index == 2:
+      self.GetSensorsInformation()
+    elif index == 3:
+      self.GetSettingInformation()
+    elif index == 4:
+      self.GetConfigInformation()
+    return
+
   def GetBasicInformation(self):
     """
-    // "DEVICE_INFO"
-    "PRODUCT_DETAIL_ID_LIST"
-    "DEVICE_MODEL_DESCRIPTION"
-    "MANUFACTURER_LABEL"
-    "DEVICE_LABEL"
-    "FACTORY_DEFAULTS"
-    "SOFTWARE_VERSION_LABEL"
-    "BOOT_SOFTWARE_VERSION_ID"
-    "BOOT_SOFTWARE_VERSION_LABEL"
     """
-    print 'Getting basic info'
     # TODO: 8 Call info DisplayApp and fetch each of the following PIDs, adding
     # them to the ]uid_dict. When you have a response for all pids print out the
     # uid_dict
@@ -68,21 +74,12 @@ class Controller(object):
 
   def GetDmxInformation(self):
     """
-    "DEVICE_INFO"
-    "DMX_PERSONALITY"
-    "DMX_PERSONALITY_DESCRIPTION"
-    "DMX_START_ADDRESS"
-    "SLOT_INFO"
-    "SLOT_DESCRIPTION"
-    "DEFAULT_SLOT_VALUE"
     """
-    print "getting DMX information..."
     self._app.GetDmxInformation()
 
-  def set_device_label(self, label):
+  def SetDeviceLabel(self, label):
     """
     """
-    print "label: %s" % label
     self._app.set_device_label(label)
 
   def GetSensorInformation(self):
@@ -191,10 +188,7 @@ class DisplayApp:
         uid: the uid of the newly selected device
     """
     if uid == self.cur_uid:
-      print "this device is already selected"
       return
-    print "uid: %s\ncur_uid: %s\nid_state: %d"%(uid, self.cur_uid, 
-                                                self.id_state.get())
     # This line is going to return "DEVICE_LABEL" so you may as well skip it
     pid_key = "DEVICE_LABEL"
     self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key]["label"], uid))
@@ -202,11 +196,9 @@ class DisplayApp:
                   lambda b, s, uid = uid:self._get_identify_complete(uid, b, s),
                   [])
     if "SUPPORTED_PARAMETERS" not in self._uid_dict[uid]:
-      self.ola_thread.rdm_get(self.universe.get(), uid, 0, 
-                      "SUPPORTED_PARAMETERS", 
-                      lambda b, l, uid = uid:self._get_pids_complete(uid, b, l),
-                      [])
-    self._notebook.Update()
+      self._controller.GetBasicInformation()
+    else:
+      self._notebook.Update(self._uid_dict[uid], 0)
     self.cur_uid = uid
     # init callbacks
 
@@ -237,12 +229,10 @@ class DisplayApp:
 
   def _upon_discover(self, status, uids):
     """ callback for client.RunRDMDiscovery. """
-    print "discovered"
     if len(self._uid_dict.keys()) == 0:
       self.device_menu["menu"].delete(0, "end")
     for uid in uids:
       if uid not in self._uid_dict.keys():
-        print "adding device..."
         self._uid_dict[uid] = {}
         self.ola_thread.rdm_get(self.universe.get(), uid, 0, "DEVICE_LABEL", 
                              lambda b, s, uid = uid:self._add_device(uid, b, s),
@@ -260,13 +250,11 @@ class DisplayApp:
       self.device_menu["menu"].add_command( label = "%s (%s)"%(
                   self._uid_dict[uid]["DEVICE_LABEL"]["label"], uid), 
                   command = lambda:self.device_selected(uid))
-      print self._uid_dict[uid]["DEVICE_LABEL"]["label"]
     else:
       self._uid_dict.setdefault(uid, {})["DEVICE_LABEL"] = {"label":""}
       self.device_menu["menu"].add_command( label = "%s" % uid, 
                                     command = lambda:self.device_selected(uid))
     self._uid_dict[uid]["index"] = self.device_menu["menu"].index(tk.END)
-    print "index: %d" % self._uid_dict[uid]["index"]
     if "SUPPORTED_PARAMETERS" not in self._uid_dict[uid]:
       self.ola_thread.rdm_get(self.universe.get(), uid, 0, 
                       "SUPPORTED_PARAMETERS", 
@@ -962,6 +950,57 @@ class DisplayApp:
       print "failed"
     # store the results in the uid dict
     self._notebook.Update()
+
+  def ChangeTab(self, index):
+    """
+    1. check if the data for the tab has be retrieved
+    2. if they are already in the dict call update with index and param_dict
+    3. if not call get info
+    """
+    pid_list = [["DEVICE_INFO", 
+                "PRODUCT_DETAIL_ID_LIST", 
+                "DEVICE_MODEL_DESCRIPTION",
+                "MANUFACTURER_LABEL",
+                "DEVICE_LABEL",
+                "FACTORY_DEFAULTS",
+                "SOFTWARE_VERSION_LABEL",
+                "BOOT_SOFTWARE_VERSION_ID",
+                "BOOT_SOFTWARE_VERSION_LABEL"],
+                ["DEVICE_INFO",
+                "DMX_PERSONALITY",
+                "DMX_PERSONALITY_DESCRIPTION",
+                "DMX_START_ADDRESS",
+                "SLOT_INFO",
+                "SLOT_DESCRIPTION",
+                "DEFAULT_SLOT_VALUE"],
+                ["SENSOR_DEFINITION",
+                "SENSOR_VALUE",
+                "RECORD_SENSORS"],
+                ["DEVICE_HOURS",
+                "LAMP_HOURS",
+                "LAMP_STRIKES",
+                "LAMP_STATE",
+                "LAMP_ON_MODE",
+                "DEVICE_POWER_CYCLES",
+                "POWER_STATE"],
+                ["LANGUAGE_CAPABILITIES",
+                "LANGUAGE",
+                "DISPLAY_INVERT",
+                "DISPLAY_LEVEL",
+                "PAN_INVERT",
+                "TILT_INVERT",
+                "PAN_TILT_SWAP",
+                "REAL_TIME_CLOCK"]]
+    for pid_value in pid_list[index]:
+      pid_key = self._pid_store.GetPid(pid_value)
+      if pid_key in self._uid_dict[self.cur_uid]["SUPPORTED_PARAMETERS"]:
+        if pid_key.name in self._uid_dict[self.cur_uid]:
+          self._notebook.Update(self._uid_dict[self.cur_uid], index)
+        else:
+          self._controller.GetIndex(index)
+    return True
+
+
 
   def main(self):
     print "Entering main loop"
