@@ -50,10 +50,6 @@ class Controller(object):
   def GetBasicInformation(self):
     """
     """
-    # TODO: 8 Call info DisplayApp and fetch each of the following PIDs, adding
-    # them to the ]uid_dict. When you have a response for all pids print out the
-    # uid_dict
-    # self._app.GetBasicInformation()
     self._app.GetBasicInformation()
 
   def GetDmxInformation(self):
@@ -171,9 +167,8 @@ class DisplayApp:
       Args: 
         uid: the uid of the newly selected device
     """
-    if self.cur_uid is None:
-      return
     if uid == self.cur_uid:
+      print "Already Selected"
       return
     # This line is going to return "DEVICE_LABEL" so you may as well skip it
     pid_key = "DEVICE_LABEL"
@@ -955,63 +950,6 @@ class DisplayApp:
       print "failed"
     # store the results in the uid dict
     self._notebook.Update()
-
-  def ChangeTab(self, index):
-    """
-    1. check if the data for the tab has be retrieved
-    2. if they are already in the dict call update with index and param_dict
-    3. if not call get info
-    """
-    if self.cur_uid is None:
-      print "error 1"
-      return
-    if "SUPPORTED_PARAMETERS" not in self._uid_dict[self.cur_uid]:
-      print "error 2"
-      return
-    pid_list = [["DEVICE_INFO", 
-                "PRODUCT_DETAIL_ID_LIST", 
-                "DEVICE_MODEL_DESCRIPTION",
-                "MANUFACTURER_LABEL",
-                "DEVICE_LABEL",
-                "FACTORY_DEFAULTS",
-                "SOFTWARE_VERSION_LABEL",
-                "BOOT_SOFTWARE_VERSION_ID",
-                "BOOT_SOFTWARE_VERSION_LABEL"],
-                ["DEVICE_INFO",
-                "DMX_PERSONALITY",
-                "DMX_PERSONALITY_DESCRIPTION",
-                "DMX_START_ADDRESS",
-                "SLOT_INFO",
-                "SLOT_DESCRIPTION",
-                "DEFAULT_SLOT_VALUE"],
-                ["SENSOR_DEFINITION",
-                "SENSOR_VALUE",
-                "RECORD_SENSORS"],
-                ["DEVICE_HOURS",
-                "LAMP_HOURS",
-                "LAMP_STRIKES",
-                "LAMP_STATE",
-                "LAMP_ON_MODE",
-                "DEVICE_POWER_CYCLES",
-                "POWER_STATE"],
-                ["LANGUAGE_CAPABILITIES",
-                "LANGUAGE",
-                "DISPLAY_INVERT",
-                "DISPLAY_LEVEL",
-                "PAN_INVERT",
-                "TILT_INVERT",
-                "PAN_TILT_SWAP",
-                "REAL_TIME_CLOCK"]]
-    for pid_value in pid_list[index]:
-      pid_key = self._pid_store.GetPid(pid_value)
-      if pid_key in self._uid_dict[self.cur_uid]["SUPPORTED_PARAMETERS"]:
-        if pid_key.name in self._uid_dict[self.cur_uid]:
-          self._notebook.Update(self._uid_dict[self.cur_uid], index)
-        else:
-          self._controller.GetIndex(index)
-    return True
-
-
 
   def main(self):
     print "Entering main loop"
