@@ -66,6 +66,8 @@ class Controller(object):
   def GetBasicInformation(self):
     """
     """
+    if self._app.cur_uid is None:
+      return
     # TODO: 8 Call info DisplayApp and fetch each of the following PIDs, adding
     # them to the ]uid_dict. When you have a response for all pids print out the
     # uid_dict
@@ -75,23 +77,35 @@ class Controller(object):
   def GetDmxInformation(self):
     """
     """
+    if self._app.cur_uid is None:
+      return
     self._app.GetDmxInformation()
 
   def SetDeviceLabel(self, label):
     """
     """
+    if self._app.cur_uid is None:
+      return
     self._app.set_device_label(label)
 
   def GetSensorInformation(self):
+    if self._app.cur_uid is None:
+      return
     pass
 
   def SetDeviceLabel(self, index):
+    if self._app.cur_uid is None:
+      return
     pass
 
   def SetSetStartAddress(self, index):
+    if self._app.cur_uid is None:
+      return
     pass
 
   def SetPersonality(self, index):
+    if self._app.cur_uid is None:
+      return
     pass
 
   # Additional methods will be added later
@@ -187,19 +201,21 @@ class DisplayApp:
       Args: 
         uid: the uid of the newly selected device
     """
+    if self.cur_uid is None:
+      return
     if uid == self.cur_uid:
       return
     # This line is going to return "DEVICE_LABEL" so you may as well skip it
     pid_key = "DEVICE_LABEL"
     self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key]["label"], uid))
     self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
-                  lambda b, s, uid = uid:self._get_identify_complete(uid, b, s),
-                  [])
-    if "SUPPORTED_PARAMETERS" not in self._uid_dict[uid]:
+                  lambda b, s, uid = uid:self._get_identify_complete(uid, b, s))
+    if self.cur_uid is None:
+      self.cur_uid = uid
       self._controller.GetBasicInformation()
     else:
       self._notebook.Update(self._uid_dict[uid], 0)
-    self.cur_uid = uid
+
     # init callbacks
 
   def set_universe(self, i):
@@ -273,6 +289,8 @@ class DisplayApp:
       return
     else:
       # TODO: 5: 
+      if self.cur_uid is None:
+        self._controller.GetBasicInformation()
       device = self._uid_dict[uid]
       device['SUPPORTED_PARAMETERS'] = set(p['param_id']
                                                      for p in params['params'])
@@ -957,6 +975,12 @@ class DisplayApp:
     2. if they are already in the dict call update with index and param_dict
     3. if not call get info
     """
+    if self.cur_uid is None:
+      print "error 1"
+      return
+    if "SUPPORTED_PARAMETERS" not in self._uid_dict[self.cur_uid]:
+      print "error 2"
+      return
     pid_list = [["DEVICE_INFO", 
                 "PRODUCT_DETAIL_ID_LIST", 
                 "DEVICE_MODEL_DESCRIPTION",
