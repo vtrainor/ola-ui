@@ -50,8 +50,6 @@ class Controller(object):
   def GetBasicInformation(self):
     """
     """
-    if self._app.cur_uid is None:
-      return
     # TODO: 8 Call info DisplayApp and fetch each of the following PIDs, adding
     # them to the ]uid_dict. When you have a response for all pids print out the
     # uid_dict
@@ -61,35 +59,23 @@ class Controller(object):
   def GetDmxInformation(self):
     """
     """
-    if self._app.cur_uid is None:
-      return
     self._app.GetDmxInformation()
 
   def SetDeviceLabel(self, label):
     """
     """
-    if self._app.cur_uid is None:
-      return
     self._app.set_device_label(label)
 
   def GetSensorInformation(self):
-    if self._app.cur_uid is None:
-      return
     pass
 
   def SetDeviceLabel(self, index):
-    if self._app.cur_uid is None:
-      return
     pass
 
   def SetSetStartAddress(self, index):
-    if self._app.cur_uid is None:
-      return
     pass
 
   def SetPersonality(self, index):
-    if self._app.cur_uid is None:
-      return
     pass
 
   # Additional methods will be added later
@@ -332,6 +318,8 @@ class DisplayApp:
       "BOOT_SOFTWARE_VERSION_ID"
       "BOOT_SOFTWARE_VERSION_LABEL"
     """
+    if self.cur_uid is None:
+      return
     self._get_product_detail_id()
 
   def _get_product_detail_id(self):
@@ -482,6 +470,8 @@ class DisplayApp:
     "SLOT_DESCRIPTION"
     "DEFAULT_SLOT_VALUE"
     """
+    if self.cur_uid is None:
+      return
     self._get_dmx_personality()
 
   def _get_dmx_personality(self):
@@ -599,6 +589,8 @@ class DisplayApp:
     "SENSOR_VALUE"
     "RECORD_SENSORS"
     """
+    if self.cur_uid is None:
+      return
 
   def _get_sensor_definition(self):
     pid_key = self._pid_store.GetName("SENSOR_DEFINITION")
@@ -647,7 +639,8 @@ class DisplayApp:
     "DEVICE_POWER_CYCLES"
     "POWER_STATE"
     """
-    pass
+    if self.cur_uid is None:
+      return
 
   def _get_device_hours(self):
     pid_key = self._pid_store.GetName("DEVICE_HOURS")
@@ -786,6 +779,8 @@ class DisplayApp:
     "PAN_TILT_SWAP"
     "REAL_TIME_CLOCK"
     """
+    if self.cur_uid is None:
+      return
 
   def _get_language_capabilities(self):
     pid_key = self._pid_store.GetName("LANGUAGE_CAPABILITIES")
