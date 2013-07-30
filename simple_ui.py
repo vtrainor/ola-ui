@@ -239,8 +239,6 @@ class DisplayApp:
       self.device_menu["menu"].add_command( label = "%s" % uid, 
                                     command = lambda:self.device_selected(uid))
     self._uid_dict[uid]["index"] = self.device_menu["menu"].index(tk.END)
-    if self.cur_uid is None:
-      self.cur_uid = uid
 
   def _get_pids_complete(self, uid, succeeded, params):
     """ Callback for get_supported_pids.
