@@ -18,20 +18,7 @@ class RDMNotebook:
     self._notebook.bind('<<NotebookTabChanged>>', self.tab_changed)
     self.populate_defaults()
 
-  def tab_changed(self, event):
-    # Note that this will be called when the program starts
-    index = self._notebook.index('current')
-    print 'The selected tab changed to %d' % index
-    if index == 0:
-      self._controller.GetBasicInformation()
-    elif index == 1:
-      self._controller.GetDMXInformation()
-    elif index == 2:
-      self._controller.GetSensorsInformation()
-    elif index == 3:
-      self._controller.GetSettingInformation()
-    elif index == 4:
-      self._controller.GetConfigInformation()
+  
 
   def populate_defaults(self):
     """ creates the default frames. """
@@ -408,8 +395,6 @@ class RDMNotebook:
                                                       self.lamp_state.get(), "")
     self.lamp_on_mode_menu = tk.OptionMenu(self.setting_tab,
                                                     self.lamp_on_mode.get(), "")
-    self.device_power_cycles_menu = tk.OptionMenu(self.setting_tab,
-                                            self.device_power_cycles.get(), "")
     self.power_state_menu = tk.OptionMenu(self.setting_tab,
                                                     self.power_state.get(), "")
 
@@ -417,6 +402,11 @@ class RDMNotebook:
                                                         text = "Device Hours:"),
                                           tk.Label(self.setting_tab,
                                               textvariable = self.device_hours),
+
+                                          tk.Label(self.setting_tab,
+                                                text = "Device Power Cycles:"),
+                                          tk.Label(self.setting_tab, 
+                                            textvariable = self.device_power_cycles),
 
                                           tk.Label(self.setting_tab,
                                                           text = "Lamp Hours:"),
@@ -435,10 +425,6 @@ class RDMNotebook:
                                           tk.Label(self.setting_tab,
                                                         text = "Lamp On Mode:"),
                                           self.lamp_on_mode_menu,
-
-                                          tk.Label(self.setting_tab,
-                                                text = "Device Power Cycles:"),
-                                          self.device_power_cycles_menu,
 
                                           tk.Label(self.setting_tab,
                                                         text = "Power State:"),
@@ -522,18 +508,23 @@ class RDMNotebook:
     """ Main method for Notebook class. """
     self.root.mainloop()
 
-  def Update(self, param_dict, index):
-    print "Updating tabs..."
+  def tab_changed(self, event):
+    # Note that this will be called when the program starts
+    self.Update()
+
+  def Update(self):
+    index = self._notebook.index('current')
+    print 'The selected tab changed to %d' % index
     if index == 0:
-      self.RenderBasicInformation(param_dict)
+      self._controller.GetBasicInformation()
     elif index == 1:
-      self.RenderDMXInformation(param_dict)
+      self._controller.GetDMXInformation()
     elif index == 2:
-      self.RenderSensorsInformation(param_dict)
+      self._controller.GetSensorsInformation()
     elif index == 3:
-      self.RenderSettingInformation(param_dict)
+      self._controller.GetSettingInformation()
     elif index == 4:
-      self.RenderConfigInformation(param_dict)
+      self._controller.GetConfigInformation()
 
   def RenderBasicInformation(self, param_dict):
     """
@@ -554,8 +545,8 @@ class RDMNotebook:
 
     software_version = param_dict["DEVICE_INFO"]["software_version"]
     sub_device_count = param_dict["DEVICE_INFO"]["sub_device_count"]
-    if "SOFTWARE_VERSION_LABEL" in param_dict:
-      software_version = "%s (%d)" % (
+    # if "SOFTWARE_VERSION_LABEL" in param_dict:
+    software_version = "%s (%d)" % (
                           param_dict["SOFTWARE_VERSION_LABEL"]["label"],
                           param_dict["DEVICE_INFO"]["software_version"]
                           )
@@ -606,19 +597,16 @@ class RDMNotebook:
 
   def RenderSettingInformation(self, param_dict):
     print "PARAM_DICT: %s" % param_dict
-    if "DEVICE_HOURS" in param_dict:
-      self.device_hours.set(param_dict["DEVICE_HOURS"]["hours"])
-    if "LAMP_HOURS" in param_dict:
-      self.lamp_hours.set(param_dict["LAMP_HOURS"]["hours"])
-    if "LAMP_STRIKES" in param_dict:
-      self.lamp_strikes.set(param_dict["LAMP_STRIKES"]["strikes"])
+    self.device_hours.set(param_dict.get('DEVICE_HOURS', 'N/A'))
+    self.lamp_hours.set(param_dict.get('LAMP_HOURS', 'N/A'))
+    self.device_power_cycles.set(param_dict.get("DEVICE_POWER_CYCLES", "N/A"))
+    self.lamp_strikes.set(param_dict.get('LAMP_STRIKES', 'N/A'))
     print "rendered"
     # if "LAMP_STATE" in param_dict:
     #   self.lamp_state = tk.StringVar(self.setting_tab)
     # if "LAMP_ON_MODE" in param_dict:
     #   self.lamp_on_mode = tk.StringVar(self.setting_tab)
-    # if "DEVICE_POWER_CYCLES" in param_dict:
-    #   self.device_power_cycles = tk.StringVar(self.setting_tab)
+
     # if "POWER_STATE" in param_dict:
     #   self.power_state = tk.StringVar(self.setting_tab)
 

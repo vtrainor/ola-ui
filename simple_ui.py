@@ -57,27 +57,27 @@ class Controller(object):
     """
     self._app.GetDmxInformation()
 
-  def SetDeviceLabel(self, label):
-    """
-    """
-    self._app.set_device_label(label)
-
-  def GetSensorInformation(self):
+  def GetSensorsInformation(self):
     pass
 
   def GetSettingInformation(self):
     print "Hello"
     self._app.GetSettingInformation()
 
-  def SetDeviceLabel(self, index):
-    pass
+  def GetConfigInformation(self):
+    self._app.GetConfigInformation()
+
+
+  def SetDeviceLabel(self, label):
+    """
+    """
+    self._app.set_device_label(label)
 
   def SetSetStartAddress(self, index):
     pass
 
   def SetPersonality(self, index):
     pass
-
   # Additional methods will be added later
 
 class DisplayApp:
@@ -266,9 +266,7 @@ class DisplayApp:
     # at this point we now have the list of supported parameters & the device
     # info for the pid selected.
     print "uid_dict: %s" % self._uid_dict
-    # Now for testing purposes, we skip the call though the notebook and just
-    # proceed straight to getting the Basic Info
-    self._controller.GetBasicInformation()
+    self._notebook.Update()
 
   def _get_identify_complete(self, uid, succeeded, value):
     """ Callback for rdm_get in device_selected.
@@ -378,8 +376,7 @@ class DisplayApp:
 
   def _get_software_version(self):
     pid_key = self._pid_store.GetName("SOFTWARE_VERSION_LABEL")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "SOFTWARE_VERSION_LABEL" not in self._uid_dict[self.cur_uid]):
+    if "SOFTWARE_VERSION_LABEL" not in self._uid_dict[self.cur_uid]:
       self.ola_thread.rdm_get(self.universe.get(), 
                           self.cur_uid, 
                           0, 
@@ -633,7 +630,7 @@ class DisplayApp:
   def _get_device_hours_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["DEVICE_HOURS"] = data
+      self._uid_dict[self.cur_uid]["DEVICE_HOURS"] = data["hours"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -651,7 +648,7 @@ class DisplayApp:
   def _get_lamp_hours_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["LAMP_HOURS"] = data
+      self._uid_dict[self.cur_uid]["LAMP_HOURS"] = data["hours"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -669,7 +666,7 @@ class DisplayApp:
   def _get_lamp_strikes_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["LAMP_STRIKES"] = data
+      self._uid_dict[self.cur_uid]["LAMP_STRIKES"] = data["strikes"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -723,7 +720,7 @@ class DisplayApp:
   def _get_power_cycles_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["DEVICE_POWER_CYCLES"] = data
+      self._uid_dict[self.cur_uid]["DEVICE_POWER_CYCLES"] = data["power_cycles"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -934,6 +931,11 @@ class DisplayApp:
       print "failed"
     # store the results in the uid dict
     self._notebook.Update()
+
+  def Update(self, index):
+    if self.cur_uid is None:
+      print "Error: No device selected."
+      return
 
   def main(self):
     print "Entering main loop"
