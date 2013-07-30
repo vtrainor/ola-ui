@@ -605,12 +605,13 @@ class RDMNotebook:
     pass
 
   def RenderSettingInformation(self, param_dict):
+    print "PARAM_DICT: %s" % param_dict
     if "DEVICE_HOURS" in param_dict:
       self.device_hours.set(param_dict["DEVICE_HOURS"]["hours"])
     if "LAMP_HOURS" in param_dict:
       self.lamp_hours.set(param_dict["LAMP_HOURS"]["hours"])
     if "LAMP_STRIKES" in param_dict:
-      self.lamp_strikes.set(param_dict["LAMP_STRIKES"["strikes"]])
+      self.lamp_strikes.set(param_dict["LAMP_STRIKES"]["strikes"])
     print "rendered"
     # if "LAMP_STATE" in param_dict:
     #   self.lamp_state = tk.StringVar(self.setting_tab)

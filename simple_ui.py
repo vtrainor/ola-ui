@@ -52,7 +52,7 @@ class Controller(object):
     """
     self._app.GetBasicInformation()
 
-  def GetDmxInformation(self):
+  def GetDMXInformation(self):
     """
     """
     self._app.GetDmxInformation()
@@ -64,6 +64,10 @@ class Controller(object):
 
   def GetSensorInformation(self):
     pass
+
+  def GetSettingInformation(self):
+    print "Hello"
+    self._app.GetSettingInformation()
 
   def SetDeviceLabel(self, index):
     pass
@@ -180,11 +184,7 @@ class DisplayApp:
       self.ola_thread.rdm_get(
           self.universe.get(), uid, 0, "SUPPORTED_PARAMETERS",
           lambda b, l, uid = uid:self._get_pids_complete(uid, b, l))
-
     self.cur_uid = uid
-    self._controller.GetBasicInformation()
-
-    # init callbacks
 
   def set_universe(self, i):
     """ sets the int var self.universe to the value of i """
@@ -619,6 +619,7 @@ class DisplayApp:
     """
     if self.cur_uid is None:
       return
+    self._get_device_hours()
 
   def _get_device_hours(self):
     pid_key = self._pid_store.GetName("DEVICE_HOURS")
@@ -735,7 +736,7 @@ class DisplayApp:
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_power_state_complete(b, s))
     else:
-      self._notebook.RenderSettingInformation
+      self._notebook.RenderSettingInformation(self._uid_dict[self.cur_uid])
 
   def _get_power_state_complete(self, succeeded, data):
     if succeeded:
@@ -744,7 +745,7 @@ class DisplayApp:
     else:
       print "failed"
     # store the results in the uid dict
-    self._notebook.RenderSettingInformation()
+    self._notebook.RenderSettingInformation(self._uid_dict[self.cur_uid])
 
   def GetConfigInformation(self):
     """
@@ -897,7 +898,7 @@ class DisplayApp:
                               lambda b, s: self._get_real_time_complete(b, s)
                               )
     else:
-      self._notebook.RenderConfigInformation()
+      self._notebook.RenderConfigInformation(self._uid_dict[self.cur_uid])
 
   def _get_real_time_complete(self, succeeded, data):
     if succeeded:
@@ -906,7 +907,7 @@ class DisplayApp:
     else:
       print "failed"
     # store the results in the uid dict
-    self._notebook.RenderConfigInformation()
+    self._notebook.RenderConfigInformation(self._uid_dict[self.cur_uid])
 
   def set_device_label(self, label):
     """
