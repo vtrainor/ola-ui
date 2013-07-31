@@ -187,7 +187,7 @@ class DisplayApp:
                             actions.GetSupportedParams(data, self.ola_thread.rdm_get),
                             actions.GetDeviceInfo(data, self.ola_thread.rdm_get)
                             ],
-                            self._device_changed_complete())
+                            self._device_changed_complete)
     flow.Run()
 
   def set_universe(self, i):
@@ -923,7 +923,7 @@ class DisplayApp:
   def _device_changed_complete(self):
     """
     """
-    print self._uid_dict
+    print "Device selected: %s" % self._uid_dict
     self._notebook.Update()
 
   def main(self):
