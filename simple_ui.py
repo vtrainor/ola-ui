@@ -23,7 +23,7 @@ import notebook
   - call notebook.Update()
   - notebook.Update looks at the current selected tab, and then calls one of:
     - GetBasicInformation()
-    - GetDmxInformation()
+    - GetDMXInformation()
     - GetSensorInformation()
 
  Each of these send the necessary to build a dictionary (pid_info) for the tab.
@@ -55,13 +55,12 @@ class Controller(object):
   def GetDMXInformation(self):
     """
     """
-    self._app.GetDmxInformation()
+    self._app.GetDMXInformation()
 
   def GetSensorsInformation(self):
-    pass
+    self._app.GetSensorsInformation()
 
   def GetSettingInformation(self):
-    print "Hello"
     self._app.GetSettingInformation()
 
   def GetConfigInformation(self):
@@ -458,7 +457,7 @@ class DisplayApp:
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_dmx_personality_complete(b, s))
     else:
-      self._get_personality_decription()
+      self._get_personality_description()
 
   def _get_dmx_personality_complete(self, succeeded, data):
     if succeeded:
@@ -470,10 +469,12 @@ class DisplayApp:
     self._get_personality_description()
 
   def _get_personality_description(self):
-    data = [self._uid_dict[self.cur_uid]["DMX_PERSONALITY"]["personality"]]
+    
     pid_key = self._pid_store.GetName("DMX_PERSONALITY_DESCRIPTION")
     if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
           and "DMX_PERSONALITY" not in self._uid_dict[self.cur_uid]):
+      data = [self._uid_dict[self.cur_uid]["DMX_PERSONALITY_DESCRIPTION"]
+                                          ["current_personality"]]
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
             lambda b, s: self._get_personality_description_complete(b, s), data)
     else:
@@ -542,7 +543,7 @@ class DisplayApp:
     # store the results in the uid dict
     self._get_defalut_slot_value()
 
-  def _get_defalut_slot_value(self):
+  def _get_default_slot_value(self):
     pid_key = self._pid_store.GetName("DEFAULT_SLOT_VALUE")
     if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
           and "DEFAULT_SLOT_VALUE" not in self._uid_dict[self.cur_uid]):
@@ -554,13 +555,14 @@ class DisplayApp:
   def _get_default_slot_value_complete(self, succeeded, data):
     if succeeded:
       print ""
+      # this needs to be a set
       self._uid_dict[self.cur_uid]["DEFAULT_SLOT_VALUE"] = data
     else:
       print "failed"
     # store the results in the uid dict
     self._notebook.RenderDMXInformation(self._uid_dict[self.cur_uid])
 
-  def GetSensorsInformation():
+  def GetSensorsInformation(self):
     """
     "SENSOR_DEFINITION"
     "SENSOR_VALUE"
@@ -568,13 +570,15 @@ class DisplayApp:
     """
     if self.cur_uid is None:
       return
+    self._get_sensor_definition()
 
   def _get_sensor_definition(self):
     pid_key = self._pid_store.GetName("SENSOR_DEFINITION")
     if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
           and "SENSOR_DEFINITION" not in self._uid_dict[self.cur_uid]):
+      data = [1]
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_sensor_definition_complete(b, s))
+            lambda b, s: self._get_sensor_definition_complete(b, s), data)
     else:
       self._get_sensor_value()
 
@@ -591,10 +595,11 @@ class DisplayApp:
     pid_key = self._pid_store.GetName("SENSOR_VALUE")
     if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
           and "SENSOR_VALUE" not in self._uid_dict[self.cur_uid]):
+      data = [1]
       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_sensor_value_complete(b, s))
+            lambda b, s: self._get_sensor_value_complete(b, s), data)
     else:
-      self._notebook.RenderSensorInformation()
+      self._notebook.RenderSensorInformation(self._uid_dict[self.cur_uid])
       # do I need to do anything with record sensors here?
 
   def _get_sensor_value_complete(self, succeeded, data):
@@ -604,7 +609,7 @@ class DisplayApp:
     else:
       print "failed"
     # store the results in the uid dict
-    self._notebook.RenderSensorInformation()
+    self._notebook.RenderSensorInformation(self._uid_dict[self.cur_uid])
 
   def GetSettingInformation(self):
     """
@@ -686,7 +691,7 @@ class DisplayApp:
   def _get_lamp_state_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["LAMP_STATE"] = data
+      self._uid_dict[self.cur_uid]["LAMP_STATE"] = data["state"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -704,7 +709,7 @@ class DisplayApp:
   def _get_lamp_on_mode_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["LAMP_ON_MODE"] = data
+      self._uid_dict[self.cur_uid]["LAMP_ON_MODE"] = data["mode"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -740,7 +745,7 @@ class DisplayApp:
   def _get_power_state_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["POWER_STATE"] = data
+      self._uid_dict[self.cur_uid]["POWER_STATE"] = data["power_state"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -790,7 +795,7 @@ class DisplayApp:
   def _get_language_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["LANGUAGE"] = data
+      self._uid_dict[self.cur_uid]["LANGUAGE"] = data["language"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -808,7 +813,7 @@ class DisplayApp:
   def _get_display_invert_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["DISPLAY_INVERT"] = data
+      self._uid_dict[self.cur_uid]["DISPLAY_INVERT"] = data["invert_status"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -826,7 +831,7 @@ class DisplayApp:
   def _get_display_level_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["DISPLAY_LEVEL"] = data
+      self._uid_dict[self.cur_uid]["DISPLAY_LEVEL"] = data["level"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -844,7 +849,7 @@ class DisplayApp:
   def _get_pan_invert_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["PAN_INVERT"] = data
+      self._uid_dict[self.cur_uid]["PAN_INVERT"] = data["invert"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -862,7 +867,7 @@ class DisplayApp:
   def _get_tilt_invert_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["TILT_INVERT"] = data
+      self._uid_dict[self.cur_uid]["TILT_INVERT"] = data["invert"]
     else:
       print "failed"
     # store the results in the uid dict
@@ -880,7 +885,7 @@ class DisplayApp:
   def _get_pan_tilt_swap_complete(self, succeeded, data):
     if succeeded:
       print ""
-      self._uid_dict[self.cur_uid]["PAN_TILT_SWAP"] = data
+      self._uid_dict[self.cur_uid]["PAN_TILT_SWAP"] = data["swap"]
     else:
       print "failed"
     # store the results in the uid dict

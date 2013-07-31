@@ -232,7 +232,6 @@ class RDMNotebook:
     self.dmx_footprint = tk.StringVar(self.dmx_tab)
     self.dmx_start_address = tk.StringVar(self.dmx_tab)
     self.current_personality = tk.StringVar(self.dmx_tab)
-    self.dmx_personality = tk.StringVar(self.dmx_tab)
     self.slot_required = tk.StringVar(self.dmx_tab)
     self.personality_name = tk.StringVar(self.dmx_tab)
     self.slot_number = tk.StringVar(self.dmx_tab)
@@ -247,7 +246,7 @@ class RDMNotebook:
     self.start_address_entry = tk.Entry(self.dmx_tab,
                                           textvariable = self.dmx_start_address)
     self.dmx_personality_menu = tk.OptionMenu(self.dmx_tab, 
-                                                self.dmx_personality.get(), "")
+                                                self.current_personality.get(), "")
     self.slot_menu = tk.OptionMenu(self.dmx_tab, self.slot_number.get(), "")
 
     self.objects["DMX512_SETUP"] = [tk.Label(self.dmx_tab,
@@ -568,11 +567,51 @@ class RDMNotebook:
     self.boot_software.set(boot_software)                                                                                                                           
     return
 
-  def RenderDmxInformation(self, params):
-    pass
+  def RenderDMXInformation(self, param_dict):
+    """
+    """
+    self.dmx_footprint.set(param_dict["DEVICE_INFO"]["dmx_footprint"])
+    self.dmx_start_address.set(param_dict["DEVICE_INFO"]["dmx_start_address"])
+    self.current_personality.set(param_dict["DEVICE_INFO"]["current_personality"])
+    self.slot_required.set(param_dict.get("DMX_PERSONALITY_DESCRIPTION", {}).get("slots_required", "N/A"))
+    self.personality_name.set(param_dict.get("DMX_PERSONALITY_DESCRIPTION", {}).get("name", "N/A"))
+    self.slot_number.set(param_dict.get("SLOT_DESCRIPTION", {}).get("slot_number", "N/A"))
+    self.slot_name.set(param_dict.get("SLOT_DESCRIPTION", {}).get("slot_name", "N/A"))
+    self.slot_offset.set(param_dict.get("SLOT_INFO", {}).get("slot_offset", "N/A"))
+    self.slot_type.set(param_dict.get("SLOT_INFO", {}).get("slot_type", "N/A"))
+    self.slot_label_id.set(param_dict.get("SLOT_INFO", {}).get("slot_label_id", "N/A"))
+    # I'm not sure how to deal with this pid...
+    self.default_slot_offset.set("N/A")
+    self.default_slot_value.set("N/A")
+    print "DMX Rendered"
 
-  def RenderSensorInformation(self, params):
-    pass
+  def RenderSensorInformation(self, param_dict):
+    self.sensor_type.set("Type: %s" % param_dict.get(
+                                    "SENSOR_DEFINITION", {}).get("type", "N/A"))
+    self.sensor_unit.set("Unit: %s" % param_dict.get(
+                                    "SENSOR_DEFINITION", {}).get("unit", "N/A"))
+    self.sensor_prefix.set("Prefix: %s" % param_dict.get(
+                                  "SENSOR_DEFINITION", {}).get("prefix", "N/A"))
+    self.sensor_range.set("Range: %s - %s" % (
+              param_dict.get("SENSOR_DEFINITION", {}).get("range_min", "N/A"), 
+              param_dict.get("SENSOR_DEFINITION", {}).get("range_max", "N/A")))
+    self.normal_range.set("Normal Range: %s - %s" % (
+              param_dict.get("SENSOR_DEFINITION", {}).get("normal_min", "N/A"), 
+              param_dict.get("SENSOR_DEFINITION", {}).get("normal_max", "N/A")))
+    self.supports_recording.set("Supports Recording: %s" % param_dict.get(
+                      "SENSOR_DEFINITION", {}).get("supports_recording", "N/A"))
+    self.sensor_name.set("Name: %s" % param_dict.get(
+                                  "SENSOR_DEFINITION", {}).get("name", "N/A"))
+    self.sensor_number.set("Sensor Number: %s" % param_dict.get(
+                          "SENSOR_VALUE", {}).get("sensor_number", "N/A"))
+    self.present_value.set("Present Value: %s" % param_dict.get(
+                          "SENSOR_VALUE", {}).get("present_value", "N/A"))
+    self.lowest.set("Lowest Value: %s" % param_dict.get(
+                          "SENSOR_VALUE", {}).get("lowest", "N/A"))
+    self.highest.set("Hightest Value: %s" % param_dict.get(
+                          "SENSOR_VALUE", {}).get("highest", "N/A"))
+    self.recorded.set("Recorded Value: %s" % param_dict.get(
+                          "SENSOR_VALUE", {}).get("sensor_number", "N/A"))
 
   def RenderSettingInformation(self, param_dict):
     print "PARAM_DICT: %s" % param_dict
