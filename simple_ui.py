@@ -610,6 +610,7 @@ class DisplayApp:
       print "failed"
     # store the results in the uid dict
     self._notebook.RenderSensorInformation(self._uid_dict[self.cur_uid])
+    print "sensor value"
 
   def GetSettingInformation(self):
     """

@@ -586,6 +586,7 @@ class RDMNotebook:
     print "DMX Rendered"
 
   def RenderSensorInformation(self, param_dict):
+    print "rendering sensor information..."
     self.sensor_type.set("Type: %s" % param_dict.get(
                                     "SENSOR_DEFINITION", {}).get("type", "N/A"))
     self.sensor_unit.set("Unit: %s" % param_dict.get(
