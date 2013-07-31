@@ -12,9 +12,9 @@ class GetDeviceInfo(GetRDMAction):
     print self._data
     return self.PID not in self._data
 
-  def UpdateDict(self, succeeded, params):
+  def UpdateDict(self, succeeded, value):
     if succeeded:
-      self._data[self.PID] = params
+      self._data[self.PID] = value
 
 class GetSupportedParams(GetRDMAction):
 	"""
@@ -23,9 +23,22 @@ class GetSupportedParams(GetRDMAction):
 
 	def ShouldExecute(self):
 		"""" Skip this action if we already have the supported params"""
-		return [self.PID] not in self._data
+		return self.PID not in self._data
 
-	def UpdateDict(self, succeeded, params):
+	def UpdateDict(self, succeeded, value):
 		if succeeded:
-			self._data[self.PID] = ['SUPPORTED_PARAMETERS'] = set(
-																				p['param_id'] for p in params['params'])
+			self._data[self.PID] = set(p['param_id'] for p in value['params'])
+
+class GetDeviceLabel(GetRDMAction):
+	"""
+	"""
+	self.PID = "DEVICE_LABEL"
+		
+	def ShouldExecute(self):
+		"""" Skip this action if we already have the supported params"""
+		return ([self.PID] not in self._data 
+																			and in self._data["SUPPORTED_PARAMETERS"])
+
+	def UpdateDict(self, succeeded, value):
+		if succeeded:
+			self._data[self.PID] = value["label"]

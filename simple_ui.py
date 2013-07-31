@@ -8,6 +8,8 @@ import olathread
 from ola import PidStore
 import ttk
 import notebook
+import controlflow
+import actions
 
 """
  General control flow:
@@ -170,22 +172,21 @@ class DisplayApp:
       Args: 
         uid: the uid of the newly selected device
     """
+
     if uid == self.cur_uid:
       print "Already Selected"
       return
     # This line is going to return "DEVICE_LABEL" so you may as well skip it
-    pid_key = "DEVICE_LABEL"
-    self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key]["label"], uid))
-    self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
-                  lambda b, s, uid = uid:self._get_identify_complete(uid, b, s))
-
-    if "SUPPORTED_PARAMETERS" not in self._uid_dict[uid]:
-      self.ola_thread.rdm_get(
-          self.universe.get(), uid, 0, "SUPPORTED_PARAMETERS",
-          lambda b, l, uid = uid:self._get_pids_complete(uid, b, l))
-    else:
-      self._notebook.Update()
-    self.cur_uid = uid
+    controller.RDMControlFlow(self.universe, self.cur_uid, 
+                            [actions.GetDeviceInfo, actions.GetSupportedParams],
+                            lambda self._get)
+    # if "SUPPORTED_PARAMETERS" not in self._uid_dict[uid]:
+    #   self.ola_thread.rdm_get(
+    #       self.universe.get(), uid, 0, "SUPPORTED_PARAMETERS",
+    #       lambda b, l, uid = uid:self._get_pids_complete(uid, b, l))
+    # else:
+    #   self._notebook.Update()
+    # self.cur_uid = uid
 
   def set_universe(self, i):
     """ sets the int var self.universe to the value of i """
@@ -240,34 +241,6 @@ class DisplayApp:
       self.device_menu["menu"].add_command( label = "%s" % uid, 
                                     command = lambda:self.device_selected(uid))
     self._uid_dict[uid]["index"] = self.device_menu["menu"].index(tk.END)
-
-  def _get_pids_complete(self, uid, succeeded, params):
-    """ Callback for get_supported_pids.
-
-        Args:
-          succeeded: bool,  whether or not the get was a success
-          params: packed list of 16-bit pids
-    """
-    if not succeeded:
-      return
-    else:
-      device = self._uid_dict[uid]
-      device['SUPPORTED_PARAMETERS'] = set(p['param_id'] for p in params['params'])
-
-      # TODO: 6 fetch DEVICE_INFO and a call _get_device_info_complete (added
-      # below)
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, 
-                "DEVICE_INFO", 
-                lambda b, s, uid = 
-                self.cur_uid:self._get_device_info_complete(uid, b, s))
-      
-
-  def _get_device_info_complete(self, uid, succeeded, value) :
-    self._uid_dict[uid]["DEVICE_INFO"] = value
-    # at this point we now have the list of supported parameters & the device
-    # info for the pid selected.
-    print "uid_dict: %s" % self._uid_dict
-    self._notebook.Update()
 
   def _get_identify_complete(self, uid, succeeded, value):
     """ Callback for rdm_get in device_selected.
@@ -944,6 +917,12 @@ class DisplayApp:
     if self.cur_uid is None:
       print "Error: No device selected."
       return
+
+  def _device_changed_complete(self):
+    """
+    """
+    print self._uid_dict
+    self._notebook.Update()
 
   def main(self):
     print "Entering main loop"
