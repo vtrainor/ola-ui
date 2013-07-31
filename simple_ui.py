@@ -172,21 +172,23 @@ class DisplayApp:
       Args: 
         uid: the uid of the newly selected device
     """
-
     if uid == self.cur_uid:
       print "Already Selected"
       return
-    # This line is going to return "DEVICE_LABEL" so you may as well skip it
-    controller.RDMControlFlow(self.universe, self.cur_uid, 
-                            [actions.GetDeviceInfo, actions.GetSupportedParams],
-                            lambda self._get)
-    # if "SUPPORTED_PARAMETERS" not in self._uid_dict[uid]:
-    #   self.ola_thread.rdm_get(
-    #       self.universe.get(), uid, 0, "SUPPORTED_PARAMETERS",
-    #       lambda b, l, uid = uid:self._get_pids_complete(uid, b, l))
-    # else:
-    #   self._notebook.Update()
-    # self.cur_uid = uid
+    pid_key = "DEVICE_LABEL"
+    self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key]["label"], uid))
+    self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
+                  lambda b, s, uid = uid:self._get_identify_complete(uid, b, s))
+    data = self._uid_dict[uid]
+    flow = controlflow.RDMControlFlow(
+                            self.universe.get(), 
+                            uid, 
+                            [
+                            actions.GetIdentify(data, self.ola_thread.rdm_get),
+                            actions.GetDeviceInfo(data, self.ola_thread.rdm_get)
+                            ],
+                            self._device_changed_complete())
+    flow.Run()
 
   def set_universe(self, i):
     """ sets the int var self.universe to the value of i """
