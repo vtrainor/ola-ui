@@ -34,7 +34,6 @@ class GetRDMAction(RDMAction):
     if not self.ShouldExecute():
       on_complete()
       return
-
     self._get_fn(
         universe, uid, 0, self.PID,
         lambda b, s: self._Complete(b, s, on_complete))
@@ -55,19 +54,6 @@ class GetIdentify(GetRDMAction):
   def UpdateDict(self, succeeded, params):
     if succeeded:
       self._data[self.PID] = params['identify_state']
-
-class GetDeviceInfo(GetRDMAction):
-  """An action that GETs DEVICE_INFO."""
-  PID = "DEVICE_INFO"
-
-  def ShouldExecute(self):
-    """SKip this action if we already have DEVICE_INFO."""
-    print self._data
-    return self.PID not in self._data
-
-  def UpdateDict(self, succeeded, params):
-    if succeeded:
-      self._data[self.PID] = params
 
 class RDMControlFlow(object):
   """Create a new Control Flow.
@@ -126,7 +112,8 @@ def test():
       ],
       on_complete)
   flow.Run()
-
+  print data
+	
   print ''
   print 'Running again...'
 
