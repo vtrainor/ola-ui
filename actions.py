@@ -44,3 +44,108 @@ class GetDeviceLabel(GetRDMAction):
 	def UpdateDict(self, succeeded, value):
 		if succeeded:
 			self._data[self.PID] = value["label"]
+
+class GetProductDetailIds(GetRDMAction):
+	PID = "PRODUCT_DETAIL_ID_LIST"
+    
+	def ShouldExecute(self):
+		"""" Skip this action if we already have the supported params"""
+		pid_key = self._pid_store.GetName(self.PID)
+		return (self.PID not in self._data 
+														and pid_key in self._data["SUPPORTED_PARAMETERS"])
+
+	def UpdateDict(self, succeeded, value):
+		if succeeded:
+			self._data[self.PID] = value["label"]
+			self._data[self.PID]= set(
+                            value['detail_id'] for value in data['detail_ids'])
+
+class GetDeviceLabel(GetRDMAction):
+	"""
+	"""
+	PID = "DEVICE_MODEL_DESCRIPTION"
+		
+	def ShouldExecute(self):
+		"""" Skip this action if we already have the supported params"""
+		pid_key = self._pid_store.GetName(self.PID)
+		return (self.PID not in self._data 
+														and pid_key in self._data["SUPPORTED_PARAMETERS"])
+
+	def UpdateDict(self, succeeded, value):
+		if succeeded:
+			self._data[self.PID] = value["description"]
+
+class GetManufacturerLabel(GetRDMAction):
+	"""
+	"""
+	PID = "MANUFACTURER_LABEL"
+		
+	def ShouldExecute(self):
+		"""" Skip this action if we already have the supported params"""
+		pid_key = self._pid_store.GetName(self.PID)
+		return (self.PID not in self._data 
+														and pid_key in self._data["SUPPORTED_PARAMETERS"])
+
+	def UpdateDict(self, succeeded, value):
+		if succeeded:
+			self._data[self.PID] = value["label"]
+
+class GetFactoryDefaults(GetRDMAction):
+	"""
+	"""
+	PID = "FACTORY_DEFAULTS"
+		
+	def ShouldExecute(self):
+		"""" Skip this action if we already have the supported params"""
+		pid_key = self._pid_store.GetName(self.PID)
+		return (self.PID not in self._data 
+														and pid_key in self._data["SUPPORTED_PARAMETERS"])
+
+	def UpdateDict(self, succeeded, value):
+		if succeeded:
+			self._data[self.PID] = value["using_defaults"]
+
+class GetSoftwareVersion(GetRDMAction):
+	"""
+	"""
+	PID = "SOFTWARE_VERSION_LABEL"
+		
+	def ShouldExecute(self):
+		"""" Skip this action if we already have the supported params"""
+		pid_key = self._pid_store.GetName(self.PID)
+		return (self.PID not in self._data 
+														and pid_key in self._data["SUPPORTED_PARAMETERS"])
+
+	def UpdateDict(self, succeeded, value):
+		if succeeded:
+			self._data[self.PID] = value["label"]
+
+class GetDeviceLabel(GetRDMAction):
+	"""
+	"""
+	PID = "BOOT_SOFTWARE_VERSION"
+		
+	def ShouldExecute(self):
+		"""" Skip this action if we already have the supported params"""
+		pid_key = self._pid_store.GetName(self.PID)
+		return (self.PID not in self._data 
+														and pid_key in self._data["SUPPORTED_PARAMETERS"])
+
+	def UpdateDict(self, succeeded, value):
+		if succeeded:
+			self._data[self.PID] = value["version"]
+
+class GetDeviceLabel(GetRDMAction):
+	"""
+	"""
+	PID = "BOOT_SOFTWARE_LABEL"
+		
+	def ShouldExecute(self):
+		"""" Skip this action if we already have the supported params"""
+		pid_key = self._pid_store.GetName(self.PID)
+		return (self.PID not in self._data 
+														and pid_key in self._data["SUPPORTED_PARAMETERS"])
+
+	def UpdateDict(self, succeeded, value):
+		if succeeded:
+			self._data[self.PID] = value["label"]
