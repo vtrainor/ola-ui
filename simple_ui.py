@@ -184,7 +184,7 @@ class DisplayApp:
                             self.universe.get(), 
                             uid, 
                             [
-                            actions.GetIdentify(data, self.ola_thread.rdm_get),
+                            actions.GetSupportedParams(data, self.ola_thread.rdm_get),
                             actions.GetDeviceInfo(data, self.ola_thread.rdm_get)
                             ],
                             self._device_changed_complete())
