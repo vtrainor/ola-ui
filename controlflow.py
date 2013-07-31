@@ -34,6 +34,7 @@ class GetRDMAction(RDMAction):
     if not self.ShouldExecute():
       on_complete()
       return
+
     self._get_fn(
         universe, uid, 0, self.PID,
         lambda b, s: self._Complete(b, s, on_complete))
@@ -113,7 +114,7 @@ def test():
       on_complete)
   flow.Run()
   print data
-	
+  
   print ''
   print 'Running again...'
 

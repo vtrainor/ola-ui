@@ -258,6 +258,28 @@ class DisplayApp:
     print "value: %s" % value
     print "rdm set complete"
  
+  def GetBasicInformation(self):
+    """
+    """
+    if self.cur_uid is None:
+    	print "you need to select a device"
+    	return
+    data = self._uid_dict[self.cur_uid]
+    flow = controlflow.RDMControlFlow(
+                            self.universe.get(), 
+                            self.cur_uid, 
+                            [
+                            actions.GetProductDetailIds(data, self.ola_thread.rdm_get),
+                            actions.GetDeviceModel(data, self.ola_thread.rdm_get),
+                            actions.GetManufacturerLabel(data, self.ola_thread.rdm_get),
+                            actions.GetFactoryDefaults(data, self.ola_thread.rdm_get),
+                            actions.GetSoftwareVersion(data, self.ola_thread.rdm_get),
+                            actions.GetBootSoftwareLabel(data, self.ola_thread.rdm_get),
+                            actions.GetBootSoftwareVersion(data, self.ola_thread.rdm_get)
+                            ],
+                            self.UpdateBasicInformation())
+    flow.Run()
+  
   def GetDMXInformation(self):
     """
     // "DEVICE_INFO"
@@ -762,10 +784,8 @@ class DisplayApp:
     # store the results in the uid dict
     self._notebook.Update()
 
-  def Update(self, index):
-    if self.cur_uid is None:
-      print "Error: No device selected."
-      return
+  def UpdateBasicInformation(self):
+    self._notebook.RenderBasicInformation(self._uid_dict[self.cur_uid])
 
   def _device_changed_complete(self):
     """

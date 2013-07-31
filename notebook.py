@@ -177,8 +177,9 @@ class RDMNotebook:
     self.factory_defaults_button = tk.Checkbutton(self.info_tab,
                                               variable = self.factory_defaults)
     
-    self.device_label_button = tk.Button(self.info_tab, text = "Update Device Label", command = self.device_label_set)
-
+    self.device_label_button = tk.Button(self.info_tab, 
+                                        text = "Update Device Label",
+                                        command = self.device_label_set)
     self.objects["PRODUCT_INFO"] = [tk.Label(self.info_tab,
                                                      text = "RDM Protocol Version"),
                             tk.Label(self.info_tab,
@@ -219,7 +220,7 @@ class RDMNotebook:
                             tk.Label(self.info_tab,
                                               text = "Boot Software Version:"),
                             tk.Label(self.info_tab,
-                                              textvariable = self.boot_software),
+                                            textvariable = self.boot_software),
 
                             self.device_label_button,
                             tk.Label(self.info_tab, text = "")
@@ -538,17 +539,19 @@ class RDMNotebook:
                           param_dict["DEVICE_INFO"]["device_model"]
                           ))
     index = param_dict["DEVICE_INFO"]["product_category"]
-    self.product_category.set(RDMConstants.PRODUCT_CATEGORY_TO_NAME.get(index, "").replace("_"," "))
-    sub_device_count = param_dict["DEVICE_INFO"]["sub_device_count"]
-    # if "SOFTWARE_VERSION_LABEL" in param_dict:
-    software_version = "%s (%d)" % (
-                          param_dict["SOFTWARE_VERSION_LABEL"],
+    self.product_category.set(RDMConstants.PRODUCT_CATEGORY_TO_NAME.get(index, 
+    																											"").replace("_"," "))
+    self.sub_device_count.set(["DEVICE_INFO"]["sub_device_count"])
+
+    self.software_version.set("%s (%d)" % (
+                          param_dict.get("SOFTWARE_VERSION_LABEL", "N/A",
                           param_dict["DEVICE_INFO"]["software_version"]
-                          )
-    sub_device_count = param_dict["DEVICE_INFO"]["sub_device_count"]
+                          ))
+    self.sub_device_count.set(param_dict["DEVICE_INFO"]["sub_device_count"])
     if "PRODUCT_DETAIL_ID_LIST" in param_dict:
       ids = param_dict["PRODUCT_DETAIL_ID_LIST"]
-      names = ', '.join(RDMConstants.PRODUCT_DETAIL_IDS_TO_NAME[id] for id in ids).replace("_", " ")
+      names = ', '.join(RDMConstants.PRODUCT_DETAIL_IDS_TO_NAME[id]
+      																		 			for id in ids).replace("_", " ")
       self.product_detail_ids.set(names)
     self.manufacturer_label.set(param_dict.get("MANUFACTURER_LABEL", "N/A"))
     self.device_label.set(param_dict.get("DEVICE_LABEL", "N/A"))
