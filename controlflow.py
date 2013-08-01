@@ -7,7 +7,7 @@ class RDMAction(object):
 
 class GetRDMAction(RDMAction):
   """An action which performs an RDM GET."""
-  def __init__(self, data_dict, get_fn):
+  def __init__(self, data_dict, get_fn, get_data = None):
     """Create a new GET action.
 
     Args:
@@ -16,6 +16,7 @@ class GetRDMAction(RDMAction):
     """
     self._data = data_dict
     self._get_fn = get_fn
+    self._get_data = get_data
 
   def Params(self):
     """This method provides the parameters for the GET."""
@@ -37,7 +38,8 @@ class GetRDMAction(RDMAction):
 
     self._get_fn(
         universe, uid, 0, self.PID,
-        lambda b, s: self._Complete(b, s, on_complete))
+        lambda b, s: self._Complete(b, s, on_complete),
+        [self._get_data])
 
   def _Complete(self, succeeded, params, on_complete):
     """Called when the GET completes."""

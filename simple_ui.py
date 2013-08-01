@@ -266,145 +266,41 @@ class DisplayApp:
     	return
     data = self._uid_dict[self.cur_uid]
     flow = controlflow.RDMControlFlow(
-                            self.universe.get(), 
-                            self.cur_uid, 
-                            [
-                            actions.GetProductDetailIds(data, self.ola_thread.rdm_get),
-                            actions.GetDeviceModel(data, self.ola_thread.rdm_get),
-                            actions.GetManufacturerLabel(data, self.ola_thread.rdm_get),
-                            actions.GetFactoryDefaults(data, self.ola_thread.rdm_get),
-                            actions.GetSoftwareVersion(data, self.ola_thread.rdm_get),
-                            actions.GetBootSoftwareLabel(data, self.ola_thread.rdm_get),
-                            actions.GetBootSoftwareVersion(data, self.ola_thread.rdm_get)
-                            ],
-                            self.UpdateBasicInformation)
+                  self.universe.get(), 
+                  self.cur_uid, 
+                  [
+                  actions.GetProductDetailIds(data, self.ola_thread.rdm_get),
+                  actions.GetDeviceModel(data, self.ola_thread.rdm_get),
+                  actions.GetManufacturerLabel(data, self.ola_thread.rdm_get),
+                  actions.GetFactoryDefaults(data, self.ola_thread.rdm_get),
+                  actions.GetSoftwareVersion(data, self.ola_thread.rdm_get),
+                  actions.GetBootSoftwareLabel(data, self.ola_thread.rdm_get),
+                  actions.GetBootSoftwareVersion(data, self.ola_thread.rdm_get)
+                  ],
+                  self.UpdateBasicInformation)
     flow.Run()
   
   def GetDMXInformation(self):
     """
-    // "DEVICE_INFO"
-    "DMX_PERSONALITY"
-    "DMX_PERSONALITY_DESCRIPTION"
-    "DMX_START_ADDRESS"
-    "SLOT_INFO"
-    "SLOT_DESCRIPTION"
-    "DEFAULT_SLOT_VALUE"
     """
     if self.cur_uid is None:
+      print "you need to select a device."
       return
-    self._get_dmx_personality()
-
-  def _get_dmx_personality(self):
-    pid_key = self._pid_store.GetName("DMX_PERSONALITY")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "DMX_PERSONALITY" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_dmx_personality_complete(b, s))
-    else:
-      self._get_personality_description()
-
-  def _get_dmx_personality_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["DMX_PERSONALITY"] = data
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_personality_description()
-
-  def _get_personality_description(self):
-    
-    pid_key = self._pid_store.GetName("DMX_PERSONALITY_DESCRIPTION")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "DMX_PERSONALITY" not in self._uid_dict[self.cur_uid]):
-      data = [self._uid_dict[self.cur_uid]["DMX_PERSONALITY_DESCRIPTION"]
-                                          ["current_personality"]]
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_personality_description_complete(b, s), data)
-    else:
-      self._get_start_address()
-
-  def _get_personality_description_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["DMX_PERSONALITY_DESCRIPTION"] = data
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_start_address()
-
-  def _get_start_address(self):
-    pid_key = self._pid_store.GetName("DMX_START_ADDRESS")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "DMX_START_ADDRESS" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_start_address_complete(b, s))
-    else:
-      self._get_slot_info()
-
-  def _get_start_address_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["DMX_START_ADDRESS"] = data["dmx_address"]
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_slot_info()
-
-  def _get_slot_info(self):
-    pid_key = self._pid_store.GetName("SLOT_INFO")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "SLOT_INFO" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_slot_info_complete(b, s))
-    else:
-      self._get_slot_description()
-
-  def _get_slot_info_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["SLOT_INFO"] = data
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_slot_description()
-
-  def _get_slot_description(self):
-    pid_key = self._pid_store.GetName("SLOT_DESCRIPTION")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "SLOT_DESCRIPTION" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_slot_description_complete(b, s))
-    else:
-      self._get_default_slot_value()
-
-  def _get_slot_description_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["SLOT_DESCRIPTION"] = data
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_defalut_slot_value()
-
-  def _get_default_slot_value(self):
-    pid_key = self._pid_store.GetName("DEFAULT_SLOT_VALUE")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "DEFAULT_SLOT_VALUE" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_default_value_complete(b, s))
-    else:
-      self._notebook.RenderDMXInformation(self._uid_dict[self.cur_uid])
-
-  def _get_default_slot_value_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      # this needs to be a set
-      self._uid_dict[self.cur_uid]["DEFAULT_SLOT_VALUE"] = data
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._notebook.RenderDMXInformation(self._uid_dict[self.cur_uid])
+    data = self._uid_dict[self.cur_uid]
+    flow = controlflow.RDMControlFlow(
+                self.universe.get(),
+                self.cur_uid,
+                [
+                actions.GetDmxPersonality(data, self.ola_thread.rdm_get),
+                actions.GetPersonalityDescription(data, self.ola_thread.rdm_get, 
+                                    data["DEVICE_INFO"]["current_personality"]),
+                actions.GetStartAddress(data, self.ola_thread.rdm_get),
+                actions.GetSlotInfo(data, self.ola_thread.rdm_get),
+                actions.GetSlotDescription(data, self.ola_thread.rdm_get)
+                # GetDefaultSlotValue(data, self.ola_thread.rdm_get)
+                ],
+                self.UpdateDmxInformation)
+    flow.Run()
 
   def GetSensorsInformation(self):
     """
@@ -786,6 +682,9 @@ class DisplayApp:
 
   def UpdateBasicInformation(self):
     self._notebook.RenderBasicInformation(self._uid_dict[self.cur_uid])
+
+  def UpdateDmxInformation(self):
+    self._notebook.RenderDMXInformation(self._uid_dict[self.cur_uid])
 
   def _device_changed_complete(self):
     """

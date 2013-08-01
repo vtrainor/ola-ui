@@ -45,6 +45,9 @@ class GetDeviceLabel(GetRDMAction):
     if succeeded:
       self._data[self.PID] = value["label"]
 
+
+# ############################ Get Basic Info ############################
+
 class GetProductDetailIds(GetRDMAction):
   PID = "PRODUCT_DETAIL_ID_LIST"
     
@@ -56,7 +59,7 @@ class GetProductDetailIds(GetRDMAction):
   def UpdateDict(self, succeeded, value):
     if succeeded:
       self._data[self.PID]= set(
-                            value['detail_id'] for value in data['detail_ids'])
+                            data['detail_id'] for data in value['detail_ids'])
 
 class GetDeviceModel(GetRDMAction):
   """
@@ -141,3 +144,96 @@ class GetBootSoftwareLabel(GetRDMAction):
   def UpdateDict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["label"]
+
+
+# ############################ Get DMX Info ############################
+
+class GetDmxPersonality(GetRDMAction):
+  """
+  """
+  PID = "DMX_PERSONALITY"
+    
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value
+
+class GetPersonalityDescription(GetRDMAction):
+  """
+  """
+  PID = "DMX_PERSONALITY_DESCRIPTION"
+    
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value
+
+class GetStartAddress(GetRDMAction):
+  """
+  """
+  PID = "DMX_START_ADDRESS"
+    
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["dmx_address"]
+
+class GetSlotInfo(GetRDMAction):
+  """
+  """
+  PID = "SLOT_INFO"
+    
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value
+
+class GetSlotDescription(GetRDMAction):
+  """
+  """
+  PID = "SLOT_DESCRIPTION"
+    
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value
+
+class GetDefaultSlotValue(GetRDMAction):
+  """
+  """
+  PID = "DEFAULT_SLOT_VALUE"
+    
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value
+
+# ############################ Get Sensors Info ############################
+
+# ############################ Get Setting Info ############################
+
+# ############################ Get Config Info ############################
