@@ -277,7 +277,7 @@ class DisplayApp:
                             actions.GetBootSoftwareLabel(data, self.ola_thread.rdm_get),
                             actions.GetBootSoftwareVersion(data, self.ola_thread.rdm_get)
                             ],
-                            self.UpdateBasicInformation())
+                            self.UpdateBasicInformation)
     flow.Run()
   
   def GetDMXInformation(self):
@@ -794,7 +794,7 @@ class DisplayApp:
     self._uid_dict[self.cur_uid]["PARAM_NAMES"] = []
     for pid_key in self._uid_dict[self.cur_uid]["SUPPORTED_PARAMETERS"]:
       self._uid_dict[self.cur_uid]["PARAM_NAMES"].append(
-                                self._pid_store.GetName(pid_key))
+                                self._pid_store.GetPid(pid_key).name)
 
 
     self._notebook.Update()
