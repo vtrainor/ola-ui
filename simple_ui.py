@@ -176,7 +176,7 @@ class DisplayApp:
       print "Already Selected"
       return
     pid_key = "DEVICE_LABEL"
-    self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key]["label"], uid))
+    self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key], uid))
     self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
                   lambda b, s, uid = uid:self._get_identify_complete(uid, b, s))
     data = self._uid_dict[uid]
@@ -235,9 +235,9 @@ class DisplayApp:
     #       doesn't change and if you try to select the first device it tells 
     #       you that it is already selected
     if succeeded:
-      self._uid_dict.setdefault(uid, {})["DEVICE_LABEL"] = data
+      self._uid_dict.setdefault(uid, {})["DEVICE_LABEL"] = data["label"]
       self.device_menu["menu"].add_command( label = "%s (%s)"%(
-                  self._uid_dict[uid]["DEVICE_LABEL"]["label"], uid), 
+                  self._uid_dict[uid]["DEVICE_LABEL"], uid), 
                   command = lambda:self.device_selected(uid))
     else:
       self._uid_dict.setdefault(uid, {})["DEVICE_LABEL"] = {"label":""}
@@ -776,9 +776,9 @@ class DisplayApp:
     """
     if succeeded:
       index = self._uid_dict[self.cur_uid]["index"]
-      self._uid_dict[self.cur_uid]["DEVICE_LABEL"]["label"] = label
+      self._uid_dict[self.cur_uid]["DEVICE_LABEL"] = label
       self.device_menu["menu"].entryconfigure(index, label = "%s (%s)"%(
-                  self._uid_dict[uid]["DEVICE_LABEL"]["label"], uid))
+                  self._uid_dict[uid]["DEVICE_LABEL"], uid))
     else:
       print "failed"
     # store the results in the uid dict
