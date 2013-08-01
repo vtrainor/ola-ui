@@ -286,19 +286,23 @@ class DisplayApp:
     if self.cur_uid is None:
       print "you need to select a device."
       return
+    dmx_actions = []
     data = self._uid_dict[self.cur_uid]
+    dmx_actions.append(actions.GetDmxPersonality(data, self.ola_thread.rdm_get))
+    for i in range(data["DEVICE_INFO"]["current_personality"]):
+      dmx_actions.append(actions.GetPersonalityDescription(data, 
+                                                  self.ola_thread.rdm_get, i,))
+    dmx_actions.append(actions.GetStartAddress(data, self.ola_thread.rdm_get))
+    dmx_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
+    dmx_actions.append(actions.GetSlotDescription(
+                                                  data, 
+                                                  self.ola_thread.rdm_get))
+    # dmx_actions.append(actions.GetDefaultSlotValue(data, 
+    #                                                 self.ola_thread.rdm_get))
     flow = controlflow.RDMControlFlow(
                 self.universe.get(),
                 self.cur_uid,
-                [
-                actions.GetDmxPersonality(data, self.ola_thread.rdm_get),
-                actions.GetPersonalityDescription(data, self.ola_thread.rdm_get, 
-                                    data["DEVICE_INFO"]["current_personality"]),
-                actions.GetStartAddress(data, self.ola_thread.rdm_get),
-                actions.GetSlotInfo(data, self.ola_thread.rdm_get),
-                actions.GetSlotDescription(data, self.ola_thread.rdm_get)
-                # GetDefaultSlotValue(data, self.ola_thread.rdm_get)
-                ],
+                dmx_actions,
                 self.UpdateDmxInformation)
     flow.Run()
 
@@ -310,47 +314,6 @@ class DisplayApp:
     """
     if self.cur_uid is None:
       return
-    self._get_sensor_definition()
-
-  def _get_sensor_definition(self):
-    pid_key = self._pid_store.GetName("SENSOR_DEFINITION")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "SENSOR_DEFINITION" not in self._uid_dict[self.cur_uid]):
-      data = [1]
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_sensor_definition_complete(b, s), data)
-    else:
-      self._get_sensor_value()
-
-  def _get_sensor_definition_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["SENSOR_DEFINITION"] = data
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_sensor_value()
-
-  def _get_sensor_value(self):
-    pid_key = self._pid_store.GetName("SENSOR_VALUE")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "SENSOR_VALUE" not in self._uid_dict[self.cur_uid]):
-      data = [1]
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_sensor_value_complete(b, s), data)
-    else:
-      self._notebook.RenderSensorInformation(self._uid_dict[self.cur_uid])
-      # do I need to do anything with record sensors here?
-
-  def _get_sensor_value_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["SENSOR_VALUE"] = data
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._notebook.RenderSensorInformation(self._uid_dict[self.cur_uid])
-    print "sensor value"
 
   def GetSettingInformation(self):
     """

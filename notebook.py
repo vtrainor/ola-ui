@@ -573,6 +573,7 @@ class RDMNotebook:
   def RenderDMXInformation(self, param_dict):
     """
     """
+    print "param_dict: %s" % param_dict
     self.dmx_footprint.set(param_dict["DEVICE_INFO"]["dmx_footprint"])
     self.dmx_start_address.set(param_dict["DEVICE_INFO"]["dmx_start_address"])
     self.current_personality.set(param_dict["DEVICE_INFO"]["current_personality"])
