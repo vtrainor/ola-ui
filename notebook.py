@@ -541,10 +541,10 @@ class RDMNotebook:
     index = param_dict["DEVICE_INFO"]["product_category"]
     self.product_category.set(RDMConstants.PRODUCT_CATEGORY_TO_NAME.get(index, 
     																											"").replace("_"," "))
-    self.sub_device_count.set(["DEVICE_INFO"]["sub_device_count"])
+    self.sub_device_count.set(param_dict["DEVICE_INFO"]["sub_device_count"])
 
     self.software_version.set("%s (%d)" % (
-                          param_dict.get("SOFTWARE_VERSION_LABEL", "N/A",
+                          param_dict.get("SOFTWARE_VERSION_LABEL", "N/A"),
                           param_dict["DEVICE_INFO"]["software_version"]
                           ))
     self.sub_device_count.set(param_dict["DEVICE_INFO"]["sub_device_count"])

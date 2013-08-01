@@ -791,6 +791,12 @@ class DisplayApp:
     """
     """
     print "Device selected: %s" % self._uid_dict
+    self._uid_dict[self.cur_uid]["PARAM_NAMES"] = []
+    for pid_key in self._uid_dict[self.cur_uid]["SUPPORTED_PARAMETERS"]:
+      self._uid_dict[self.cur_uid]["PARAM_NAMES"].append(
+                                self._pid_store.GetName(pid_key))
+
+
     self._notebook.Update()
 
   def main(self):
