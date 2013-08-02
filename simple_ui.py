@@ -289,9 +289,9 @@ class DisplayApp:
     dmx_actions = []
     data = self._uid_dict[self.cur_uid]
     dmx_actions.append(actions.GetDmxPersonality(data, self.ola_thread.rdm_get))
-    for i in range(data["DEVICE_INFO"]["current_personality"]):
+    for i in xrange(data["DEVICE_INFO"]["personality_count"]):
       dmx_actions.append(actions.GetPersonalityDescription(data, 
-                                                  self.ola_thread.rdm_get, i,))
+                                                  self.ola_thread.rdm_get, i + 1,))
     dmx_actions.append(actions.GetStartAddress(data, self.ola_thread.rdm_get))
     dmx_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
     dmx_actions.append(actions.GetSlotDescription(

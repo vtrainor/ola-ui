@@ -174,10 +174,7 @@ class GetPersonalityDescription(GetRDMAction):
   def UpdateDict(self, succeeded, value):
     if succeeded:
       index = value["personality"]
-      if self.PID not in self._data:
-        self._data[self.PID] = [index]
-      else:
-        self._data[self.PID].append(index)
+      personalities = self._data.setdefault(self.PID, {})
       self._data[self.PID][index] = {"slots_required":value["slots_required"],
                                      "name":value["name"]}
       
