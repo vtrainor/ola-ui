@@ -574,11 +574,15 @@ class RDMNotebook:
     """
     """
     print "param_dict: %s" % param_dict
+    if "DMX_PERSONALITY_DESCRIPTION" in param_dict:
+      for i in xrange(param_dict["DEVICE_INFO"]["personality_count"]):
+        index = i + 1
+        self.dmx_personality_menu["menu"].add_command(label = "Personality %d" % (index),
+                                          command = lambda:self._update_personality_menu(index, param_dict))
     self.dmx_footprint.set(param_dict["DEVICE_INFO"]["dmx_footprint"])
     self.dmx_start_address.set(param_dict["DEVICE_INFO"]["dmx_start_address"])
     self.current_personality.set(param_dict["DEVICE_INFO"]["current_personality"])
-    self.slot_required.set(param_dict.get("DMX_PERSONALITY_DESCRIPTION", {}).get("slots_required", "N/A"))
-    self.personality_name.set(param_dict.get("DMX_PERSONALITY_DESCRIPTION", {}).get("name", "N/A"))
+
     self.slot_number.set(param_dict.get("SLOT_DESCRIPTION", {}).get("slot_number", "N/A"))
     self.slot_name.set(param_dict.get("SLOT_DESCRIPTION", {}).get("slot_name", "N/A"))
     self.slot_offset.set(param_dict.get("SLOT_INFO", {}).get("slot_offset", "N/A"))
@@ -588,6 +592,10 @@ class RDMNotebook:
     self.default_slot_offset.set("N/A")
     self.default_slot_value.set("N/A")
     print "DMX Rendered"
+
+  def _update_personality_menu(self, i, param_dict):
+    self.slot_required.set(param_dict.get("DMX_PERSONALITY_DESCRIPTION", {})[i].get("slots_required", "N/A"))
+    self.personality_name.set(param_dict.get("DMX_PERSONALITY_DESCRIPTION", {})[i].get("name", "N/A"))
 
   def RenderSensorInformation(self, param_dict):
     print "rendering sensor information..."
@@ -632,6 +640,10 @@ class RDMNotebook:
 
     # if "POWER_STATE" in param_dict:
     #   self.power_state = tk.StringVar(self.setting_tab)
+
+  def RenderConfigInformation(self, param_dict):
+    print "Rendering Config...."
+    print param_dict
 
 if __name__ == "__main__":
   ui = simple_ui.DisplayApp()

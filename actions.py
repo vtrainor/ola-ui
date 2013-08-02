@@ -238,6 +238,8 @@ class GetDefaultSlotValue(GetRDMAction):
 
 # ############################ Get Sensors Info ############################
 
+# the following classes need data
+
 class GetSensorDefinition(GetRDMAction):
   """
   """
@@ -251,46 +253,240 @@ class GetSensorDefinition(GetRDMAction):
   def UpdateDict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value
-#   def _get_sensor_definition(self):
-#     pid_key = self._pid_store.GetName("SENSOR_DEFINITION")
-#     if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-#           and "SENSOR_DEFINITION" not in self._uid_dict[self.cur_uid]):
-#       data = [1]
-#       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-#             lambda b, s: self._get_sensor_definition_complete(b, s), data)
-#     else:
-#       self._get_sensor_value()
 
-#   def _get_sensor_definition_complete(self, succeeded, data):
-#     if succeeded:
-#       print ""
-#       self._uid_dict[self.cur_uid]["SENSOR_DEFINITION"] = data
-#     else:
-#       print "failed"
-#     # store the results in the uid dict
-#     self._get_sensor_value()
+class GetSensorValue(GetRDMAction):
+  """
+  """
+  PID = "SENSOR_VALUE"
 
-#   def _get_sensor_value(self):
-#     pid_key = self._pid_store.GetName("SENSOR_VALUE")
-#     if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-#           and "SENSOR_VALUE" not in self._uid_dict[self.cur_uid]):
-#       data = [1]
-#       self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-#             lambda b, s: self._get_sensor_value_complete(b, s), data)
-#     else:
-#       self._notebook.RenderSensorInformation(self._uid_dict[self.cur_uid])
-#       # do I need to do anything with record sensors here?
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
 
-#   def _get_sensor_value_complete(self, succeeded, data):
-#     if succeeded:
-#       print ""
-#       self._uid_dict[self.cur_uid]["SENSOR_VALUE"] = data
-#     else:
-#       print "failed"
-#     # store the results in the uid dict
-#     self._notebook.RenderSensorInformation(self._uid_dict[self.cur_uid])
-#     print "sensor value"
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value
+
 
 # # ############################ Get Setting Info ############################
 
+class GetDeviceHours(GetRDMAction):
+  """
+  """
+  PID = "DEVICE_HOURS"
+
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["hours"]
+ 
+class GetLampHours(GetRDMAction):
+  """
+  """
+  PID = "LAMP_HOURS"
+
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["hours"]
+
+class GetLampStrikes(GetRDMAction):
+  """
+  """
+  PID = "LAMP_STRIKES"
+
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["strikes"]
+
+class GetLampState(GetRDMAction):
+  """
+  """
+  PID = "LAMP_STATE"
+
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["state"]
+
+class GetLampOnMode(GetRDMAction):
+  """
+  """
+  PID = "LAMP_ON_MODE"
+
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["mode"]
+
+class GetPowerCycles(GetRDMAction):
+  """
+  """
+  PID = "DEVICE_POWER_CYCLES"
+
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["power_cycles"]
+
+class GetPowerState(GetRDMAction):
+  """
+  """
+  PID = "POWER_STATE"
+
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["power_state"]
+
+
 # # ############################ Get Config Info ############################
+class GetLanguageCapabilities(GetRDMAction):
+  """
+  """
+  PID = "LANGUAGE_CAPABILITIES"
+
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["languages"]
+
+class GetLanguage(GetRDMAction):
+  """
+  """
+  PID = "LANGUAGE"
+
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["language"]
+
+class GetDisplayInvert(GetRDMAction):
+  """
+  """
+  PID = "DISPLAY_INVERT"
+
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["invert_status"]
+
+class GetDisplayLevel(GetRDMAction):
+  """
+  """
+  PID = "DISPLAY_LEVEL"
+
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["level"]
+
+class GetPanInvert(GetRDMAction):
+  """
+  """
+  PID = "PAN_INVERT"
+
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["invert"]
+
+class GetTiltInvert(GetRDMAction):
+  """
+  """
+  PID = "TILT_INVERT"
+
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["invert"]
+
+class GetPanTiltSwap(GetRDMAction):
+  """
+  """
+  PID = "PAN_TILT_SWAP"
+
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value["swap"]
+
+  # def _get_real_time(self):
+  #   pid_key = self._pid_store.GetName("REAL_TIME_CLOCK")
+  #   if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
+  #         and "REAL_TIME_CLOCK" not in self._uid_dict[self.cur_uid]):
+  #     self.ola_thread.rdm_get(self.universe.get(), 
+  #                             self.cur_uid,
+  #                             0, 
+  #                             pid_key.name, 
+  #                             lambda b, s: self._get_real_time_complete(b, s)
+  #                             )
+  #   else:
+  #     self._notebook.RenderConfigInformation(self._uid_dict[self.cur_uid])
+
+  # def _get_real_time_complete(self, succeeded, data):
+  #   if succeeded:
+  #     print ""
+  #     self._uid_dict[self.cur_uid]["REAL_TIME_CLOCK"] = data
+  #   else:
+  #     print "failed"
+  #   # store the results in the uid dict
+  #   self._notebook.RenderConfigInformation(self._uid_dict[self.cur_uid])

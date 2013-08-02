@@ -191,6 +191,17 @@ class DisplayApp:
     flow.Run()
     self.cur_uid = uid
 
+  def _device_changed_complete(self):
+    """
+    """
+    print "Device selected: %s" % self._uid_dict
+    self._uid_dict[self.cur_uid]["PARAM_NAMES"] = set()
+    for pid_key in self._uid_dict[self.cur_uid]["SUPPORTED_PARAMETERS"]:
+      pid = self._pid_store.GetPid(pid_key)
+      if pid is not None:
+        self._uid_dict[self.cur_uid]["PARAM_NAMES"].add(pid.name)
+    self._notebook.Update()
+
   def set_universe(self, i):
     """ sets the int var self.universe to the value of i """
     self.universe.set(i)
@@ -257,13 +268,13 @@ class DisplayApp:
     """ callback for the rdm_set in identify. """
     print "value: %s" % value
     print "rdm set complete"
- 
+
   def GetBasicInformation(self):
     """
     """
     if self.cur_uid is None:
-    	print "you need to select a device"
-    	return
+      print "you need to select a device"
+      return
     data = self._uid_dict[self.cur_uid]
     flow = controlflow.RDMControlFlow(
                   self.universe.get(), 
@@ -290,8 +301,10 @@ class DisplayApp:
     data = self._uid_dict[self.cur_uid]
     dmx_actions.append(actions.GetDmxPersonality(data, self.ola_thread.rdm_get))
     for i in xrange(data["DEVICE_INFO"]["personality_count"]):
-      dmx_actions.append(actions.GetPersonalityDescription(data, 
-                                                  self.ola_thread.rdm_get, i + 1,))
+      dmx_actions.append(actions.GetPersonalityDescription(
+                                                  data, 
+                                                  self.ola_thread.rdm_get, 
+                                                  i + 1))
     dmx_actions.append(actions.GetStartAddress(data, self.ola_thread.rdm_get))
     dmx_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
     dmx_actions.append(actions.GetSlotDescription(
@@ -308,320 +321,93 @@ class DisplayApp:
 
   def GetSensorsInformation(self):
     """
-    "SENSOR_DEFINITION"
-    "SENSOR_VALUE"
-    "RECORD_SENSORS"
     """
     if self.cur_uid is None:
+      print "you need to select a device."
       return
+    sensor_actions = []
+    data = self._uid_dict[self.cur_uid]
+    for i in xrange(data["DEVICE_INFO"]["sensor_count"]):
+      sensor_actions.append(actions.GetSensorDefinition(
+                                                    data, 
+                                                    self.ola_thread.rdm_get,
+                                                    i + 1))
+      sensor_actions.append(actions.GetSensorValue(
+                                                  data, 
+                                                  self.ola_thread.rdm_get,
+                                                  i + 1))
+    flow = controlflow.RDMControlFlow(
+                self.universe.get(),
+                self.cur_uid,
+                sensor_actions,
+                self.UpdateSensorInformation)
+    flow.Run()
 
   def GetSettingInformation(self):
     """
-    "DEVICE_HOURS"
-    "LAMP_HOURS"
-    "LAMP_STRIKES"
-    "LAMP_STATE"
-    "LAMP_ON_MODE"
-    "DEVICE_POWER_CYCLES"
-    "POWER_STATE"
     """
     if self.cur_uid is None:
+      print "you need to select a device"
       return
-    self._get_device_hours()
+    data = self._uid_dict[self.cur_uid]
+    flow = controlflow.RDMControlFlow(
+                  self.universe.get(), 
+                  self.cur_uid, 
+                  [
+                  actions.GetDeviceHours(data, self.ola_thread.rdm_get),
+                  actions.GetLampHours(data, self.ola_thread.rdm_get),
+                  actions.GetLampState(data, self.ola_thread.rdm_get),
+                  actions.GetLampOnMode(data, self.ola_thread.rdm_get),
+                  actions.GetPowerCycles(data, self.ola_thread.rdm_get),
+                  actions.GetPowerState(data, self.ola_thread.rdm_get),
+                  ],
+                  self.UpdateSettingInformation)
+    flow.Run()
 
-  def _get_device_hours(self):
-    pid_key = self._pid_store.GetName("DEVICE_HOURS")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "DEVICE_HOURS" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_device_hours_complete(b, s))
-    else:
-      self._get_lamp_hours()
-
-  def _get_device_hours_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["DEVICE_HOURS"] = data["hours"]
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_lamp_hours()
-
-  def _get_lamp_hours(self):
-    pid_key = self._pid_store.GetName("LAMP_HOURS")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "LAMP_HOURS" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_lamp_hours_complete(b, s))
-    else:
-      self._get_lamp_strikes()
-
-  def _get_lamp_hours_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["LAMP_HOURS"] = data["hours"]
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_lamp_strikes()
-
-  def _get_lamp_strikes(self):
-    pid_key = self._pid_store.GetName("LAMP_STRIKES")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "LAMP_STRIKES" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_lamp_strikes_complete(b, s))
-    else:
-      self._get_lamp_state()
-
-  def _get_lamp_strikes_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["LAMP_STRIKES"] = data["strikes"]
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_lamp_state()
-
-  def _get_lamp_state(self):
-    pid_key = self._pid_store.GetName("LAMP_STATE")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "LAMP_STATE" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_lamp_state_complete(b, s))
-    else:
-      self._get_lamp_on_mode()
-
-  def _get_lamp_state_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["LAMP_STATE"] = data["state"]
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_lamp_on_mode()
-
-  def _get_lamp_on_mode(self):
-    pid_key = self._pid_store.GetName("LAMP_ON_MODE")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "LAMP_ON_MODE" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_lamp_on_mode_complete(b, s))
-    else:
-      self._get_power_cycles()
-
-  def _get_lamp_on_mode_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["LAMP_ON_MODE"] = data["mode"]
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_power_cycles()
-
-  def _get_power_cycles(self):
-    pid_key = self._pid_store.GetName("DEVICE_POWER_CYCLES")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "DEVICE_POWER_CYCLES" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_power_cycles_complete(b, s))
-    else:
-      self._get_power_state()
-
-  def _get_power_cycles_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["DEVICE_POWER_CYCLES"] = data["power_cycles"]
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_power_state()
-
-  def _get_power_state(self):
-    pid_key = self._pid_store.GetName("POWER_STATE")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "POWER_STATE" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_power_state_complete(b, s))
-    else:
-      self._notebook.RenderSettingInformation(self._uid_dict[self.cur_uid])
-
-  def _get_power_state_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["POWER_STATE"] = data["power_state"]
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._notebook.RenderSettingInformation(self._uid_dict[self.cur_uid])
-
+ 
   def GetConfigInformation(self):
     """
-    "LANGUAGE_CAPABILITIES"
-    "LANGUAGE"
-    "DISPLAY_INVERT"
-    "DISPLAY_LEVEL"
-    "PAN_INVERT"
-    "TILT_INVERT"
-    "PAN_TILT_SWAP"
-    "REAL_TIME_CLOCK"
     """
     if self.cur_uid is None:
+      print "you need to select a device"
       return
+    data = self._uid_dict[self.cur_uid]
+    flow = controlflow.RDMControlFlow(
+                  self.universe.get(), 
+                  self.cur_uid, 
+                  [
+                  actions.GetLanguageCapabilities(data, self.ola_thread.rdm_get),
+                  actions.GetLanguage(data, self.ola_thread.rdm_get),
+                  actions.GetDisplayInvert(data, self.ola_thread.rdm_get),
+                  actions.GetDisplayLevel(data, self.ola_thread.rdm_get),
+                  actions.GetPanInvert(data, self.ola_thread.rdm_get),
+                  actions.GetTiltInvert(data, self.ola_thread.rdm_get),
+                  actions.GetPanTiltSwap(data, self.ola_thread.rdm_get)
+                  ],
+                  self.UpdateConfigInformation)
+    flow.Run()
 
-  def _get_language_capabilities(self):
-    pid_key = self._pid_store.GetName("LANGUAGE_CAPABILITIES")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "LANGUAGE_CAPABILITIES" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_language_capabilities_complete(b, s))
-    else:
-      self._get_language()
+  def UpdateBasicInformation(self):
+    self._notebook.RenderBasicInformation(self._uid_dict[self.cur_uid])
 
-  def _get_language_capabilities_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["LANGUAGE_CAPABILITIES"] = data
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_language()
+  def UpdateDmxInformation(self):
+    self._notebook.RenderDMXInformation(self._uid_dict[self.cur_uid])
 
-  def _get_language(self):
-    pid_key = self._pid_store.GetName("LANGUAGE")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "LANGUAGE" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_language_complete(b, s))
-    else:
-      self._get_display_invert()
+  def UpdateSensorInformation(self):
+    self._notebook.RenderSensorInformation(self._uid_dict[self.cur_uid])
 
-  def _get_language_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["LANGUAGE"] = data["language"]
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_display_invert()
+  def UpdateSettingInformation(self):
+    self._notebook.RenderSettingInformation(self._uid_dict[self.cur_uid])
 
-  def _get_display_invert(self):
-    pid_key = self._pid_store.GetName("DISPLAY_INVERT")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "DISPLAY_INVERT" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_display_invert_complete(b, s))
-    else:
-      self._get_display_level()
-
-  def _get_display_invert_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["DISPLAY_INVERT"] = data["invert_status"]
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_display_level()
-
-  def _get_display_level(self):
-    pid_key = self._pid_store.GetName("DISPLAY_LEVEL")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "DISPLAY_LEVEL" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_display_level_complete(b, s))
-    else:
-      self._get_pan_invert()
-
-  def _get_display_level_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["DISPLAY_LEVEL"] = data["level"]
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_pan_invert()
-
-  def _get_pan_invert(self):
-    pid_key = self._pid_store.GetName("PAN_INVERT")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "PAN_INVERT" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_pan_invert_complete(b, s))
-    else:
-      self._get_tilt_invert()
-
-  def _get_pan_invert_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["PAN_INVERT"] = data["invert"]
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_tilt_invert()
-
-  def _get_tilt_invert(self):
-    pid_key = self._pid_store.GetName("TILT_INVERT")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "TILT_INVERT" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_tilt_invert_complete(b, s))
-    else:
-      self._get_pan_tilt_swap()
-
-  def _get_tilt_invert_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["TILT_INVERT"] = data["invert"]
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_pan_tilt_swap()
-
-  def _get_pan_tilt_swap(self):
-    pid_key = self._pid_store.GetName("PAN_TILT_SWAP")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "PAN_TILT_SWAP" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), self.cur_uid, 0, pid_key.name, 
-            lambda b, s: self._get_pan_tilt_swap_complete(b, s))
-    else:
-      self._get_real_time()
-
-  def _get_pan_tilt_swap_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["PAN_TILT_SWAP"] = data["swap"]
-    else:
-      print "failed"
-    # store the results in the uid dict
-    self._get_real_time()
-
-  def _get_real_time(self):
-    pid_key = self._pid_store.GetName("REAL_TIME_CLOCK")
-    if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-          and "REAL_TIME_CLOCK" not in self._uid_dict[self.cur_uid]):
-      self.ola_thread.rdm_get(self.universe.get(), 
-                              self.cur_uid,
-                              0, 
-                              pid_key.name, 
-                              lambda b, s: self._get_real_time_complete(b, s)
-                              )
-    else:
-      self._notebook.RenderConfigInformation(self._uid_dict[self.cur_uid])
-
-  def _get_real_time_complete(self, succeeded, data):
-    if succeeded:
-      print ""
-      self._uid_dict[self.cur_uid]["REAL_TIME_CLOCK"] = data
-    else:
-      print "failed"
-    # store the results in the uid dict
+  def UpdateConfigInformation(self):
     self._notebook.RenderConfigInformation(self._uid_dict[self.cur_uid])
 
   def set_device_label(self, label):
     """
     """
     uid = self.cur_uid
-    callback = lambda b, s, label = label, uid = uid:self.set_device_label_complete(uid, label, b, s)
+    callback = (lambda b, s, label = label, uid = uid:
+                              self.set_device_label_complete(uid, label, b, s))
     self.ola_thread.rdm_set(self.universe.get(), 
                                   uid,
                                   0, 
@@ -641,24 +427,6 @@ class DisplayApp:
     else:
       print "failed"
     # store the results in the uid dict
-    self._notebook.Update()
-
-  def UpdateBasicInformation(self):
-    self._notebook.RenderBasicInformation(self._uid_dict[self.cur_uid])
-
-  def UpdateDmxInformation(self):
-    self._notebook.RenderDMXInformation(self._uid_dict[self.cur_uid])
-
-  def _device_changed_complete(self):
-    """
-    """
-    print "Device selected: %s" % self._uid_dict
-    self._uid_dict[self.cur_uid]["PARAM_NAMES"] = set()
-    for pid_key in self._uid_dict[self.cur_uid]["SUPPORTED_PARAMETERS"]:
-      pid = self._pid_store.GetPid(pid_key)
-      if pid is not None:
-        self._uid_dict[self.cur_uid]["PARAM_NAMES"].add(pid.name)
-
     self._notebook.Update()
 
   def main(self):
