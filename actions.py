@@ -110,8 +110,7 @@ class GetSoftwareVersion(GetRDMAction):
     
   def ShouldExecute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return self.PID not in self._data
 
   def UpdateDict(self, succeeded, value):
     if succeeded:

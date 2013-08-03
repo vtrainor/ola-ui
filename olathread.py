@@ -43,6 +43,18 @@ class OLAThread(threading.Thread):
     """
     self._ss.Execute(lambda:self._run_discovery(universe,callback))
 
+  def fetch_universes(self,callback):
+    """ runs discovery in specified universe
+      
+      Args:
+        universe: int, specifies the universe in which to run discovery
+        callback: method called upon discovery, takes two arguments(bool, [UID])
+    
+      Can be called from any thread.
+      Callback is run in the OLA thread.
+    """
+    self._ss.Execute(lambda:self._fetch_universes(callback))
+
   def rdm_get(self,universe,uid,sub_device,pid,callback,data=''):
     """ Executes, in the ola thread, an rdm inquiry. """
     # print "pid: %s" % pid
@@ -77,8 +89,15 @@ class OLAThread(threading.Thread):
     if response==False:
       callback(False,[])
 
+  def _fetch_universes(self, callback):
+    """ This method is only run in the OLA thread. """
+    response = self._client.FetchUniverses(callback)
+    if response==False:
+      callback([])
+
   def _rdm_get(self,universe,uid,sub_device,pid,callback,data):
     """ This method is only run in the OLA thread. """
+    print "get %s" % pid
     self._rdm_api.Get(universe,uid,sub_device,self._pid_store.GetName(pid),
                       lambda r,d,e:self.complete_get(callback,r,d,e),data)
     # print "pid: %s" % pid

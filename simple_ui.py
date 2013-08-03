@@ -104,8 +104,7 @@ class DisplayApp:
     self.root.update_idletasks()
     # Assigning fields
     self.universe = tk.IntVar(self.root)
-    self.universe.set(1)
-    self.universe_list = [1, 2, 3, 4, 5]
+    self.universe_dict = {}
     self.cur_uid = None
     self.id_state = tk.IntVar(self.root)
     self.auto_disc = tk.BooleanVar(self.root)
@@ -114,16 +113,19 @@ class DisplayApp:
     self._uid_dict = {}
     
     # Call initialing functions
-    self._pid_store = PidStore.GetStore()
-    self.ola_thread = olathread.OLAThread(self._pid_store)
-    self.ola_thread.start()
     self.build_frames()
     self.build_cntrl()
     self._notebook = notebook.RDMNotebook(self.root, self._controller)
-    self.discover()
-    self.auto_disc.set(False)
 
-    print "currently in thread: %d"%threading.currentThread().ident
+    self._pid_store = PidStore.GetStore()
+    self.ola_thread = olathread.OLAThread(self._pid_store)
+    self.ola_thread.start()
+
+
+    self.auto_disc.set(False)
+    self.fetch_universes(self.fetch_universes_complete)
+
+    print "currently in thread: %d" % threading.currentThread().ident
     time.sleep(1)
     print "back from sleep"
 
@@ -145,9 +147,10 @@ class DisplayApp:
       device_menu:
     """
     tk.Label(self.cntrl_frame, text = "Select\nUniverse:").pack(side = tk.LEFT)
-    menu = tk.OptionMenu(self.cntrl_frame, self.universe, *self.universe_list, 
-                       command = self.set_universe)
-    menu.pack(side = tk.LEFT)
+    universes = self.universe_dict.keys()
+    print universes
+    self.universe_menu = tk.OptionMenu(self.cntrl_frame, self.universe, [])
+    self.universe_menu.pack(side = tk.LEFT)
     discover_button = tk.Button(self.cntrl_frame, text = "Discover", 
                                 command = self.discover)
     discover_button.pack(side = tk.LEFT)
@@ -194,17 +197,37 @@ class DisplayApp:
   def _device_changed_complete(self):
     """
     """
-    print "Device selected: %s" % self._uid_dict
     self._uid_dict[self.cur_uid]["PARAM_NAMES"] = set()
     for pid_key in self._uid_dict[self.cur_uid]["SUPPORTED_PARAMETERS"]:
       pid = self._pid_store.GetPid(pid_key)
       if pid is not None:
         self._uid_dict[self.cur_uid]["PARAM_NAMES"].add(pid.name)
+    print "Device selected: %s" % self._uid_dict[self.cur_uid]
     self._notebook.Update()
 
-  def set_universe(self, i):
+  def fetch_universes(self, callback):
+    """
+    """
+    self.ola_thread.fetch_universes(self.fetch_universes_complete)
+
+  def fetch_universes_complete(self, succeeded, universes):
+    """
+    """
+    if succeeded:
+      for universe in universes:
+        self.universe_dict[universe.id] = []
+        self.universe_menu["menu"].add_command(label = universe.id,
+                                      command = self._set_universe(universe.id))
+      self.universe.set(universes[0].id)
+
+  def _set_universe(self, i):
     """ sets the int var self.universe to the value of i """
     self.universe.set(i)
+    if not self.universe_dict[i]:
+      self.discover()
+    else: 
+      for uid in self.universe_dict[i]:
+        self._add_device(uid, True, self._uid_dict[uid]["DEVICE_LABEL"])
 
   def discover(self):
     """ runs discovery for the current universe. """
@@ -229,9 +252,10 @@ class DisplayApp:
 
   def _upon_discover(self, status, uids):
     """ callback for client.RunRDMDiscovery. """
-    if len(self._uid_dict.keys()) == 0:
+    if not uids:
       self.device_menu["menu"].delete(0, "end")
     for uid in uids:
+      self.universe_dict[self.universe.get()].append(uid)
       if uid not in self._uid_dict.keys():
         self._uid_dict[uid] = {}
         self.ola_thread.rdm_get(self.universe.get(), uid, 0, "DEVICE_LABEL", 
