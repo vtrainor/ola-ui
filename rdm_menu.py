@@ -14,17 +14,18 @@ class RDMMenu(object):
     self.clear_menu()
     
   def get(self):
-  	return self.variable.get()
+    return self.variable.get()
     
   def set(self, value):
-  	print "setting to: %s" % value
-  	self.variable.set(value)
+    print "setting to: %s" % value
+    self.variable.set(value)
+    self.root.update_idletasks()
     
   def pack(self, *args, **kwargs):
-  	self.menu.pack(*args, **kwargs)
-  	
+    self.menu.pack(*args, **kwargs)
+    
   def grid(self, *args, **kwargs):
-  	self.menu.grid(*args, **kwargs)
+    self.menu.grid(*args, **kwargs)
   
 
   def clear_menu(self):
@@ -49,4 +50,4 @@ class RDMMenu(object):
     command()
     
   def config(self, *args, **kwargs):
-  	self.menu.config(*args, **kwargs)
+    self.menu.config(*args, **kwargs)
