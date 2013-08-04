@@ -264,19 +264,23 @@ class DisplayApp(object):
       self.discover()
     else:
       for uid in self.universe_dict[universe_id].uids:
-        self._add_device(uid, True, self._uid_dict[uid]['DEVICE_LABEL'])
+        self._add_device_to_menu(uid)
 
   def discover(self):
     ' runs discovery for the current universe. '
-    self.ola_thread.run_discovery(self.universe.get(), self._upon_discover)
+    universe_id = self.universe.get()
+    self.ola_thread.run_discovery(universe_id, 
+            lambda status, uids:self._upon_discover(status, uids, universe_id))
     if self.auto_disc.get():
       self.ola_thread.add_event(5000, self.discover)
     else: 
       print 'Automatic discovery is off.'
   
-  def _upon_discover(self, status, uids):
+  def _upon_discover(self, status, uids, universe_id):
     ' callback for client.RunRDMDiscovery. '
-    self.universe_dict[self.universe.get()].set_uids(uids)
+    if self.universe.get() != universe_id:
+      return
+    self.universe_dict[universe_id].set_uids(uids)
     if not uids:
       self.device_menu.clear_menu()
     for uid in uids:
@@ -305,12 +309,9 @@ class DisplayApp(object):
     '''
     if succeeded:
       self._uid_dict.setdefault(uid, {})['DEVICE_LABEL'] = data['label']
-      label = '%s (%s)' % (self._uid_dict[uid]['DEVICE_LABEL'], uid)
     else:
       self._uid_dict.setdefault(uid, {})['DEVICE_LABEL'] = {''}
-      label = '%s' % uid
-    index = self.device_menu.add_item(label, lambda:self.device_selected(uid))
-    self._uid_dict[uid]['index'] = index
+    self._add_device_to_menu(uid)
 
 
 
@@ -501,6 +502,15 @@ class DisplayApp(object):
       print 'failed'
     # store the results in the uid dict
     self._notebook.Update()
+
+  def _add_device_to_menu(self, uid):
+    label = self._uid_dict[uid]['DEVICE_LABEL']
+    if label == '':
+      menu_label = '%s' % uid
+    else:
+      menu_label = '%s (%s)' % (label, uid)
+    index = self.device_menu.add_item(menu_label, lambda:self.device_selected(uid))
+    self._uid_dict[uid]['index'] = index
 
   def main(self):
     print 'Entering main loop'
