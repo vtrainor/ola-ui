@@ -2,6 +2,7 @@ import Tkinter as tk
 import simple_ui
 import ttk
 import ola.RDMConstants as RDMConstants
+from rdm_menu import RDMMenu
 
 class RDMNotebook(object):
   def __init__(self, root, controller, width=800, height=500, side=tk.TOP):
@@ -155,7 +156,6 @@ class RDMNotebook(object):
     # Text Variables
     self.dmx_footprint = tk.StringVar(self.dmx_tab)
     self.dmx_start_address = tk.StringVar(self.dmx_tab)
-    self.current_personality = tk.StringVar(self.dmx_tab)
     self.slot_required = tk.StringVar(self.dmx_tab)
     self.personality_name = tk.StringVar(self.dmx_tab)
     self.slot_number = tk.StringVar(self.dmx_tab)
@@ -169,9 +169,9 @@ class RDMNotebook(object):
     # Widgets
     self.start_address_entry = tk.Entry(self.dmx_tab,
                                           textvariable = self.dmx_start_address)
-    self.current_personality.set("DMX Personalities")
-    self.dmx_personality_menu = tk.OptionMenu(self.dmx_tab, 
-                                                self.current_personality, [])
+    self.dmx_personality_menu = RDMMenu(self.dmx_tab,
+                                        "Personality description not supported.",
+                                        "DMX Personalities")
     self.slot_menu = tk.OptionMenu(self.dmx_tab, self.slot_number, [])
 
     self.objects["DMX512_SETUP"] = [tk.Label(self.dmx_tab,
@@ -485,14 +485,15 @@ class RDMNotebook(object):
     if "DMX_PERSONALITY_DESCRIPTION" in param_dict:
       for i in xrange(param_dict["DEVICE_INFO"]["personality_count"]):
         index = i + 1
-        self.dmx_personality_menu["menu"].add_command(
-              label = "Personality %d" % (index),
-              command = lambda index = index:self._controller.SetPersonality(index))
+        self.dmx_personality_menu.add_item( "Personality %d" % (index),
+                  lambda index = index:self._controller.SetPersonality(index))
     self.dmx_footprint.set(param_dict["DEVICE_INFO"]["dmx_footprint"])
     self.dmx_start_address.set(param_dict["DEVICE_INFO"]["dmx_start_address"])
-
-    self.slot_number.set(param_dict.get("SLOT_DESCRIPTION", {}).get("slot_number", "N/A"))
-    self.slot_name.set(param_dict.get("SLOT_DESCRIPTION", {}).get("slot_name", "N/A"))
+    if "SLOT_DESCRIPTION" in param_dict:
+      for index in xrange(param_dict["DEVICE_INFO"]["dmx_footprint"]):
+        self.slot_menu["menu"].add_command( label = "Slot Number %d" % index,
+                  command = lambda index = i:self._display_slot_info(index, 
+                                                                    param_dict))
     self.slot_offset.set(param_dict.get("SLOT_INFO", {}).get("slot_offset", "N/A"))
     self.slot_type.set(param_dict.get("SLOT_INFO", {}).get("slot_type", "N/A"))
     self.slot_label_id.set(param_dict.get("SLOT_INFO", {}).get("slot_label_id", "N/A"))
@@ -554,7 +555,6 @@ class RDMNotebook(object):
   # ============================================================================
 
   def PersonalityCallback(self, personality, param_dict):
-    self.current_personality.set("Personality %d" % personality)
     slots_required = param_dict.get("DMX_PERSONALITY_DESCRIPTION", 
                                     {})[personality].get(
                                     "slots_required", 
@@ -629,7 +629,10 @@ class RDMNotebook(object):
     #   elif pid in self.pid_location_dict["CONFIGURATION"].keys():
     #     for i in self.pid_location_dict["CONFIGURATION"][pid]:
     #       self.objects["CONFIGURATION"][i].config(state = tk.NORMAL)
-
+  def _display_slot_info(self, slot_number, param_dict):
+    """
+    """
+    self.slot_name.set(param_dict.get("SLOT_DESCRIPTION", {}).get(slot_number, "N/A"))
   # ============================== Main Loop ===================================
 
   def main(self):
