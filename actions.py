@@ -178,7 +178,7 @@ class GetPersonalityDescription(GetRDMAction):
     if succeeded:
       index = value["personality"]
       personalities = self._data.setdefault(self.PID, {})
-      self._data[self.PID][index] = {"slots_required":value["slots_required"],
+      personalities[index] = {"slots_required":value["slots_required"],
                                      "name":value["name"]}
       
 
@@ -208,7 +208,12 @@ class GetSlotInfo(GetRDMAction):
 
   def UpdateDict(self, succeeded, value):
     if succeeded:
-      self._data[self.PID] = value
+      for slot in value["slots"]:
+        self._data[self.PID][slot["slot_offset"]] = {"slot_type":
+                                                     slot["slot_type"],
+                                                     "slot_label_id":
+                                                     slot["slot_label_id"]
+                                                     }
 
 class GetSlotDescription(GetRDMAction):
   """
@@ -222,7 +227,9 @@ class GetSlotDescription(GetRDMAction):
 
   def UpdateDict(self, succeeded, value):
     if succeeded:
-      self._data[self.PID] = value
+      index = value["slot_number"]
+      slots = self._data.setdefault(self.PID, {})
+      slots[index] = {value["name"]}
 
 class GetDefaultSlotValue(GetRDMAction):
   """
@@ -236,7 +243,9 @@ class GetDefaultSlotValue(GetRDMAction):
 
   def UpdateDict(self, succeeded, value):
     if succeeded:
-      self._data[self.PID] = value
+      for slot_value in value["slot_values"]:
+        self._data[self.PID][slot_value["slot_offset"]] = slot_value[
+                                                          "default_slot_value"]
 
 # ==============================================================================
 # ============================ Get Sensors Info ================================

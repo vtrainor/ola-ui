@@ -102,7 +102,7 @@ class OLAThread(threading.Thread):
                       lambda r,d,e:self.complete_get(callback,r,d,e),data)
     # print "pid: %s" % pid
     # print "data: %s" % data
-      
+
   def _rdm_set(self,universe,uid,sub_device,pid,callback,data):
     """ This method is only run in the OLA thread. """
     print '_rdm_set'

@@ -33,7 +33,7 @@ class RDMNotebook(object):
     self.config_tab = self._create_tab("config_tab", "Configuration")
     self._init_config()
     self.pid_location_dict = {"PRODUCT_INFO": {"DEVICE_INFO": [0,1,2,3,4,5,6,7,
-                                                              8,9], 
+                                                              8,9],
                                       "PRODUCT_DETAIL_ID_LIST": [10,11],
                                       "DEVICE_MODEL_DESCRIPTION": [3],
                                       "MANUFACTURER_LABEL": [12,13],
@@ -477,27 +477,33 @@ class RDMNotebook(object):
     elif boot_software_version:
       boot_software =  boot_software_version
 
-    self.boot_software.set(boot_software)                                                                                                                           
+    self.boot_software.set(boot_software)
     return
 
   def RenderDMXInformation(self, param_dict):
     """
     """
     print "param_dict: %s" % param_dict
+    device_info = param_dict["DEVICE_INFO"]
     self.dmx_personality_menu.clear_menu()
     self.slot_menu.clear_menu()
     if "DMX_PERSONALITY_DESCRIPTION" in param_dict:
-      self.dmx_personality_menu.set(param_dict["DEVICE_INFO"]['current_personality'])
-      for i in xrange(param_dict["DEVICE_INFO"]["personality_count"]):
-        index = i + 1
-        self.dmx_personality_menu.add_item( "Personality %d" % (index),
-                  lambda index = index:self._controller.SetPersonality(index))
+      pers_desc = param_dict["DMX_PERSONALITY_DESCRIPTION"]
+      for pers_id, data in param_dict["DMX_PERSONALITY_DESCRIPTION"].iteritems():
+        self.dmx_personality_menu.add_item(self._get_personality_string(data),
+                  lambda i = pers_id:self._controller.SetPersonality(i))
+      personality = device_info['current_personality']
+      self.dmx_personality_menu.set(self._get_personality_string(pers_desc[personality]))
+      s = pers_desc[personality]['slots_required']
+      p = personality
+      self._display_personality_decription(s, p)
     self.dmx_footprint.set(param_dict["DEVICE_INFO"]["dmx_footprint"])
     self.dmx_start_address.set(param_dict["DEVICE_INFO"]["dmx_start_address"])
-    if "SLOT_DESCRIPTION" in param_dict:
-      for index in xrange(param_dict["DEVICE_INFO"]["dmx_footprint"]):
-        self.slot_menu["menu"].add_item("Slot Number %d" % index,
-                lambda index = index:self._display_slot_info(index, param_dict))
+    # if "SLOT_DESCRIPTION" in param_dict:
+    #   slot_info = param_dict["SLOT_INFO"]
+    #   for index in xrange(param_dict["DEVICE_INFO"]["dmx_footprint"]):
+    #     self.slot_menu["menu"].add_item("Slot Number %d" % index,
+    #             lambda index = index:self._display_slot_info(index, param_dict))
     self.slot_offset.set(param_dict.get("SLOT_INFO", {}).get("slot_offset", "N/A"))
     self.slot_type.set(param_dict.get("SLOT_INFO", {}).get("slot_type", "N/A"))
     self.slot_label_id.set(param_dict.get("SLOT_INFO", {}).get("slot_label_id", "N/A"))
@@ -563,8 +569,7 @@ class RDMNotebook(object):
                                     {})[personality].get(
                                     "slots_required", 
                                     "N/A")
-    self.slot_required.set("Slots Required: %s" % slots_required)
-    self.personality_name.set("Personality ID: %s" % personality)
+    self._display_personality_decription(slots_required, personality)
 
   # ============================================================================
   # ========================== Internal Methods ================================
@@ -637,6 +642,13 @@ class RDMNotebook(object):
     """
     """
     self.slot_name.set(param_dict.get("SLOT_DESCRIPTION", {}).get(slot_number, "N/A"))
+
+  def _display_personality_decription(self, slots_required, personality):
+    self.slot_required.set("Slots Required: %s" % slots_required)
+    self.personality_name.set("Personality ID: %s" % personality)
+
+  def _get_personality_string(self, personality):
+    return '%s (%d)' % (personality['name'], personality['slots_required'])
   # ============================== Main Loop ===================================
 
   def main(self):

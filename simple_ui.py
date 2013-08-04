@@ -235,6 +235,14 @@ class DisplayApp(object):
     print 'Device selected: %s' % self._uid_dict[self.cur_uid]
     self._notebook.Update()
 
+  def _get_identify_complete(self, uid, succeeded, value):
+    ''' Callback for rdm_get in device_selected.
+
+        Sets the checkbox's state to that of the currently selected device
+    '''
+    if succeeded: 
+      self.id_state.set(value['identify_state'])
+
   def fetch_universes(self, callback):
 
     self.ola_thread.fetch_universes(self.fetch_universes_complete)
@@ -265,6 +273,18 @@ class DisplayApp(object):
       self.ola_thread.add_event(5000, self.discover)
     else: 
       print 'Automatic discovery is off.'
+  
+  def _upon_discover(self, status, uids):
+    ' callback for client.RunRDMDiscovery. '
+    self.universe_dict[self.universe.get()].set_uids(uids)
+    if not uids:
+      self.device_menu.clear_menu()
+    for uid in uids:
+      if uid not in self._uid_dict.keys():
+        self._uid_dict[uid] = {}
+        self.ola_thread.rdm_get(self.universe.get(), uid, 0, 'DEVICE_LABEL', 
+                             lambda b, s, uid = uid:self._add_device(uid, b, s),
+                             [])
 
   def identify(self):
     ''' Command is called by id_box.
@@ -279,18 +299,6 @@ class DisplayApp(object):
               lambda b, s, uid = self.cur_uid:self._rdm_set_complete(uid, b, s), 
               [self.id_state.get()])
 
-  def _upon_discover(self, status, uids):
-    ' callback for client.RunRDMDiscovery. '
-    self.universe_dict[self.universe.get()].set_uids(uids)
-    if not uids:
-      self.device_menu.clear_menu()
-    for uid in uids:
-      if uid not in self._uid_dict.keys():
-        self._uid_dict[uid] = {}
-        self.ola_thread.rdm_get(self.universe.get(), uid, 0, 'DEVICE_LABEL', 
-                             lambda b, s, uid = uid:self._add_device(uid, b, s),
-                             [])
-
   def _add_device(self, uid, succeeded, data):
     ''' callback for the rdm_get in upon_discover.
         populates self.device_menu
@@ -304,13 +312,7 @@ class DisplayApp(object):
     index = self.device_menu.add_item(label, lambda:self.device_selected(uid))
     self._uid_dict[uid]['index'] = index
 
-  def _get_identify_complete(self, uid, succeeded, value):
-    ''' Callback for rdm_get in device_selected.
 
-        Sets the checkbox's state to that of the currently selected device
-    '''
-    if succeeded: 
-      self.id_state.set(value['identify_state'])
 
   def _rdm_set_complete(self, uid, succeded, value):
     ''' callback for the rdm_set in identify. '''
@@ -339,7 +341,7 @@ class DisplayApp(object):
                   ],
                   self.UpdateBasicInformation)
     flow.Run()
-  
+
   def GetDMXInformation(self):
 
     if self.cur_uid is None:
@@ -412,7 +414,6 @@ class DisplayApp(object):
                   self.UpdateSettingInformation)
     flow.Run()
 
- 
   def GetConfigInformation(self):
 
     if self.cur_uid is None:
@@ -482,7 +483,7 @@ class DisplayApp(object):
     self.ola_thread.rdm_set(self.universe.get(), 
                                   uid,
                                   0, 
-                                  'DEVICE_LABEL', 
+                                  'DEVICE_LABEL',
                                   callback,
                                   [label]
                                   )
