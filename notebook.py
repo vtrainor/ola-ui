@@ -487,6 +487,7 @@ class RDMNotebook(object):
     device_info = param_dict["DEVICE_INFO"]
     self.dmx_personality_menu.clear_menu()
     self.slot_menu.clear_menu()
+    self._display_personality_decription('N/A', 'N/A')
     if "DMX_PERSONALITY_DESCRIPTION" in param_dict:
       pers_desc = param_dict["DMX_PERSONALITY_DESCRIPTION"]
       for pers_id, data in param_dict["DMX_PERSONALITY_DESCRIPTION"].iteritems():
@@ -498,7 +499,13 @@ class RDMNotebook(object):
       p = personality
       self._display_personality_decription(s, p)
     self.dmx_footprint.set(param_dict["DEVICE_INFO"]["dmx_footprint"])
-    self.dmx_start_address.set(param_dict["DEVICE_INFO"]["dmx_start_address"])
+    start_address = param_dict["DEVICE_INFO"]["dmx_start_address"]
+    if start_address == 0xffff:
+      self.dmx_start_address.set('N/A')
+      self.start_address_entry.config(state = tk.DISABLED)
+    else:
+      self.dmx_start_address.set(start_address)
+      self.start_address_entry.config(state = tk.NORMAL)
     # if "SLOT_DESCRIPTION" in param_dict:
     #   slot_info = param_dict["SLOT_INFO"]
     #   for index in xrange(param_dict["DEVICE_INFO"]["dmx_footprint"]):
