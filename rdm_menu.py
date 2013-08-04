@@ -16,6 +16,10 @@ class RDMMenu(object):
   def get(self):
   	return self.variable.get()
     
+  def set(self, value):
+  	print "setting to: %s" % value
+  	self.variable.set(value)
+    
   def pack(self, *args, **kwargs):
   	self.menu.pack(*args, **kwargs)
   	

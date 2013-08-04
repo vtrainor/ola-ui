@@ -172,7 +172,9 @@ class RDMNotebook(object):
     self.dmx_personality_menu = RDMMenu(self.dmx_tab,
                                         "Personality description not supported.",
                                         "DMX Personalities")
-    self.slot_menu = tk.OptionMenu(self.dmx_tab, self.slot_number, [])
+    self.slot_menu = RDMMenu(self.dmx_tab,
+                             "No slot description.",
+                             "Choose Slot")
 
     self.objects["DMX512_SETUP"] = [tk.Label(self.dmx_tab,
                                                       text = "DMX Footprint:"),
@@ -482,7 +484,10 @@ class RDMNotebook(object):
     """
     """
     print "param_dict: %s" % param_dict
+    self.dmx_personality_menu.clear_menu()
+    self.slot_menu.clear_menu()
     if "DMX_PERSONALITY_DESCRIPTION" in param_dict:
+      self.dmx_personality_menu.set(param_dict["DEVICE_INFO"]['current_personality'])
       for i in xrange(param_dict["DEVICE_INFO"]["personality_count"]):
         index = i + 1
         self.dmx_personality_menu.add_item( "Personality %d" % (index),
@@ -491,9 +496,8 @@ class RDMNotebook(object):
     self.dmx_start_address.set(param_dict["DEVICE_INFO"]["dmx_start_address"])
     if "SLOT_DESCRIPTION" in param_dict:
       for index in xrange(param_dict["DEVICE_INFO"]["dmx_footprint"]):
-        self.slot_menu["menu"].add_command( label = "Slot Number %d" % index,
-                  command = lambda index = i:self._display_slot_info(index, 
-                                                                    param_dict))
+        self.slot_menu["menu"].add_item("Slot Number %d" % index,
+                lambda index = index:self._display_slot_info(index, param_dict))
     self.slot_offset.set(param_dict.get("SLOT_INFO", {}).get("slot_offset", "N/A"))
     self.slot_type.set(param_dict.get("SLOT_INFO", {}).get("slot_type", "N/A"))
     self.slot_label_id.set(param_dict.get("SLOT_INFO", {}).get("slot_label_id", "N/A"))
