@@ -4,6 +4,8 @@
 from controlflow import GetRDMAction
 from ola import PidStore
 
+
+
 class GetDeviceInfo(GetRDMAction):
   """An action that GETs DEVICE_INFO."""
   PID = "DEVICE_INFO"
@@ -45,8 +47,9 @@ class GetDeviceLabel(GetRDMAction):
     if succeeded:
       self._data[self.PID] = value["label"]
 
-
-# ############################ Get Basic Info ############################
+# ==============================================================================
+# ============================ Get Basic Info ==================================
+# ==============================================================================
 
 class GetProductDetailIds(GetRDMAction):
   PID = "PRODUCT_DETAIL_ID_LIST"
@@ -144,8 +147,9 @@ class GetBootSoftwareLabel(GetRDMAction):
     if succeeded:
       self._data[self.PID] = value["label"]
 
-
-# ############################ Get DMX Info ############################
+# ==============================================================================
+# ============================ Get DMX Info ====================================
+# ==============================================================================
 
 class GetDmxPersonality(GetRDMAction):
   """
@@ -234,10 +238,9 @@ class GetDefaultSlotValue(GetRDMAction):
     if succeeded:
       self._data[self.PID] = value
 
-
-# ############################ Get Sensors Info ############################
-
-# the following classes need data
+# ==============================================================================
+# ============================ Get Sensors Info ================================
+# ==============================================================================
 
 class GetSensorDefinition(GetRDMAction):
   """
@@ -267,8 +270,9 @@ class GetSensorValue(GetRDMAction):
     if succeeded:
       self._data[self.PID] = value
 
-
-# # ############################ Get Setting Info ############################
+# ==============================================================================
+# ============================ Get Setting Info ================================
+# ==============================================================================
 
 class GetDeviceHours(GetRDMAction):
   """
@@ -368,8 +372,10 @@ class GetPowerState(GetRDMAction):
     if succeeded:
       self._data[self.PID] = value["power_state"]
 
+# ==============================================================================
+# ============================ Get Config Info =================================
+# ==============================================================================
 
-# # ############################ Get Config Info ############################
 class GetLanguageCapabilities(GetRDMAction):
   """
   """

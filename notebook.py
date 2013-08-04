@@ -3,7 +3,7 @@ import simple_ui
 import ttk
 import ola.RDMConstants as RDMConstants
 
-class RDMNotebook:
+class RDMNotebook(object):
   def __init__(self, root, controller, width=800, height=500, side=tk.TOP):
     """ Builds the ttk.Notebook """
     self.root = root
@@ -15,23 +15,21 @@ class RDMNotebook:
     self.pid_location_dict = {}
     self._notebook = ttk.Notebook(self.root, name="nb", height=height,
                                   width=width)
-    self._notebook.bind('<<NotebookTabChanged>>', self.tab_changed)
-    self.populate_defaults()
-
-  
+    self._notebook.bind('<<NotebookTabChanged>>', self._tab_changed)
+    self.populate_defaults()  
 
   def populate_defaults(self):
     """ creates the default frames. """
     # create and populate the three default tabs
-    self.info_tab = self.create_tab("info_tab", "Device Information")
+    self.info_tab = self._create_tab("info_tab", "Device Information")
     self._init_info()
-    self.dmx_tab = self.create_tab("dmx_tab", "DMX512 Setup")
+    self.dmx_tab = self._create_tab("dmx_tab", "DMX512 Setup")
     self._init_dmx()
-    self.sensor_tab = self.create_tab("sensor_tab", "Sensors")
+    self.sensor_tab = self._create_tab("sensor_tab", "Sensors")
     self._init_sensor()
-    self.setting_tab = self.create_tab("setting_tab", "Power and Lamp Settings")
+    self.setting_tab = self._create_tab("setting_tab", "Power and Lamp Settings")
     self._init_setting()
-    self.config_tab = self.create_tab("config_tab", "Configuration")
+    self.config_tab = self._create_tab("config_tab", "Configuration")
     self._init_config()
     self.pid_location_dict = {"PRODUCT_INFO": {"DEVICE_INFO": [0,1,2,3,4,5,6,7,
                                                               8,9], 
@@ -75,88 +73,13 @@ class RDMNotebook:
                                       "PAN_TILT_SWAP": [10,11],
                                       "REAL_TIME_CLOCK": [12,13]
                               }}
-    # self.factory_defaults_button.config(command = self.rdm_set(
-    #                           "FACTORY_DEFAULTS", self.factory_defaults.get()))
-    # self.start_address_entry.config(validatecommand = self.rdm_set(
-    #                         "DMX_START_ADDRESS", self.dmx_start_address.get()))
-    # self.dmx_personality_menu.config(command = self.rdm_set(
-    #                             "DMX_PERSONALITY", self.dmx_personality.get()))
-    # self.slot_menu.config(command = self.rdm_set(
-    #                                         "SLOT_INFO",self.slot_number.get()))
-    # self.sensor_def.config(command = self.rdm_get(
-    #                             "SENSOR_DEFINITION", self.sensor_number.get()))
-    # self.sensor_value.config(command = self.rdm_get(
-    #                                   "SENSOR_VALUE", self.sensor_number.get()))
-    # self.lamp_state_menu.config(command = self.rdm_set(
-    #                                         "LAMP_STATE",self.lamp_state.get()))
-    # self.lamp_on_mode_menu.config(command = self.rdm_set(
-    #                                   "LAMP_ON_MODE", self.lamp_on_mode.get()))
-    # self.device_power_cycles_menu.config(command = self.rdm_set(
-    #                     "DEVICE_POWER_CYCLES", self.device_power_cycles.get()))
-    # self.power_state_menu.config(command = self.rdm_set(
-    #                                     "POWER_STATE", self.power_state.get()))
-    # self.language_menu.config(command = self.rdm_set(
-    #                                           "LANGUAGE", self.language.get()))
-    # self.display_invert_menu.config(command = self.rdm_set(
-    #                               "DISAPLAY_INVERT",self.display_invert.get()))
-    # self.display_level_menu.config(command = self.rdm_set(
-    #                                 "DISPLAY_LEVEL", self.display_level.get()))
-    # self.pan_invert_button.config(command = self.rdm_set(
-    #                                       "PAN_INVERT", self.pan_invert.get()))
-    # self.tilt_invert_button.config(command = self.rdm_set(
-    #                                     "TILT_INVERT", self.tilt_invert.get()))
-    # self.pan_tilt_swap_button.config(command = self.rdm_set(
-    #                                 "PAN_TILT_SWAP", self.pan_tilt_swap.get()))
     for key in self.pid_location_dict.keys():
         self._grid_info(self.objects[key])
     self._notebook.pack(side = self.side)
 
-  def create_tab(self, tab_name, tab_label=None):
-    """ Creates a tab. 
-
-        will want to have all the options allowed by the ttk notebook widget to
-        be args for this method
-
-        Args:
-          tab_name: string, cannot begin with a capital letter
-          pid_list: list of strings, 
-          tab_label: string that will be displayed on the tab, default set to 
-            None, and tab_name will be on the tab
-
-        Returns:
-          tab: the Frame 
-    """
-    if tab_label is None:
-        tab_label = tab_name
-    tab = tk.Frame(self._notebook, name = tab_name)
-    self._notebook.add(tab, text = tab_label)
-    return tab
-
-  def act_objects(self, supported_pids):
-    """
-    """
-    # pass
-    for key in self.objects.keys():
-      for widget in self.objects[key]:
-        widget.config(state = tk.DISABLED)
-    for pid in supported_pids:
-      if pid == "QUEUED_MESSAGE":
-        pass
-      elif pid in self.pid_location_dict["PRODUCT_INFO"].keys():
-        for i in self.pid_location_dict["PRODUCT_INFO"][pid]:
-          self.objects["PRODUCT_INFO"][i].config(state = tk.NORMAL)
-      elif pid in self.pid_location_dict["DMX512_SETUP"].keys():
-        for i in self.pid_location_dict["DMX512_SETUP"][pid]:
-          self.objects["DMX512_SETUP"][i].config(state = tk.NORMAL)
-      elif pid in self.pid_location_dict["SENSORS"].keys():
-        for i in self.pid_location_dict["SENSORS"][pid]:
-          self.objects["SENSORS"][i].config(state = tk.NORMAL)
-      elif pid in self.pid_location_dict["POWER_LAMP_SETTINGS"].keys():
-        for i in self.pid_location_dict["POWER_LAMP_SETTINGS"][pid]:
-          self.objects["POWER_LAMP_SETTINGS"][i].config(state = tk.NORMAL)
-      elif pid in self.pid_location_dict["CONFIGURATION"].keys():
-        for i in self.pid_location_dict["CONFIGURATION"][pid]:
-          self.objects["CONFIGURATION"][i].config(state = tk.NORMAL)
+# ==============================================================================
+# ============================ Tab Inits =======================================
+# ==============================================================================
 
   def _init_info(self):
     """
@@ -246,9 +169,10 @@ class RDMNotebook:
     # Widgets
     self.start_address_entry = tk.Entry(self.dmx_tab,
                                           textvariable = self.dmx_start_address)
+    self.current_personality.set("DMX Personalities")
     self.dmx_personality_menu = tk.OptionMenu(self.dmx_tab, 
-                                                self.current_personality.get(), "")
-    self.slot_menu = tk.OptionMenu(self.dmx_tab, self.slot_number.get(), "")
+                                                self.current_personality, [])
+    self.slot_menu = tk.OptionMenu(self.dmx_tab, self.slot_number, [])
 
     self.objects["DMX512_SETUP"] = [tk.Label(self.dmx_tab,
                                                       text = "DMX Footprint:"),
@@ -486,31 +410,13 @@ class RDMNotebook:
                                             textvariable = self.real_time_clock) 
                                    ]
 
-  def _grid_info(self, obj_list):
-    """
-    """
-    for i in range(len(obj_list)):
-      if i%2 == 1:
-        obj_list[i].config(width=35)
-      else:
-        obj_list[i].config(width=20)
-    obj_list.reverse()
-    for r in range((len(obj_list)+1)/2):
-      for c in range(2):
-        obj_list.pop().grid(row=r, column=c)
-
   def device_label_set(self):
     """
     """
     self._controller.SetDeviceLabel(self.device_label.get())
-
-  def main(self):
-    """ Main method for Notebook class. """
-    self.root.mainloop()
-
-  def tab_changed(self, event):
-    # Note that this will be called when the program starts
-    self.Update()
+  # ============================================================================
+  # ============================== Update Tabs =================================
+  # ============================================================================
 
   def Update(self):
     index = self._notebook.index('current')
@@ -525,6 +431,8 @@ class RDMNotebook:
       self._controller.GetSettingInformation()
     elif index == 4:
       self._controller.GetConfigInformation()
+
+  # ========================= Information Rendering ============================
 
   def RenderBasicInformation(self, param_dict):
     """
@@ -577,11 +485,11 @@ class RDMNotebook:
     if "DMX_PERSONALITY_DESCRIPTION" in param_dict:
       for i in xrange(param_dict["DEVICE_INFO"]["personality_count"]):
         index = i + 1
-        self.dmx_personality_menu["menu"].add_command(label = "Personality %d" % (index),
-                                          command = lambda:self._update_personality_menu(index, param_dict))
+        self.dmx_personality_menu["menu"].add_command(
+              label = "Personality %d" % (index),
+              command = lambda index = index:self._controller.SetPersonality(index))
     self.dmx_footprint.set(param_dict["DEVICE_INFO"]["dmx_footprint"])
     self.dmx_start_address.set(param_dict["DEVICE_INFO"]["dmx_start_address"])
-    self.current_personality.set(param_dict["DEVICE_INFO"]["current_personality"])
 
     self.slot_number.set(param_dict.get("SLOT_DESCRIPTION", {}).get("slot_number", "N/A"))
     self.slot_name.set(param_dict.get("SLOT_DESCRIPTION", {}).get("slot_name", "N/A"))
@@ -592,10 +500,6 @@ class RDMNotebook:
     self.default_slot_offset.set("N/A")
     self.default_slot_value.set("N/A")
     print "DMX Rendered"
-
-  def _update_personality_menu(self, i, param_dict):
-    self.slot_required.set(param_dict.get("DMX_PERSONALITY_DESCRIPTION", {})[i].get("slots_required", "N/A"))
-    self.personality_name.set(param_dict.get("DMX_PERSONALITY_DESCRIPTION", {})[i].get("name", "N/A"))
 
   def RenderSensorInformation(self, param_dict):
     print "rendering sensor information..."
@@ -644,6 +548,93 @@ class RDMNotebook:
   def RenderConfigInformation(self, param_dict):
     print "Rendering Config...."
     print param_dict
+
+  # ============================================================================
+  # ========================== RDM Set Callbacks ===============================
+  # ============================================================================
+
+  def PersonalityCallback(self, personality, param_dict):
+    self.current_personality.set("Personality %d" % personality)
+    slots_required = param_dict.get("DMX_PERSONALITY_DESCRIPTION", 
+                                    {})[personality].get(
+                                    "slots_required", 
+                                    "N/A")
+    self.slot_required.set("Slots Required: %s" % slots_required)
+    self.personality_name.set("Personality ID: %s" % personality)
+
+  # ============================================================================
+  # ========================== Internal Methods ================================
+  # ============================================================================
+
+  def _tab_changed(self, event):
+    # Note that this will be called when the program starts
+    self.Update()
+
+  def _grid_info(self, obj_list):
+    """
+    """
+    for i in range(len(obj_list)):
+      if i%2 == 1:
+        obj_list[i].config(width=35)
+      else:
+        obj_list[i].config(width=20)
+    obj_list.reverse()
+    for r in range((len(obj_list)+1)/2):
+      for c in range(2):
+        obj_list.pop().grid(row=r, column=c)
+
+  def _create_tab(self, tab_name, tab_label=None):
+    """ Creates a tab. 
+
+        will want to have all the options allowed by the ttk notebook widget to
+        be args for this method
+
+        Args:
+          tab_name: string, cannot begin with a capital letter
+          pid_list: list of strings, 
+          tab_label: string that will be displayed on the tab, default set to 
+            None, and tab_name will be on the tab
+
+        Returns:
+          tab: the Frame
+    """
+    if tab_label is None:
+        tab_label = tab_name
+    tab = tk.Frame(self._notebook, name = tab_name)
+    self._notebook.add(tab, text = tab_label)
+    return tab
+
+  def act_objects(self, supported_pids):
+    """
+    """
+    pass
+    # for key in self.objects.keys():
+    #   for widget in self.objects[key]:
+    #     widget.config(state = tk.DISABLED)
+    # for pid in supported_pids:
+    #   if pid == "QUEUED_MESSAGE":
+    #     pass
+    #   elif pid in self.pid_location_dict["PRODUCT_INFO"].keys():
+    #     for i in self.pid_location_dict["PRODUCT_INFO"][pid]:
+    #       self.objects["PRODUCT_INFO"][i].config(state = tk.NORMAL)
+    #   elif pid in self.pid_location_dict["DMX512_SETUP"].keys():
+    #     for i in self.pid_location_dict["DMX512_SETUP"][pid]:
+    #       self.objects["DMX512_SETUP"][i].config(state = tk.NORMAL)
+    #   elif pid in self.pid_location_dict["SENSORS"].keys():
+    #     for i in self.pid_location_dict["SENSORS"][pid]:
+    #       self.objects["SENSORS"][i].config(state = tk.NORMAL)
+    #   elif pid in self.pid_location_dict["POWER_LAMP_SETTINGS"].keys():
+    #     for i in self.pid_location_dict["POWER_LAMP_SETTINGS"][pid]:
+    #       self.objects["POWER_LAMP_SETTINGS"][i].config(state = tk.NORMAL)
+    #   elif pid in self.pid_location_dict["CONFIGURATION"].keys():
+    #     for i in self.pid_location_dict["CONFIGURATION"][pid]:
+    #       self.objects["CONFIGURATION"][i].config(state = tk.NORMAL)
+
+  # ============================== Main Loop ===================================
+
+  def main(self):
+    """ Main method for Notebook class. """
+    self.root.mainloop()
 
 if __name__ == "__main__":
   ui = simple_ui.DisplayApp()

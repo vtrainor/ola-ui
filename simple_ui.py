@@ -41,6 +41,10 @@ import actions
   which then updates all the widgets.
 """
 
+# ==============================================================================
+# ============================ Controller Class ================================
+# ==============================================================================
+
 class Controller(object):
   """The controller will act as the glue between the notebook (display) the the
      DisplayApp (data). This keeps us honest by not leaking RDM information
@@ -78,10 +82,48 @@ class Controller(object):
     pass
 
   def SetPersonality(self, index):
-    pass
+    self._app.SetPersonality(index)
   # Additional methods will be added later
 
-class DisplayApp:
+# ==============================================================================
+# ============================ Universe Class ==================================
+# ==============================================================================
+class UniverseObj(object):
+
+  def __init__(self, uni_id, name):
+    """
+    """
+    self._id = uni_id 
+    self._name = name 
+    self._discover = False
+    self._uids = set()
+
+  @property
+  def name(self):
+    return self._name
+
+  @property
+  def id(self):
+    return self._id
+
+  @property
+  def discovery_run(self):
+    return self._discover
+
+  @property
+  def uids(self):
+    return self._uids
+
+  def set_uids(self, uid_list):
+    self._uids = set(uid_list)
+    self._discover = True
+
+
+# ==============================================================================
+# ============================ Display App Class ===============================
+# ==============================================================================
+
+class DisplayApp(object):
   """ Creates the GUI for sending and receiving RDM messages through the
       ola thread. 
   """
@@ -92,7 +134,7 @@ class DisplayApp:
       width: the int value of the width of the tkinter window
       height: the int value of the height of the tkinter window
     """
-    # Initialize the tk root window
+    # ================== Initialize the tk root window =========================
     self._controller = Controller(self)
     self.root = tk.Tk()
     self.init_dx = width
@@ -102,32 +144,24 @@ class DisplayApp:
     self.root.maxsize(1600, 900)
     self.root.lift()
     self.root.update_idletasks()
-    # Assigning fields
+    # ================== Initialize Variables and Ola Thread ===================
     self.universe = tk.IntVar(self.root)
     self.universe_dict = {}
     self.cur_uid = None
-    self.id_state = tk.IntVar(self.root)
-    self.auto_disc = tk.BooleanVar(self.root)
-    self.id_state.set(0)
-#     self.state  =  0
     self._uid_dict = {}
-    
-    # Call initialing functions
-    self.build_frames()
-    self.build_cntrl()
-    self._notebook = notebook.RDMNotebook(self.root, self._controller)
-
     self._pid_store = PidStore.GetStore()
     self.ola_thread = olathread.OLAThread(self._pid_store)
     self.ola_thread.start()
-
-
-    self.auto_disc.set(False)
+    self.build_frames()
+    self.build_cntrl()
+    self._notebook = notebook.RDMNotebook(self.root, self._controller)
+    # ================== Call Fetch Universes ==================================
     self.fetch_universes(self.fetch_universes_complete)
 
     print "currently in thread: %d" % threading.currentThread().ident
     time.sleep(1)
     print "back from sleep"
+
 
   def build_frames(self):
     """ builds the two tkinter frames that are used as parents for the
@@ -141,15 +175,12 @@ class DisplayApp:
   def build_cntrl(self):
     """ Builds the top bar of the GUI.
 
-    Initializes all the general tkinter control widgets,  including:
-      dev_label: tk string variable for the currently selected device
-      id_box:
-      device_menu:
+    Initializes all the general tkinter control widgets
     """
     tk.Label(self.cntrl_frame, text = "Select\nUniverse:").pack(side = tk.LEFT)
-    universes = self.universe_dict.keys()
-    print universes
-    self.universe_menu = tk.OptionMenu(self.cntrl_frame, self.universe, [])
+    self.universe_name = tk.StringVar(self.root)
+    self.universe_name.set("Universes")
+    self.universe_menu = tk.OptionMenu(self.cntrl_frame, self.universe_name, [])
     self.universe_menu.pack(side = tk.LEFT)
     discover_button = tk.Button(self.cntrl_frame, text = "Discover", 
                                 command = self.discover)
@@ -157,12 +188,15 @@ class DisplayApp:
     self.dev_label = tk.StringVar(self.root)
     self.dev_label.set("Devices")
     self.device_menu = tk.OptionMenu(self.cntrl_frame, self.dev_label, [])
-    # self.device_menu["menu"].config(tearoff = 0)
     self.device_menu.pack(side = tk.LEFT)
+    self.id_state = tk.IntVar(self.root)
+    self.id_state.set(0)
     self.id_box = tk.Checkbutton(self.cntrl_frame, text = "Identify", 
                                  variable = self.id_state, 
                                  command = self.identify)
     self.id_box.pack(side = tk.LEFT)
+    self.auto_disc = tk.BooleanVar(self.root)
+    self.auto_disc.set(False)
     self.auto_disc_box = tk.Checkbutton(self.cntrl_frame, 
                                         text = "Automatic\nDiscovery",
                                         variable = self.auto_disc, 
@@ -178,6 +212,7 @@ class DisplayApp:
     if uid == self.cur_uid:
       print "Already Selected"
       return
+    print "device label: %s" % self.dev_label
     pid_key = "DEVICE_LABEL"
     self.dev_label.set("%s (%s)"%(self._uid_dict[uid][pid_key], uid))
     self.ola_thread.rdm_get(self.universe.get(), uid, 0, "IDENTIFY_DEVICE", 
@@ -215,18 +250,20 @@ class DisplayApp:
     """
     if succeeded:
       for universe in universes:
-        self.universe_dict[universe.id] = []
-        self.universe_menu["menu"].add_command(label = universe.id,
-                                      command = self._set_universe(universe.id))
-      self.universe.set(universes[0].id)
+        self.universe_dict[universe.id] = UniverseObj(universe.id, universe.name)
+        self.universe_menu["menu"].add_command(label = universe.name,
+                              command = lambda i = universe.id: self._set_universe(i))
 
   def _set_universe(self, i):
     """ sets the int var self.universe to the value of i """
+    print "i %d" % i
     self.universe.set(i)
-    if not self.universe_dict[i]:
+    self.universe_name.set(self.universe_dict[i].name)
+    self.device_menu["menu"].delete(0, "end")
+    if not self.universe_dict[i].discovery_run:
       self.discover()
-    else: 
-      for uid in self.universe_dict[i]:
+    else:
+      for uid in self.universe_dict[i].uids:
         self._add_device(uid, True, self._uid_dict[uid]["DEVICE_LABEL"])
 
   def discover(self):
@@ -235,7 +272,7 @@ class DisplayApp:
     if self.auto_disc.get():
       self.ola_thread.add_event(5000, self.discover)
     else: 
-      print "auto_disc is off"
+      print "Automatic discovery is off."
 
   def identify(self):
     """ Command is called by id_box.
@@ -252,10 +289,10 @@ class DisplayApp:
 
   def _upon_discover(self, status, uids):
     """ callback for client.RunRDMDiscovery. """
+    self.universe_dict[self.universe.get()].set_uids(uids)
     if not uids:
       self.device_menu["menu"].delete(0, "end")
     for uid in uids:
-      self.universe_dict[self.universe.get()].append(uid)
       if uid not in self._uid_dict.keys():
         self._uid_dict[uid] = {}
         self.ola_thread.rdm_get(self.universe.get(), uid, 0, "DEVICE_LABEL", 
@@ -266,16 +303,13 @@ class DisplayApp:
     """ callback for the rdm_get in upon_discover.
         populates self.device_menu
     """
-    # TODO: Bug: on discover the label in the label in the device option menu 
-    #       doesn't change and if you try to select the first device it tells 
-    #       you that it is already selected
     if succeeded:
       self._uid_dict.setdefault(uid, {})["DEVICE_LABEL"] = data["label"]
       self.device_menu["menu"].add_command( label = "%s (%s)"%(
                   self._uid_dict[uid]["DEVICE_LABEL"], uid), 
                   command = lambda:self.device_selected(uid))
     else:
-      self._uid_dict.setdefault(uid, {})["DEVICE_LABEL"] = {"label":""}
+      self._uid_dict.setdefault(uid, {})["DEVICE_LABEL"] = {""}
       self.device_menu["menu"].add_command( label = "%s" % uid, 
                                     command = lambda:self.device_selected(uid))
     self._uid_dict[uid]["index"] = self.device_menu["menu"].index(tk.END)
@@ -292,6 +326,9 @@ class DisplayApp:
     """ callback for the rdm_set in identify. """
     print "value: %s" % value
     print "rdm set complete"
+
+  # ============================================================================
+  # ============================ RDM Gets ======================================
 
   def GetBasicInformation(self):
     """
@@ -410,6 +447,8 @@ class DisplayApp:
                   ],
                   self.UpdateConfigInformation)
     flow.Run()
+  
+  # ============================ Notebook Updates ==============================
 
   def UpdateBasicInformation(self):
     self._notebook.RenderBasicInformation(self._uid_dict[self.cur_uid])
@@ -426,12 +465,38 @@ class DisplayApp:
   def UpdateConfigInformation(self):
     self._notebook.RenderConfigInformation(self._uid_dict[self.cur_uid])
 
+  # ============================ RDM Sets ======================================
+
+  def SetPersonality(self, personality):
+    """
+    """
+    uid = self.cur_uid
+    callback = lambda b, s: self._personality_callback(uid, personality, b, s)
+    self.ola_thread.rdm_set(self.universe.get(), 
+                                  uid,
+                                  0, 
+                                  "DMX_PERSONALITY", 
+                                  callback,
+                                  [personality]
+                                  )
+
+  # ================================ Callbacks =================================
+  def _personality_callback(self, uid, personality, succeeded, data):
+    """
+    """
+    if succeeded:
+      self._uid_dict[self.cur_uid]["DEVICE_INFO"]["current_personality"] = personality
+      self._uid_dict[self.cur_uid]["DMX_PERSONALITY"]["current_personality"] = personality
+      self._notebook.PersonalityCallback(personality, 
+                                         self._uid_dict[self.cur_uid])
+    else:
+      print "!!Error: RDM set for DMX Personality failed!!"
+
   def set_device_label(self, label):
     """
     """
     uid = self.cur_uid
-    callback = (lambda b, s, label = label, uid = uid:
-                              self.set_device_label_complete(uid, label, b, s))
+    callback = (lambda b, s: self.set_device_label_complete(uid, label, b, s))
     self.ola_thread.rdm_set(self.universe.get(), 
                                   uid,
                                   0, 
@@ -447,6 +512,8 @@ class DisplayApp:
       index = self._uid_dict[self.cur_uid]["index"]
       self._uid_dict[self.cur_uid]["DEVICE_LABEL"] = label
       self.device_menu["menu"].entryconfigure(index, label = "%s (%s)"%(
+                  self._uid_dict[uid]["DEVICE_LABEL"], uid))
+      self.dev_label.set("%s (%s)"%(
                   self._uid_dict[uid]["DEVICE_LABEL"], uid))
     else:
       print "failed"
