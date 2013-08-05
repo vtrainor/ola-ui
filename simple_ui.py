@@ -324,7 +324,7 @@ class DisplayApp(object):
     if succeeded:
       self._uid_dict.setdefault(uid, {})['DEVICE_LABEL'] = data['label']
     else:
-      self._uid_dict.setdefault(uid, {})['DEVICE_LABEL'] = {''}
+      self._uid_dict.setdefault(uid, {})['DEVICE_LABEL'] = ''
     self._add_device_to_menu(uid)
 
 
