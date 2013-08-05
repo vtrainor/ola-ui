@@ -73,10 +73,7 @@ class Controller(object):
   def GetConfigInformation(self):
     self._app.GetConfigInformation()
 
-
   def SetDeviceLabel(self, label):
-    '''
-    '''
     self._app.set_device_label(label)
 
   def SetSetStartAddress(self, index):
@@ -85,6 +82,24 @@ class Controller(object):
   def SetPersonality(self, index):
     self._app.SetPersonality(index)
   # Additional methods will be added later
+
+  def SetLanguage(self, language):
+    self._app.SetLanguage(language)
+
+  def SetDisplayInvert(self, invert):
+    self._app.SetDisplayInvert(invert)
+
+  def SetDisplayLevel(self, level):
+    self._app.SetDisplayLevel(level)
+
+  def SetPanInvert(self, invert):
+    self._app.SetPanInvert(invert)
+
+  def SetTiltInvert(self, invert):
+    self._app.SetTiltInvert(invert)
+
+  def SetPanTiltSwap(self, swap):
+    self._app.SetPanTiltSwap(swap)
 
 # ==============================================================================
 # ============================ Universe Class ==================================
@@ -210,6 +225,7 @@ class DisplayApp(object):
     if uid == self.cur_uid:
       print 'Already Selected'
       return
+    self.cur_uid = uid
     pid_key = 'DEVICE_LABEL'
     self.ola_thread.rdm_get(self.universe.get(), uid, 0, 'IDENTIFY_DEVICE', 
                   lambda b, s, uid = uid:self._get_identify_complete(uid, b, s))
@@ -223,10 +239,8 @@ class DisplayApp(object):
                             ],
                             self._device_changed_complete)
     flow.Run()
-    self.cur_uid = uid
 
   def _device_changed_complete(self):
-
     self._uid_dict[self.cur_uid]['PARAM_NAMES'] = set()
     for pid_key in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']:
       pid = self._pid_store.GetPid(pid_key)
@@ -456,7 +470,9 @@ class DisplayApp(object):
   # ============================ RDM Sets ======================================
 
   def SetPersonality(self, personality):
-  
+    if self.cur_uid is None:
+      print 'you need to select a device'
+      return
     uid = self.cur_uid
     callback = lambda b, s: self._personality_callback(uid, personality, b, s)
     self.ola_thread.rdm_set(self.universe.get(), 
@@ -466,17 +482,113 @@ class DisplayApp(object):
                                   callback,
                                   [personality]
                                   )
-
-  # ================================ Callbacks =================================
   def _personality_callback(self, uid, personality, succeeded, data):
-
     if succeeded:
-      self._uid_dict[self.cur_uid]['DEVICE_INFO']['current_personality'] = personality
-      self._uid_dict[self.cur_uid]['DMX_PERSONALITY']['current_personality'] = personality
+      self._uid_dict[uid]['DEVICE_INFO']['current_personality'] = personality
+      self._uid_dict[uid]['DMX_PERSONALITY']['current_personality'] = personality
       self._notebook.PersonalityCallback(personality, 
-                                         self._uid_dict[self.cur_uid])
+                                         self._uid_dict[uid])
     else:
       print '!!Error: RDM set for DMX Personality failed!!'
+
+  def SetDisplayLevel(self, level):
+    if self.cur_uid is None:
+      return
+    uid = self.cur_uid
+    callback = lambda b, s: self._display_level_complete(uid, level, b, s)
+    self.ola_thread.rdm_set(self.universe.get(),
+                            uid,
+                            0,
+                            'DISPLAY_LEVEL',
+                            callback,
+                            [level])
+  def _display_level_complete(self, uid, level, succeeded, data):
+    if succeeded:
+      self._uid_dict[uid]['DISPLAY_LEVEL'] = level
+      self._notebook.DisplayLevelCallback(level)
+
+  def SetLanguage(self, language):
+    if self.cur_uid is None:
+      return
+    uid = self.cur_uid
+    callback = lambda b, s: self._language_complete(uid, language, b, s)
+    self.ola_thread.rdm_set(self.universe.get(),
+                            uid,
+                            0,
+                            'LANGUAGE',
+                            callback,
+                            [language])
+  def _language_complete(self, uid, language, succeeded, data):
+    if succeeded:
+      self._uid_dict[uid]['LANGUAGE'] = language
+      self._notebook.SetLanguageComplete(language)
+
+  def SetDisplayInvert(self, invert):
+    if self.cur_uid is None:
+      return
+    uid = self.cur_uid
+    callback = lambda b, s: self._display_invert_complete(uid, invert, b, s)
+    self.ola_thread.rdm_set(self.universe.get(),
+                            uid,
+                            0,
+                            'DISPLAY_INVERT',
+                            callback,
+                            [invert])
+  def _display_invert_complete(self, uid, invert, succeeded, data):
+    if succeeded:
+      self._uid_dict[uid]['DISPLAY_INVERT'] = invert
+      self._notebook.SetDisplayInvertComplete(invert)
+
+  def SetPanInvert(self, invert):
+    if self.cur_uid is None:
+      return
+    uid = self.cur_uid
+    callback = lambda b, s: self._pan_invert_complete(uid, invert, b, s)
+    self.ola_thread.rdm_set(self.universe.get(),
+                            uid,
+                            0,
+                            'PAN_INVERT',
+                            callback,
+                            [invert])
+  def _pan_invert_complete(self, uid, invert, succeeded, data):
+    if succeeded:
+      self._uid_dict[uid]['PAN_INVERT'] = invert
+      self._notebook.SetPanInvertComplete(invert)
+
+  def SetTiltInvert(self, invert):
+    if self.cur_uid is None:
+      return
+    uid = self.cur_uid
+    callback = lambda b, s: self._tilt_invert_complete(uid, invert, b, s)
+    self.ola_thread.rdm_set(self.universe.get(),
+                            uid,
+                            0,
+                            'TILT_INVERT',
+                            callback,
+                            [invert])
+  def _tilt_invert_complete(self, uid, invert, succeeded, data):
+    if succeeded:
+      self._uid_dict[uid]['TILT_INVERT'] = invert
+      self._notebook.SetTiltInvertComplete(invert)
+
+  def SetPanTiltSwap(self, swap):
+    if self.cur_uid is None:
+      return
+    uid = self.cur_uid
+    callback = lambda b, s: self._pan_tilt_swap_complete(uid, swap, b, s)
+    self.ola_thread.rdm_set(self.universe.get(),
+                            uid,
+                            0,
+                            'PAN_TILT_SWAP',
+                            callback,
+                            [swap])
+  def _pan_tilt_swap_complete(self, uid, swap, succeeded, data):
+    if succeeded:
+      self._uid_dict[uid]['PAN_TILT_SWAP'] = swap
+      self._notebook.SetPanTiltSwapComplete(swap)
+
+  # ================================ Callbacks =================================
+
 
   def set_device_label(self, label):
     uid = self.cur_uid

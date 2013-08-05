@@ -208,8 +208,9 @@ class GetSlotInfo(GetRDMAction):
 
   def UpdateDict(self, succeeded, value):
     if succeeded:
+      slots = self._data.setdefault(self.PID, {})
       for slot in value["slots"]:
-        self._data[self.PID][slot["slot_offset"]] = {"slot_type":
+        slots[slot["slot_offset"]] = {"slot_type":
                                                      slot["slot_type"],
                                                      "slot_label_id":
                                                      slot["slot_label_id"]

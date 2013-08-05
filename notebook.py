@@ -3,6 +3,7 @@ import simple_ui
 import ttk
 import ola.RDMConstants as RDMConstants
 from rdm_menu import RDMMenu
+import PIDDict
 
 class RDMNotebook(object):
   def __init__(self, root, controller, width=800, height=500, side=tk.TOP):
@@ -171,7 +172,7 @@ class RDMNotebook(object):
                                           textvariable = self.dmx_start_address)
     self.dmx_personality_menu = RDMMenu(self.dmx_tab,
                                         "Personality description not supported.",
-                                        "DMX Personalities")
+                                        "")
     self.slot_menu = RDMMenu(self.dmx_tab,
                              "No slot description.",
                              "Choose Slot")
@@ -361,25 +362,37 @@ class RDMNotebook(object):
     """
     """
     # Variables
-    self.language = tk.StringVar(self.config_tab)
     self.display_invert = tk.StringVar(self.config_tab)
-    self.display_level = tk.StringVar(self.config_tab)
+    self.display_level = tk.IntVar(self.config_tab)
     self.pan_invert = tk.BooleanVar(self.config_tab)
     self.tilt_invert = tk.BooleanVar(self.config_tab)
     self.pan_tilt_swap = tk.BooleanVar(self.config_tab)
     self.real_time_clock = tk.StringVar(self.config_tab)
 
     # Widgets
-    self.language_menu = tk.OptionMenu(self.config_tab, self.language, "")
+    self.language_menu = RDMMenu(self.config_tab, "Languages not supported.", "")
     self.display_invert_menu = tk.OptionMenu(self.config_tab,
-                                                  self.display_invert.get(), "")
-    self.display_level_menu = tk.OptionMenu(self.config_tab,
-                                                  self.display_level.get(), "")
+                                            self.display_invert, 
+                                            *PIDDict.DISPLAY_INVERT.values(),
+                                            command = self._set_display_invert)
+    self.display_level_menu = tk.Scale(self.config_tab, from_ = 0, to = 255, 
+                                  variable = self.display_level,
+                                  orient = tk.HORIZONTAL,
+                                  command = self._controller.SetDisplayLevel,
+                                  length = 255, 
+                                  state = tk.DISABLED)
     self.pan_invert_button = tk.Checkbutton(self.config_tab,
-                          variable = self.pan_invert, 
-                          text = "(what it means for the\nbutton to be checked")
-    self.tilt_invert_button = tk.Checkbutton(self.config_tab)
-    self.pan_tilt_swap_button = tk.Checkbutton(self.config_tab)
+                                            variable = self.pan_invert,
+                                            command = self._set_pan_invert,
+                                            state = tk.DISABLED)
+    self.tilt_invert_button = tk.Checkbutton(self.config_tab,
+                                             variable = self.tilt_invert,
+                                             command = self._set_tilt_invert,
+                                             state = tk.DISABLED)
+    self.pan_tilt_swap_button = tk.Checkbutton(self.config_tab,
+                                               variable = self.pan_tilt_swap,
+                                               command = self._set_pan_tilt_swap,
+                                               state = tk.DISABLED)
 
 
     self.objects["CONFIGURATION"] = [tk.Label(self.config_tab,
@@ -506,17 +519,20 @@ class RDMNotebook(object):
     else:
       self.dmx_start_address.set(start_address)
       self.start_address_entry.config(state = tk.NORMAL)
-    # if "SLOT_DESCRIPTION" in param_dict:
+    if "SLOT_INFO" in param_dict:
+      pass
+    # NOTE: Need to deal with this when the new Dummys are available with
+    #       SLOT_INFO supported.
     #   slot_info = param_dict["SLOT_INFO"]
     #   for index in xrange(param_dict["DEVICE_INFO"]["dmx_footprint"]):
     #     self.slot_menu["menu"].add_item("Slot Number %d" % index,
     #             lambda index = index:self._display_slot_info(index, param_dict))
-    self.slot_offset.set(param_dict.get("SLOT_INFO", {}).get("slot_offset", "N/A"))
-    self.slot_type.set(param_dict.get("SLOT_INFO", {}).get("slot_type", "N/A"))
-    self.slot_label_id.set(param_dict.get("SLOT_INFO", {}).get("slot_label_id", "N/A"))
-    # I'm not sure how to deal with this pid...
-    self.default_slot_offset.set("N/A")
-    self.default_slot_value.set("N/A")
+    # self.slot_offset.set(param_dict.get("SLOT_INFO", {}).get("slot_offset", "N/A"))
+    # self.slot_type.set(param_dict.get("SLOT_INFO", {}).get("slot_type", "N/A"))
+    # self.slot_label_id.set(param_dict.get("SLOT_INFO", {}).get("slot_label_id", "N/A"))
+    # # I'm not sure how to deal with this pid...
+    # self.default_slot_offset.set("N/A")
+    # self.default_slot_value.set("N/A")
     print "DMX Rendered"
 
   def RenderSensorInformation(self, param_dict):
@@ -564,11 +580,53 @@ class RDMNotebook(object):
     #   self.power_state = tk.StringVar(self.setting_tab)
 
   def RenderConfigInformation(self, param_dict):
+    self.language_menu.clear_menu()
+    if 'LANGUAGE_CAPABILITIES' in param_dict:
+      self.language_menu.config(state = tk.NORMAL)
+      for value in param_dict['LANGUAGE_CAPABILITIES']:
+        language = value['language']
+        self.language_menu.add_item(language, 
+                                lambda l = language: self._set_language(l))
+    self.language_menu.set(param_dict.get('LANGUAGE', 'N/A'))
+    if "DISPLAY_LEVEL" in param_dict:
+      self.display_level.set(param_dict['DISPLAY_LEVEL'])
+      self.display_level_menu.config(state = tk.NORMAL)
+    else:
+      self.display_level.set(0)
+      self.display_level_menu.config(state = tk.DISABLED)
+
+    if 'DISPLAY_INVERT' in param_dict:
+      self.display_invert.set(PIDDict.DISPLAY_INVERT.values()
+                                                [param_dict['DISPLAY_INVERT']])
+      self.display_invert_menu.config(state = tk.NORMAL)
+    else:
+      self.display_invert.set('N/A')
+      self.display_invert_menu.config(state = tk.DISABLED)
+
+    if 'PAN_INVERT' in param_dict:
+      self.pan_invert.set(param_dict['PAN_INVERT'])
+      self.pan_invert_button.config(state = tk.NORMAL)
+    else:
+      self.pan_invert.set(False)
+      self.pan_invert_button.config(state = tk.DISABLED)
+
+    if 'TILT_INVERT' in param_dict:
+      self.tilt_invert.set(param_dict['TILT_INVERT'])
+      self.tilt_invert_button.config(state = tk.NORMAL)
+    else:
+      self.tilt_invert.set(False)
+      self.tilt_invert_button.config(state = tk.DISABLED)
+
+    if 'PAN_TILT_SWAP' in param_dict:
+      self.pan_tilt_swap.set(param_dict['PAN_TILT_SWAP'])
+      self.pan_tilt_swap_button.config(state = tk.NORMAL)
+    else:
+      self.pan_tilt_swap.set(False)
+      self.pan_tilt_swap_button.config(state = tk.DISABLED)
     print "Rendering Config...."
-    print param_dict
 
   # ============================================================================
-  # ========================== RDM Set Callbacks ===============================
+  # ============================ RDM Set Methods ===============================
   # ============================================================================
 
   def PersonalityCallback(self, personality, param_dict):
@@ -577,6 +635,42 @@ class RDMNotebook(object):
                                     "slots_required", 
                                     "N/A")
     self._display_personality_decription(slots_required, personality)
+
+  def _set_display_invert(self, invert):
+    self._controller.SetDisplayInvert(invert)
+    # self._controller.SetDisplayInvert(self.display_invert.get())
+
+  def SetDisplayInvertComplete(self, invert):
+    if self.display_invert.get() != invert:
+      self.display_invert.set(invert)
+
+  def _set_pan_invert(self):
+    self._controller.SetPanInvert(self.pan_invert.get())
+
+  def SetPanInvertComplete(self, invert):
+    if self.pan_invert.get() != invert:
+      self.pan_invert.set(invert)
+
+  def _set_tilt_invert(self):
+    self._controller.SetTiltInvert(self.tilt_invert.get())
+
+  def SetTiltInvertComplete(self, invert):
+    if self.tilt_invert.get() != invert:
+      self.tilt_invert.set(invert)
+
+  def _set_pan_tilt_swap(self):
+    self._controller.SetPanTiltSwap(self.pan_tilt_swap.get())
+
+  def SetPanTiltSwapComplete(self, swap):
+    if self.pan_tilt_swap.get() != swap:
+      self.pan_tilt_swap.set(swap)
+
+  def _set_language(self, language):
+    self._controller.SetLanguage(language)
+
+  def SetLanguageComplete(self, language):
+    if self.language_menu.get() != language:
+      self.language_menu.set(language)
 
   # ============================================================================
   # ========================== Internal Methods ================================
@@ -589,11 +683,6 @@ class RDMNotebook(object):
   def _grid_info(self, obj_list):
     """
     """
-    for i in range(len(obj_list)):
-      if i%2 == 1:
-        obj_list[i].config(width=35)
-      else:
-        obj_list[i].config(width=20)
     obj_list.reverse()
     for r in range((len(obj_list)+1)/2):
       for c in range(2):
@@ -645,6 +734,7 @@ class RDMNotebook(object):
     #   elif pid in self.pid_location_dict["CONFIGURATION"].keys():
     #     for i in self.pid_location_dict["CONFIGURATION"][pid]:
     #       self.objects["CONFIGURATION"][i].config(state = tk.NORMAL)
+
   def _display_slot_info(self, slot_number, param_dict):
     """
     """
@@ -656,6 +746,15 @@ class RDMNotebook(object):
 
   def _get_personality_string(self, personality):
     return '%s (%d)' % (personality['name'], personality['slots_required'])
+
+  # def _set_display_level(self):
+  #   level = self.display_level_menu.get()
+  #   self._controller.SetDisplayLevel(level)
+
+  def DisplayLevelCallback(self, level):
+    if level != self.display_level_menu.get():
+      pass
+      # self.display_level_menu.set(level)
   # ============================== Main Loop ===================================
 
   def main(self):
