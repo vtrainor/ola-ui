@@ -32,21 +32,6 @@ class GetSupportedParams(GetRDMAction):
     if succeeded:
       self._data[self.PID] = set(p['param_id'] for p in value['params'])
 
-class GetDeviceLabel(GetRDMAction):
-  """
-  """
-  PID = "DEVICE_LABEL"
-    
-  def ShouldExecute(self):
-    """" Skip this action if we already have the supported params"""
-    pid_key = self._pid_store.GetName(self.PID)
-    return (self.PID not in self._data 
-                            and pid_key in self._data["PARAM_NAMES"])
-
-  def UpdateDict(self, succeeded, value):
-    if succeeded:
-      self._data[self.PID] = value["label"]
-
 # ==============================================================================
 # ============================ Get Basic Info ==================================
 # ==============================================================================
