@@ -484,24 +484,16 @@ class GetPanTiltSwap(GetRDMAction):
     if succeeded:
       self._data[self.PID] = value["swap"]
 
-  # def _get_real_time(self):
-  #   pid_key = self._pid_store.GetName("REAL_TIME_CLOCK")
-  #   if (pid_key.value in self._uid_dict[self.cur_uid]['SUPPORTED_PARAMETERS']
-  #         and "REAL_TIME_CLOCK" not in self._uid_dict[self.cur_uid]):
-  #     self.ola_thread.rdm_get(self.universe.get(), 
-  #                             self.cur_uid,
-  #                             0, 
-  #                             pid_key.name, 
-  #                             lambda b, s: self._get_real_time_complete(b, s)
-  #                             )
-  #   else:
-  #     self._notebook.RenderConfigInformation(self._uid_dict[self.cur_uid])
+class GetRealTimeClock(GetRDMAction):
+  """
+  """
+  PID = "REAL_TIME_CLOCK"
 
-  # def _get_real_time_complete(self, succeeded, data):
-  #   if succeeded:
-  #     print ""
-  #     self._uid_dict[self.cur_uid]["REAL_TIME_CLOCK"] = data
-  #   else:
-  #     print "failed"
-  #   # store the results in the uid dict
-  #   self._notebook.RenderConfigInformation(self._uid_dict[self.cur_uid])
+  def ShouldExecute(self):
+    """" Skip this action if we already have the supported params"""
+    return (self.PID not in self._data 
+                            and self.PID in self._data["PARAM_NAMES"])
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      self._data[self.PID] = value

@@ -64,7 +64,6 @@ class OLAThread(threading.Thread):
 
   def rdm_set(self, universe, uid, sub_device, pid, callback, data):
     """ Executes, in the ola thread, the setting of an rdm variable. """
-    print 'rdm set'
     self._ss.Execute(lambda:self._rdm_set(universe,uid,sub_device,pid,
                                           callback,data))
 
@@ -97,7 +96,7 @@ class OLAThread(threading.Thread):
 
   def _rdm_get(self,universe,uid,sub_device,pid,callback,data):
     """ This method is only run in the OLA thread. """
-    print "get %s" % pid
+    print "get %s, %s" % (uid, pid)
     self._rdm_api.Get(universe,uid,sub_device,self._pid_store.GetName(pid),
                       lambda r,d,e:self.complete_get(callback,r,d,e),data)
     # print "pid: %s" % pid
@@ -105,7 +104,7 @@ class OLAThread(threading.Thread):
 
   def _rdm_set(self,universe,uid,sub_device,pid,callback,data):
     """ This method is only run in the OLA thread. """
-    print '_rdm_set'
+    print "set %s, %s" % (uid, pid)
     self._rdm_api.Set(universe,uid,sub_device,self._pid_store.GetName(pid),
                       lambda r,d,e:self.complete_set(callback,r,d,e),data)
 

@@ -380,7 +380,8 @@ class RDMNotebook(object):
                                   orient = tk.HORIZONTAL,
                                   command = self._controller.SetDisplayLevel,
                                   length = 255, 
-                                  state = tk.DISABLED)
+                                  state = tk.DISABLED,
+                                  tickinterval = 255)
     self.pan_invert_button = tk.Checkbutton(self.config_tab,
                                             variable = self.pan_invert,
                                             command = self._set_pan_invert,
@@ -623,6 +624,16 @@ class RDMNotebook(object):
     else:
       self.pan_tilt_swap.set(False)
       self.pan_tilt_swap_button.config(state = tk.DISABLED)
+      
+    if 'REAL_TIME_CLOCK' in param_dict:
+      clock = param_dict['REAL_TIME_CLOCK']
+      self.real_time_clock.set("%d:%d:%d %d/%d/%d" % (clock['hour'],
+                                                      clock['minute'],
+                                                      clock['second'],
+                                                      clock['day'],
+                                                      clock['month'],
+                                                      clock['year']
+                                                      ))
     print "Rendering Config...."
 
   # ============================================================================

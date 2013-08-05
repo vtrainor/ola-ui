@@ -445,7 +445,8 @@ class DisplayApp(object):
                   actions.GetDisplayLevel(data, self.ola_thread.rdm_get),
                   actions.GetPanInvert(data, self.ola_thread.rdm_get),
                   actions.GetTiltInvert(data, self.ola_thread.rdm_get),
-                  actions.GetPanTiltSwap(data, self.ola_thread.rdm_get)
+                  actions.GetPanTiltSwap(data, self.ola_thread.rdm_get),
+                  actions.GetRealTimeClock(data, self.ola_thread.rdm_get)
                   ],
                   self.UpdateConfigInformation)
     flow.Run()
