@@ -5,7 +5,6 @@ from controlflow import GetRDMAction
 from ola import PidStore
 
 
-
 class GetDeviceInfo(GetRDMAction):
   """An action that GETs DEVICE_INFO."""
   PID = "DEVICE_INFO"
@@ -244,12 +243,13 @@ class GetSensorDefinition(GetRDMAction):
     
   def ShouldExecute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID in self._data["PARAM_NAMES"])
 
   def UpdateDict(self, succeeded, value):
     if succeeded:
-      self._data[self.PID] = value
+      index = value['sensor_number']
+      sensor_info = self._data.setdefault(self.PID, {})
+      sensor_info[index] = value
 
 class GetSensorValue(GetRDMAction):
   """
@@ -258,12 +258,13 @@ class GetSensorValue(GetRDMAction):
 
   def ShouldExecute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID in self._data["PARAM_NAMES"])
 
   def UpdateDict(self, succeeded, value):
     if succeeded:
-      self._data[self.PID] = value
+      index = value['sensor_number']
+      sensor_info = self._data.setdefault(self.PID, {})
+      sensor_info[index] = value
 
 # ==============================================================================
 # ============================ Get Setting Info ================================

@@ -64,8 +64,8 @@ class Controller(object):
     '''
     self._app.GetDMXInformation()
 
-  def GetSensorsInformation(self):
-    self._app.GetSensorsInformation()
+  def GetSensorsInformation(self, sensor_number = 0):
+    self._app.GetSensorsInformation(sensor_number)
 
   def GetSettingInformation(self):
     self._app.GetSettingInformation()
@@ -386,28 +386,36 @@ class DisplayApp(object):
                 self.UpdateDmxInformation)
     flow.Run()
 
-  def GetSensorsInformation(self):
+  def GetSensorsInformation(self, senosr_number):
 
     if self.cur_uid is None:
       print 'you need to select a device.'
       return
-    sensor_actions = []
-    data = self._uid_dict[self.cur_uid]
-    for i in xrange(data['DEVICE_INFO']['sensor_count']):
-      sensor_actions.append(actions.GetSensorDefinition(
-                                                    data, 
-                                                    self.ola_thread.rdm_get,
-                                                    i + 1))
-      sensor_actions.append(actions.GetSensorValue(
-                                                  data, 
-                                                  self.ola_thread.rdm_get,
-                                                  i + 1))
-    flow = controlflow.RDMControlFlow(
-                self.universe.get(),
-                self.cur_uid,
-                sensor_actions,
-                self.UpdateSensorInformation)
-    flow.Run()
+    if sensor_number == 0:
+      sensor_actions = []
+      data = self._uid_dict[self.cur_uid]
+      sensor_actions = [actions.GetSensorDefinition(data, self.ola_thread.rdm_get),
+                        actions.GetSensorValue(data, self.ola_thread.rdm_get)]
+      flow = controlflow.RDMControlFlow(
+                  self.universe.get(),
+                  self.cur_uid,
+                  sensor_actions,
+                  self.UpdateSensorInformation)
+      flow.Run()
+
+    else:
+      sensor_actions = []
+      data = self._uid_dict[self.cur_uid]
+      sensor_actions = [actions.GetSensorDefinition(data, self.ola_thread.rdm_get,
+                                                    sensor_number),
+                        actions.GetSensorValue(data, self.ola_thread.rdm_get,
+                                               sensor_number)]
+      flow = controlflow.RDMControlFlow(
+                  self.universe.get(),
+                  self.cur_uid,
+                  sensor_actions,
+                  lambda: self.PopulateSensorTab(sensor_number))
+      flow.Run()
 
   def GetSettingInformation(self):
 
@@ -461,6 +469,9 @@ class DisplayApp(object):
 
   def UpdateSensorInformation(self):
     self._notebook.RenderSensorInformation(self._uid_dict[self.cur_uid])
+
+  def PopulateSensorTab(self,sensor_number):
+    self._notebook.PopulateSensorTab(self._uid_dict[self.cur_uid])
 
   def UpdateSettingInformation(self):
     self._notebook.RenderSettingInformation(self._uid_dict[self.cur_uid])

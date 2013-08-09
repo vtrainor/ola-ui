@@ -245,14 +245,13 @@ class RDMNotebook(object):
     self.recorded = tk.StringVar(self.sensor_tab)
 
     # Widgets
-    self.sensor_def = tk.OptionMenu(self.sensor_tab,
-                                                  self.sensor_number.get(), "")
-    self.sensor_value = tk.OptionMenu(self.sensor_tab,
-                                                  self.sensor_number.get(), "")
+    self.sensor_menu = RDMMenu(self.sensor_tab,
+                                        "Sensor information not provided.",
+                                        "")
 
     self.objects["SENSORS"] = [tk.Label(self.sensor_tab,
                                                         text = "Choose Sensor"),
-                              self.sensor_def,
+                              self.sensor_menu,
 
                               tk.Label(self.sensor_tab, text = ""),
                               tk.Label(self.sensor_tab,
@@ -281,9 +280,6 @@ class RDMNotebook(object):
                               tk.Label(self.sensor_tab, text = ""),
                               tk.Label(self.sensor_tab,
                                               textvariable = self.sensor_name),
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              self.sensor_value,
 
                               tk.Label(self.sensor_tab, text = ""),
                               tk.Label(self.sensor_tab,
@@ -537,33 +533,44 @@ class RDMNotebook(object):
     print "DMX Rendered"
 
   def RenderSensorInformation(self, param_dict):
+    '''
+    2 dictionaries of values per sensor_number
+      1. SENSOR_VALUE
+      2. SENSOR_DEFINITION
+
+    the sensor number will be sensor_menu.get()
+    don't set the sensor_number upon rendering the tab
+      -> wait for user input to display the sensor information
+    '''
+    # the display sensor info method should take 2 dictionaries
+    # one for definition and one for value
+    # these disctionaries should default to none
+    # in sensor display create a check for if each dict is None
+    # if that dictionary is None skip to next check
+    # otherwise display  the information in that dict
+    # then go to the next check
+    # to _controller.GetSensorValue(index)
     print "rendering sensor information..."
-    self.sensor_type.set("Type: %s" % param_dict.get(
-                                    "SENSOR_DEFINITION", {}).get("type", "N/A"))
-    self.sensor_unit.set("Unit: %s" % param_dict.get(
-                                    "SENSOR_DEFINITION", {}).get("unit", "N/A"))
-    self.sensor_prefix.set("Prefix: %s" % param_dict.get(
-                                  "SENSOR_DEFINITION", {}).get("prefix", "N/A"))
-    self.sensor_range.set("Range: %s - %s" % (
-              param_dict.get("SENSOR_DEFINITION", {}).get("range_min", "N/A"), 
-              param_dict.get("SENSOR_DEFINITION", {}).get("range_max", "N/A")))
-    self.normal_range.set("Normal Range: %s - %s" % (
-              param_dict.get("SENSOR_DEFINITION", {}).get("normal_min", "N/A"), 
-              param_dict.get("SENSOR_DEFINITION", {}).get("normal_max", "N/A")))
-    self.supports_recording.set("Supports Recording: %s" % param_dict.get(
-                      "SENSOR_DEFINITION", {}).get("supports_recording", "N/A"))
-    self.sensor_name.set("Name: %s" % param_dict.get(
-                                  "SENSOR_DEFINITION", {}).get("name", "N/A"))
-    self.sensor_number.set("Sensor Number: %s" % param_dict.get(
-                          "SENSOR_VALUE", {}).get("sensor_number", "N/A"))
-    self.present_value.set("Present Value: %s" % param_dict.get(
-                          "SENSOR_VALUE", {}).get("present_value", "N/A"))
-    self.lowest.set("Lowest Value: %s" % param_dict.get(
-                          "SENSOR_VALUE", {}).get("lowest", "N/A"))
-    self.highest.set("Hightest Value: %s" % param_dict.get(
-                          "SENSOR_VALUE", {}).get("highest", "N/A"))
-    self.recorded.set("Recorded Value: %s" % param_dict.get(
-                          "SENSOR_VALUE", {}).get("sensor_number", "N/A"))
+    sensor_info = {}
+    if ['SENSOR_DEFINITION'] or ['SENSOR_VALUE'] in param_dict:
+      for sensor in param_dict['DEVICE_INFO']['sensor_count']:
+        self.sensor_menu.add_item("Sensor %d" % sensor, 
+                                lambda i: self._populate_sensor_tab(i))
+    else: 
+      self.sensor_menu.clear_menu()
+      return
+
+    # if "DMX_PERSONALITY_DESCRIPTION" in param_dict:
+    #   pers_desc = param_dict["DMX_PERSONALITY_DESCRIPTION"]
+    #   for pers_id, data in param_dict["DMX_PERSONALITY_DESCRIPTION"].iteritems():
+    #     self.dmx_personality_menu.add_item(self._get_personality_string(data),
+    #               lambda i = pers_id:self._controller.SetPersonality(i))
+    #   personality = device_info['current_personality']
+    #   self.dmx_personality_menu.set(self._get_personality_string(pers_desc[personality]))
+    #   s = pers_desc[personality]['slots_required']
+    #   p = personality
+    #   self._display_personality_decription(s, p)
+   
 
   def RenderSettingInformation(self, param_dict):
     print "PARAM_DICT: %s" % param_dict
@@ -688,11 +695,15 @@ class RDMNotebook(object):
   # ============================================================================
 
   def _tab_changed(self, event):
+    '''
+    Method bound to tab change evet, calls self.Update
+    '''
     # Note that this will be called when the program starts
     self.Update()
 
   def _grid_info(self, obj_list):
     """
+    places the widgets subject to change upon completion of controlflows
     """
     obj_list.reverse()
     for r in range((len(obj_list)+1)/2):
@@ -720,32 +731,6 @@ class RDMNotebook(object):
     self._notebook.add(tab, text = tab_label)
     return tab
 
-  def act_objects(self, supported_pids):
-    """
-    """
-    pass
-    # for key in self.objects.keys():
-    #   for widget in self.objects[key]:
-    #     widget.config(state = tk.DISABLED)
-    # for pid in supported_pids:
-    #   if pid == "QUEUED_MESSAGE":
-    #     pass
-    #   elif pid in self.pid_location_dict["PRODUCT_INFO"].keys():
-    #     for i in self.pid_location_dict["PRODUCT_INFO"][pid]:
-    #       self.objects["PRODUCT_INFO"][i].config(state = tk.NORMAL)
-    #   elif pid in self.pid_location_dict["DMX512_SETUP"].keys():
-    #     for i in self.pid_location_dict["DMX512_SETUP"][pid]:
-    #       self.objects["DMX512_SETUP"][i].config(state = tk.NORMAL)
-    #   elif pid in self.pid_location_dict["SENSORS"].keys():
-    #     for i in self.pid_location_dict["SENSORS"][pid]:
-    #       self.objects["SENSORS"][i].config(state = tk.NORMAL)
-    #   elif pid in self.pid_location_dict["POWER_LAMP_SETTINGS"].keys():
-    #     for i in self.pid_location_dict["POWER_LAMP_SETTINGS"][pid]:
-    #       self.objects["POWER_LAMP_SETTINGS"][i].config(state = tk.NORMAL)
-    #   elif pid in self.pid_location_dict["CONFIGURATION"].keys():
-    #     for i in self.pid_location_dict["CONFIGURATION"][pid]:
-    #       self.objects["CONFIGURATION"][i].config(state = tk.NORMAL)
-
   def _display_slot_info(self, slot_number, param_dict):
     """
     """
@@ -755,12 +740,20 @@ class RDMNotebook(object):
     self.slot_required.set("Slots Required: %s" % slots_required)
     self.personality_name.set("Personality ID: %s" % personality)
 
+  def _display_sensor_information(self, sensor_dict):
+    pass
+
   def _get_personality_string(self, personality):
     return '%s (%d)' % (personality['name'], personality['slots_required'])
 
   # def _set_display_level(self):
   #   level = self.display_level_menu.get()
   #   self._controller.SetDisplayLevel(level)
+  def _populate_sensor_tab(self, sensor_number):
+    self._controller.GetSensorsInformation(sensor_number)
+
+  def PopulateSensorTab(self, param_dict):
+     pass
 
   def DisplayLevelCallback(self, level):
     if level != self.display_level_menu.get():
