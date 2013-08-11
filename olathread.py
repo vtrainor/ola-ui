@@ -111,10 +111,39 @@ class OLAThread(threading.Thread):
   def complete_get(self,callback,response,data,unpack_exception):
     """ Checks if the get was a success, calls the callback from run_get. """
     # need to do something with unpack_exception here
+    # if ACK timer then schedule event in n milisecs
     if response.WasAcked()==False:
       callback(False,'')
     else:
       callback(True, data)
+    # Section 8 of the standard (8.3)
+    # need pid and uid so I can keep track of messages
+    # ask Simon for sample code
+    # 4. schedule call to get queued
+
+  # 5. get queued
+  #    calls _rdm_api. get for QUEUED_MESSAGE
+
+  # 6. call back for 5
+  # 7. goes back to ui
+
+  # from olaclient:
+  #   Failures can occur at many layers, the recommended way for dealing with
+  # responses is:
+  #   Check .status.Succeeded(), if not true this indicates a rpc or server
+  #     error.
+  #   Check .response_code, if not RDM_COMPLETED_OK, it indicates a problem with
+  #     the RDM transport layer or malformed response.
+  #   If .response_code is RDM_COMPLETED_OK, .sub_device, .command_class, .pid,
+  #   .queued_messages hold the properties of the response.
+  #   Then check .response_type:
+  #   if .response_type is ACK:
+  #     .data holds the param data of the response.
+  #   If .response_type is ACK_TIMER:
+  #     .ack_timer: holds the number of ms before the response should be
+  #     available.
+  #   If .response_type is NACK_REASON:
+  #     .nack_reason holds the reason for nack'ing
 
   def complete_set(self,callback,response,data,unpack_exception):
     """ Checks if the set was a success, calls the callback from run_set. """

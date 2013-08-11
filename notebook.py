@@ -438,7 +438,12 @@ class RDMNotebook(object):
     elif index == 1:
       self._controller.GetDMXInformation()
     elif index == 2:
-      self._controller.GetSensorsInformation()
+      # get sensor name through sensor description 
+      # for sensors 1 through sensor count,
+      # then get sensor value when the user select sensor on menuy
+      # add refresh button that triggers the control 
+      # record sensor button (own pid) (takes sensor number)
+      self._controller.GetSensorNames()
     elif index == 3:
       self._controller.GetSettingInformation()
     elif index == 4:
@@ -552,13 +557,16 @@ class RDMNotebook(object):
     # to _controller.GetSensorValue(index)
     print "rendering sensor information..."
     sensor_info = {}
-    if ['SENSOR_DEFINITION'] or ['SENSOR_VALUE'] in param_dict:
-      for sensor in param_dict['DEVICE_INFO']['sensor_count']:
-        self.sensor_menu.add_item("Sensor %d" % sensor, 
-                                lambda i: self._populate_sensor_tab(i))
+    if 'SENSOR_DEFINITION' in param_dict:
+      for index in param_dict['SENSOR_DEFINITION']:
+        sensor_name = param_dict['SENSOR_DEFINITION'][index]['name']
+        self.sensor_menu.add_item('%s (%d)' % (sensor_name, index),
+                                lambda i=index: self._populate_sensor_tab(i))
     else: 
       self.sensor_menu.clear_menu()
       return
+
+    # need second control flows for sensor tab 
 
     # if "DMX_PERSONALITY_DESCRIPTION" in param_dict:
     #   pers_desc = param_dict["DMX_PERSONALITY_DESCRIPTION"]
@@ -750,10 +758,25 @@ class RDMNotebook(object):
   #   level = self.display_level_menu.get()
   #   self._controller.SetDisplayLevel(level)
   def _populate_sensor_tab(self, sensor_number):
-    self._controller.GetSensorsInformation(sensor_number)
+    self._controller.GetSensorInformation(sensor_number)
 
-  def PopulateSensorTab(self, param_dict):
-     pass
+  def PopulateSensorTab(self, param_dict, sensor_number):
+    definition = param_dict['SENSOR_DEFINITION'][sensor_number]
+    self.sensor_type.set('Type: %d' % definition['type'])
+    self.sensor_unit.set('Unit: %d' % definition['unit'])
+    self.sensor_prefix.set('Prefix: %d' % definition['prefix'])
+    self.sensor_range.set('Range: %d - %d' % (definition['range_min'], 
+                                               definition['range_max']))
+    self.normal_range.set('Normal Range: %d - %d' % (definition['normal_min'], 
+                                               definition['normal_max']))
+    self.supports_recording.set('Supports Recording? %d' %
+                                               definition['supports_recording'])
+    if 'SENSOR_VALUE' in param_dict:
+      value = param_dict['SENSOR_VALUE']
+      self.present_value.set('Value: %d' % value['present_value'])
+      self.lowest.set('Lowest Value: %d' % value['lowest'])
+      self.highest.set('Highest Value: %d' % value['highest'])
+      self.recorded.set('Recorded Value: %d' % value['recorded'])
 
   def DisplayLevelCallback(self, level):
     if level != self.display_level_menu.get():
