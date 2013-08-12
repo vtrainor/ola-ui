@@ -556,6 +556,17 @@ class RDMNotebook(object):
     # then go to the next check
     # to _controller.GetSensorValue(index)
     print "rendering sensor information..."
+    self.sensor_menu.clear_menu()
+    self.sensor_type.set('')
+    self.sensor_unit.set('')
+    self.sensor_prefix.set('')
+    self.sensor_range.set('')
+    self.normal_range.set('')
+    self.supports_recording.set('')
+    self.present_value.set('')
+    self.lowest.set('')
+    self.highest.set('')
+    self.recorded.set('')
     sensor_info = {}
     if 'SENSOR_DEFINITION' in param_dict:
       for index, sensor in param_dict['SENSOR_DEFINITION'].iteritems():
