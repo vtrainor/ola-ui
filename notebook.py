@@ -247,7 +247,7 @@ class RDMNotebook(object):
     # Widgets
     self.sensor_menu = RDMMenu(self.sensor_tab,
                                         "Sensor information not provided.",
-                                        "")
+                                        "Choose Sensor")
 
     self.objects["SENSORS"] = [tk.Label(self.sensor_tab,
                                                         text = "Choose Sensor"),
@@ -443,7 +443,7 @@ class RDMNotebook(object):
       # then get sensor value when the user select sensor on menuy
       # add refresh button that triggers the control 
       # record sensor button (own pid) (takes sensor number)
-      self._controller.GetSensorNames()
+      self._controller.GetSensorDefinitions()
     elif index == 3:
       self._controller.GetSettingInformation()
     elif index == 4:
@@ -558,9 +558,9 @@ class RDMNotebook(object):
     print "rendering sensor information..."
     sensor_info = {}
     if 'SENSOR_DEFINITION' in param_dict:
-      for index in param_dict['SENSOR_DEFINITION']:
-        sensor_name = param_dict['SENSOR_DEFINITION'][index]['name']
-        self.sensor_menu.add_item('%s (%d)' % (sensor_name, index),
+      for index, sensor in param_dict['SENSOR_DEFINITION'].iteritems():
+        sensor_name = sensor['name']
+        self.sensor_menu.add_item('%s' % sensor_name,
                                 lambda i=index: self._populate_sensor_tab(i))
     else: 
       self.sensor_menu.clear_menu()
@@ -758,9 +758,9 @@ class RDMNotebook(object):
   #   level = self.display_level_menu.get()
   #   self._controller.SetDisplayLevel(level)
   def _populate_sensor_tab(self, sensor_number):
-    self._controller.GetSensorInformation(sensor_number)
+    self._controller.GetSensorValue(sensor_number)
 
-  def PopulateSensorTab(self, param_dict, sensor_number):
+  def DisplaySensorData(self, param_dict, sensor_number):
     definition = param_dict['SENSOR_DEFINITION'][sensor_number]
     self.sensor_type.set('Type: %d' % definition['type'])
     self.sensor_unit.set('Unit: %d' % definition['unit'])
@@ -769,10 +769,11 @@ class RDMNotebook(object):
                                                definition['range_max']))
     self.normal_range.set('Normal Range: %d - %d' % (definition['normal_min'], 
                                                definition['normal_max']))
-    self.supports_recording.set('Supports Recording? %d' %
-                                               definition['supports_recording'])
+    self.supports_recording.set('Supports Recording: %s' %
+                          PIDDict.SENSOR_VALUE[definition['supports_recording']]
+                                               )
     if 'SENSOR_VALUE' in param_dict:
-      value = param_dict['SENSOR_VALUE']
+      value = param_dict['SENSOR_VALUE'][sensor_number]
       self.present_value.set('Value: %d' % value['present_value'])
       self.lowest.set('Lowest Value: %d' % value['lowest'])
       self.highest.set('Highest Value: %d' % value['highest'])

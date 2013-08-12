@@ -48,6 +48,9 @@ class RDMMenu(object):
     print 'Item selected %s' % item
     self.variable.set(item)
     command()
+
+  def entryconfigure(self, index, *args, **kwargs):
+    self.menu['menu'].entryconfigure(index, *args, **kwargs)
     
   def config(self, *args, **kwargs):
     self.menu.config(*args, **kwargs)

@@ -64,11 +64,11 @@ class Controller(object):
     '''
     self._app.GetDMXInformation()
 
-  def GetSensorInformation(self, sensor_number):
-    self._app.GetSensorInformation(sensor_number)
+  def GetSensorValue(self, sensor_number):
+    self._app.GetSensorValue(sensor_number)
 
-  def GetSensorNames(self):
-    self._app.GetSensorNames()
+  def GetSensorDefinitions(self):
+    self._app.GetSensorDefinitions()
 
   # def RecordSensors():
 
@@ -391,7 +391,7 @@ class DisplayApp(object):
                 self.UpdateDmxInformation)
     flow.Run()
 
-  def GetSensorNames(self):
+  def GetSensorDefinitions(self):
     if self.cur_uid is None:
       return
     sensor_actions = []
@@ -408,23 +408,20 @@ class DisplayApp(object):
                   self.UpdateSensorInformation)
     flow.Run()
 
-  def GetSensorInformation(self, sensor_number):
+  def GetSensorValue(self, sensor_number):
     if self.cur_uid is None:
       return
     sensor_actions = []
     data = self._uid_dict[self.cur_uid]
-    sensor_actions.append(actions.GetSensorDefinition(data, 
-                                                      self.ola_thread.rdm_get,
-                                                      sensor_number))
-    sensor_actions.append(actions.GetSensorValue(data,
+    sensor_actions = [actions.GetSensorValue(data,
                                                  self.ola_thread.rdm_get,
-                                                 sensor_number))
+                                                 sensor_number)]
                         
     flow = controlflow.RDMControlFlow(
                   self.universe.get(),
                   self.cur_uid,
                   sensor_actions,
-                  lambda: self.PopulateSensorTab(sensor_number))
+                  lambda: self.DisplaySensorData(sensor_number))
     flow.Run()
 
   def GetSettingInformation(self):
@@ -480,8 +477,8 @@ class DisplayApp(object):
   def UpdateSensorInformation(self):
     self._notebook.RenderSensorInformation(self._uid_dict[self.cur_uid])
 
-  def PopulateSensorTab(self,sensor_number):
-    self._notebook.PopulateSensorTab(self._uid_dict[self.cur_uid],sensor_number)
+  def DisplaySensorData(self,sensor_number):
+    self._notebook.DisplaySensorData(self._uid_dict[self.cur_uid],sensor_number)
 
   def UpdateSettingInformation(self):
     self._notebook.RenderSettingInformation(self._uid_dict[self.cur_uid])
@@ -628,13 +625,12 @@ class DisplayApp(object):
     if succeeded:
       index = self._uid_dict[self.cur_uid]['index']
       self._uid_dict[self.cur_uid]['DEVICE_LABEL'] = label
-      self.device_menu['menu'].entryconfigure(index, label = '%s (%s)'%(
-                  self._uid_dict[uid]['DEVICE_LABEL'], uid))
-      self.dev_label.set('%s (%s)'%(
+      self.device_menu.entryconfigure(index, label = '%s (%s)'%(
                   self._uid_dict[uid]['DEVICE_LABEL'], uid))
     else:
       print 'failed'
     # store the results in the uid dict
+    self.root.update_idletasks()
     self._notebook.Update()
 
   def _add_device_to_menu(self, uid):
