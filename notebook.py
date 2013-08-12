@@ -762,9 +762,12 @@ class RDMNotebook(object):
 
   def DisplaySensorData(self, param_dict, sensor_number):
     definition = param_dict['SENSOR_DEFINITION'][sensor_number]
-    self.sensor_type.set('Type: %d' % definition['type'])
-    self.sensor_unit.set('Unit: %d' % definition['unit'])
-    self.sensor_prefix.set('Prefix: %d' % definition['prefix'])
+    TYPE = RDMConstants.SENSOR_TYPE_TO_NAME[definition['type']].replace("_", " ")
+    UNIT = RDMConstants.UNIT_TO_NAME[definition['unit']].replace("_", " ")
+    PREFIX = RDMConstants.PREFIX_TO_NAME[definition['prefix']].replace("_", " ")
+    self.sensor_type.set('Type: %s' % TYPE)
+    self.sensor_unit.set('Unit: %s' % UNIT)
+    self.sensor_prefix.set('Prefix: %s' % PREFIX)
     self.sensor_range.set('Range: %d - %d' % (definition['range_min'], 
                                                definition['range_max']))
     self.normal_range.set('Normal Range: %d - %d' % (definition['normal_min'], 
