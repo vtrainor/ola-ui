@@ -19,3 +19,14 @@ DISPLAY_INVERT = {
   1:"On",
   2:"Auto"
 }
+
+SENSOR_VALUE = {
+	0: "Recorded Value Supported",
+	1: "Lowest/Highest Detected Values Supported",
+	2: "Reserved",
+	3: "Reserved",
+	4: "Reserved",
+	5: "Reserved",
+	6: "Reserved",
+	7: "Reserved"
+}
