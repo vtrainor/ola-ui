@@ -30,3 +30,10 @@ SENSOR_VALUE = {
 	6: "Reserved",
 	7: "Reserved"
 }
+
+POWER_STATE = {
+  0: "Full Off",
+  1: "Shutdown",
+  2: "Standby",
+  255: "Normal"
+}

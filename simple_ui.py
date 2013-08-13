@@ -94,6 +94,12 @@ class Controller(object):
   def SetLampState(self, state):
     self._app.SetLampState(state)
 
+  def SetLampOnMode(self, mode):
+    self._app.SetLampOnMode(mode)
+
+  def SetPowerState(self, state):
+    self._app.SetPowerState(state)
+
   def SetLanguage(self, language):
     self._app.SetLanguage(language)
 
@@ -445,6 +451,7 @@ class DisplayApp(object):
                   actions.GetDeviceHours(data, self.ola_thread.rdm_get),
                   actions.GetLampHours(data, self.ola_thread.rdm_get),
                   actions.GetLampState(data, self.ola_thread.rdm_get),
+                  actions.GetLampStrikes(data, self.ola_thread.rdm_get),
                   actions.GetLampOnMode(data, self.ola_thread.rdm_get),
                   actions.GetPowerCycles(data, self.ola_thread.rdm_get),
                   actions.GetPowerState(data, self.ola_thread.rdm_get),
@@ -504,8 +511,8 @@ class DisplayApp(object):
     flow_actions.append(actions.SetDMXPersonality(data, self.ola_thread.rdm_set, personality))
     flow_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
     flow_actions.append(actions.GetSlotDescription(data, self.ola_thread.rdm_get, personality))
-    # dmx_actions.append(actions.GetDefaultSlotValue(data, 
-    #                                                 self.ola_thread.rdm_get))
+    flow_actions.append(actions.GetDefaultSlotValue(data, self.ola_thread.rdm_get))
+
     flow = controlflow.RDMControlFlow(
                 self.universe.get(),
                 self.cur_uid,
@@ -544,10 +551,45 @@ class DisplayApp(object):
                             'LAMP_STATE',
                             callback,
                             [state])
+
   def _set_lamp_state_complete(self, uid, state, succeeded, data):
-    if succeded:
+    if succeeded:
       self._uid_dict[uid]['LAMP_STATE'] = state
       self._notebook.LampStateCallback(state)
+
+  def SetLampOnMode(self, mode):
+    if self.cur_uid is None:
+      return
+    uid = self.cur_uid
+    callback = lambda b, s: self._set_lamp_on_mode_complete(uid, state, b, s)
+    self.ola_thread.rdm_set(self.universe.get(),
+                            uid,
+                            0,
+                            'LAMP_ON_MODE',
+                            callback,
+                            [mode])
+    
+  def _set_lamp_on_mode_complete(self, uid, mode, succeeded, data):
+    if succeeded:
+      self._uid_dict[uid]['LAMP_ON_MODE'] = mode
+      self._notebook.LampOnModeCallback(mode)
+
+  def SetPowerState(self, state):
+    if self.cur_uid is None:
+      return
+    uid = self.cur_uid
+    callback = lambda b, s: self._set_power_state_complete(uid, state, b, s)
+    self.ola_thread.rdm_set(self.universe.get(),
+                            uid,
+                            0,
+                            'POWER_STATE',
+                            callback,
+                            [state])
+    
+  def _set_power_state_complete(self, uid, state, succeeded, data):
+    if succeeded:
+      self._uid_dict[uid]['POWER_STATE'] = state
+      self._notebook.PowerStateCallback(state)
 
   def SetLanguage(self, language):
     if self.cur_uid is None:
@@ -563,7 +605,7 @@ class DisplayApp(object):
   def _language_complete(self, uid, language, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['LANGUAGE'] = language
-      self._notebook.SetLanguageComplete(language)
+      self._notebook.SetLanguageComplete(PIDDict.LAMP_STATE[language])
 
   def SetDisplayInvert(self, invert):
     if self.cur_uid is None:
