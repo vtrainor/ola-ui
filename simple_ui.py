@@ -91,6 +91,9 @@ class Controller(object):
     self._app.SetPersonality(index)
   # Additional methods will be added later
 
+  def SetLampState(self, state):
+    self._app.SetLampState(state)
+
   def SetLanguage(self, language):
     self._app.SetLanguage(language)
 
@@ -529,6 +532,22 @@ class DisplayApp(object):
     if succeeded:
       self._uid_dict[uid]['DISPLAY_LEVEL'] = level
       self._notebook.DisplayLevelCallback(level)
+
+  def SetLampState(self, state):
+    if self.cur_uid is None:
+      return
+    uid = self.cur_uid
+    callback = lambda b, s: self._set_lamp_state_complete(uid, state, b, s)
+    self.ola_thread.rdm_set(self.universe.get(),
+                            uid,
+                            0,
+                            'LAMP_STATE',
+                            callback,
+                            [state])
+  def _set_lamp_state_complete(self, uid, state, succeeded, data):
+    if succeded:
+      self._uid_dict[uid]['LAMP_STATE'] = state
+      self._notebook.LampStateCallback(state)
 
   def SetLanguage(self, language):
     if self.cur_uid is None:

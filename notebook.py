@@ -312,11 +312,13 @@ class RDMNotebook(object):
     # Widgets
     self.lamp_state_menu = RDMMenu(self.setting_tab,
                                    'Lamp state not supported.',
-                                   'Choose lamp state')
+                                   '')
     self.lamp_on_mode_menu = RDMMenu(self.setting_tab,
-                                                    self.lamp_on_mode.get(), "")
+                                     'Lamp on mode not supported',
+                                     '')
     self.power_state_menu = RDMMenu(self.setting_tab,
-                                                    self.power_state.get(), "")
+                                    'Power state not supported.',
+                                    '')
 
     self.objects["POWER_LAMP_SETTINGS"] = [tk.Label(self.setting_tab,
                                                         text = "Device Hours:"),
@@ -589,9 +591,13 @@ class RDMNotebook(object):
     self.lamp_hours.set(param_dict.get('LAMP_HOURS', 'N/A'))
     self.device_power_cycles.set(param_dict.get("DEVICE_POWER_CYCLES", "N/A"))
     self.lamp_strikes.set(param_dict.get('LAMP_STRIKES', 'N/A'))
-    print "rendered"
     # if "LAMP_STATE" in param_dict:
-    #   self.lamp_state = tk.StringVar(self.setting_tab)
+    if 'LAMP_STATE' in param_dict:
+      self.language_menu.config(state = tk.NORMAL)
+      for key, value in PIDDict.LAMP_STATE:
+        self.lamp_state_menu.add_item(value, 
+                                lambda k=key: self._set_lamp_state(k))
+    self.language_menu.set(PIDDict.LAMP_STATE[param_dict.get('LAMP_STATE', 'N/A')])
     # if "LAMP_ON_MODE" in param_dict:
     #   self.lamp_on_mode = tk.StringVar(self.setting_tab)
 
@@ -658,6 +664,13 @@ class RDMNotebook(object):
   # ============================ RDM Set Methods ===============================
   # ============================================================================
 
+  def _set_lamp_state(self, state):
+    self._controller.SetLampState(state)
+
+  def LampStateCallback(self, state):
+    if self.lamp_state_menu.get() != state:
+      self.lamp_state_menu.set(state)
+
   def PersonalityCallback(self, param_dict):
     personality = param_dict['DEVICE_INFO']['current_personality']
     slots_required = param_dict.get("DMX_PERSONALITY_DESCRIPTION", 
@@ -669,7 +682,6 @@ class RDMNotebook(object):
     for index in xrange(slots_required):
       self.slot_menu.add_item('Slot %d' % index, 
                               lambda i=index: self._display_slot_info(i, param_dict))
-
 
   def _set_display_invert(self, invert):
     self._controller.SetDisplayInvert(invert)
@@ -751,8 +763,8 @@ class RDMNotebook(object):
   def _display_slot_info(self, slot_number, param_dict):
     """
     """
-    print param_dict['SLOT_INFO']
-    print param_dict['SLOT_DESCRIPTION']
+    print 'slot_number: %d \n SLOT_INFO: %s \n SLOT_DESCRIPTION %s' % (
+           slot_number, param_dict['SLOT_INFO'], param_dict['SLOT_DESCRIPTION']) 
     self.slot_name.set('Name: %s' % param_dict.get('SLOT_DESCRIPTION', {}).get('name', "N/A"))
     TYPE = RDMConstants.SLOT_TYPE_TO_NAME[
           param_dict.get('SLOT_INFO', {})[slot_number].get('slot_type', "N/A")
