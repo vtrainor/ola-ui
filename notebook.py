@@ -522,19 +522,20 @@ class RDMNotebook(object):
       self.dmx_start_address.set(start_address)
       self.start_address_entry.config(state = tk.NORMAL)
     if "SLOT_INFO" in param_dict:
-      pass
-    # NOTE: Need to deal with this when the new Dummys are available with
-    #       SLOT_INFO supported.
-    #   slot_info = param_dict["SLOT_INFO"]
-    #   for index in xrange(param_dict["DEVICE_INFO"]["dmx_footprint"]):
-    #     self.slot_menu["menu"].add_item("Slot Number %d" % index,
-    #             lambda index = index:self._display_slot_info(index, param_dict))
-    # self.slot_offset.set(param_dict.get("SLOT_INFO", {}).get("slot_offset", "N/A"))
-    # self.slot_type.set(param_dict.get("SLOT_INFO", {}).get("slot_type", "N/A"))
-    # self.slot_label_id.set(param_dict.get("SLOT_INFO", {}).get("slot_label_id", "N/A"))
-    # # I'm not sure how to deal with this pid...
-    # self.default_slot_offset.set("N/A")
-    # self.default_slot_value.set("N/A")
+      print '!!Slot info in supported pids.!!'
+      print 'hello'
+      slot_info = param_dict["SLOT_INFO"]
+      print slot_info
+      for index in xrange(param_dict["DEVICE_INFO"]["dmx_footprint"]):
+        print index
+        self.slot_menu.add_item("Slot Number %d" % index,
+                        lambda i = index:self._display_slot_info(i, param_dict))
+    self.slot_offset.set(param_dict.get("SLOT_INFO", {}).get("slot_offset", "N/A"))
+    self.slot_type.set(param_dict.get("SLOT_INFO", {}).get("slot_type", "N/A"))
+    self.slot_label_id.set(param_dict.get("SLOT_INFO", {}).get("slot_label_id", "N/A"))
+    # I'm not sure how to deal with this pid...
+    self.default_slot_offset.set("N/A")
+    self.default_slot_value.set("N/A")
     print "DMX Rendered"
 
   def RenderSensorInformation(self, param_dict):

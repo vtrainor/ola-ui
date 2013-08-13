@@ -64,6 +64,9 @@ class Controller(object):
     '''
     self._app.GetDMXInformation()
 
+  def SetDMXFootprint(self):
+    self._app.SetDMXFootprint()
+
   def GetSensorValue(self, sensor_number):
     self._app.GetSensorValue(sensor_number)
 
@@ -377,11 +380,13 @@ class DisplayApp(object):
                                                   i + 1))
     dmx_actions.append(actions.GetStartAddress(data, self.ola_thread.rdm_get))
     dmx_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
+    print 'dmx_footprint: %d' % data['DEVICE_INFO']['dmx_footprint']
     for i in xrange(data['DEVICE_INFO']['dmx_footprint']):
       dmx_actions.append(actions.GetSlotDescription(
                                                   data, 
                                                   self.ola_thread.rdm_get,
                                                   i))
+      print i
     # dmx_actions.append(actions.GetDefaultSlotValue(data, 
     #                                                 self.ola_thread.rdm_get))
     flow = controlflow.RDMControlFlow(
@@ -490,21 +495,25 @@ class DisplayApp(object):
 
   def SetPersonality(self, personality):
     if self.cur_uid is None:
-      print 'you need to select a device'
       return
-    uid = self.cur_uid
-    callback = lambda b, s: self._personality_callback(uid, personality, b, s)
-    self.ola_thread.rdm_set(self.universe.get(), 
-                                  uid,
-                                  0, 
-                                  'DMX_PERSONALITY', 
-                                  callback,
-                                  [personality]
-                                  )
-  def _personality_callback(self, uid, personality, succeeded, data):
+    flow_actions = []
+    data = self._uid_dict[self.cur_uid]
+    flow_actions.append(actions.SetDMXPersonality(data, self.ola_thread.rdm_get, personality))
+    flow_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
+    # dmx_actions.append(actions.GetDefaultSlotValue(data, 
+    #                                                 self.ola_thread.rdm_get))
+    flow = controlflow.RDMControlFlow(
+                self.universe.get(),
+                self.cur_uid,
+                flow_actions,
+                lambda b, s: self._personality_callback(uid, b, s))
+    flow.Run()
+
+  def _personality_callback(self, uid, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['DEVICE_INFO']['current_personality'] = personality
       self._uid_dict[uid]['DMX_PERSONALITY']['current_personality'] = personality
+
       self._notebook.PersonalityCallback(personality, 
                                          self._uid_dict[uid])
     else:

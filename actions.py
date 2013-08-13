@@ -2,6 +2,7 @@
 # actions.py
 
 from controlflow import GetRDMAction
+from controlflow import SetRDMAction
 from ola import PidStore
 
 
@@ -483,3 +484,19 @@ class GetRealTimeClock(GetRDMAction):
   def UpdateDict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value
+
+# ==============================================================================
+# ============================ RDM Set Actions =================================
+# ==============================================================================
+
+class SetDMXPersonality(SetRDMAction):
+  '''
+  '''
+  PID = 'DMX_PERSONALITY'
+
+  def ShouldExecute(self):
+    return self.PID not in self._data
+
+  def UpdateDict(self, succeeded, value):
+    if succeeded:
+      print value

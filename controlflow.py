@@ -46,6 +46,46 @@ class GetRDMAction(RDMAction):
     self.UpdateDict(succeeded, params)
     on_complete()
 
+class SetRDMAction(RDMAction):
+  """An action which performs an RDM GET."""
+  def __init__(self, data_dict, set_fn, set_data = None):
+    """Create a new GET action.
+
+    Args:
+      data_dict: the dict to update
+      get_fn: the function to use for RDM GETs
+    """
+    self._data = data_dict
+    self._set_fn = set_fn
+    self._set_data = set_data
+
+  def Params(self):
+    """This method provides the parameters for the SET."""
+    return []
+
+  def UpdateDict(succeeded, params):
+    """This method is called when the SET completes."""
+    pass
+
+  def ShouldExecute(self):
+    """This method controls if the action should be skipped."""
+    return True
+
+  def Execute(self, universe, uid, on_complete):
+    """Perform the RDM GET."""
+    if not self.ShouldExecute():
+      on_complete()
+      return
+
+    self._set_fn(
+        universe, uid, 0, self.PID,
+        lambda b, s: self._Complete(b, s, on_complete),
+        [self._set_data])
+
+  def _Complete(self, succeeded, params, on_complete):
+    """Called when the GET completes."""
+    self.UpdateDict(succeeded, self._set_data)
+    on_complete()
 
 class GetIdentify(GetRDMAction):
   """An example GET IDENTIFY_DEVICE action.
