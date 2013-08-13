@@ -500,6 +500,7 @@ class DisplayApp(object):
     data = self._uid_dict[self.cur_uid]
     flow_actions.append(actions.SetDMXPersonality(data, self.ola_thread.rdm_set, personality))
     flow_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
+    flow_actions.append(actions.GetSlotDescription(data, self.ola_thread.rdm_get, personality))
     # dmx_actions.append(actions.GetDefaultSlotValue(data, 
     #                                                 self.ola_thread.rdm_get))
     flow = controlflow.RDMControlFlow(
@@ -510,6 +511,7 @@ class DisplayApp(object):
     flow.Run()
 
   def _personality_callback(self):
+    self._notebook.PersonalityCallback(self._uid_dict[self.cur_uid])
     pass
 
   def SetDisplayLevel(self, level):

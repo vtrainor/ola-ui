@@ -207,10 +207,6 @@ class RDMNotebook(object):
 
                                   tk.Label(self.dmx_tab, text = ""),
                                   tk.Label(self.dmx_tab,
-                                              textvariable = self.slot_offset),
-
-                                  tk.Label(self.dmx_tab, text = ""),
-                                  tk.Label(self.dmx_tab,
                                                 textvariable = self.slot_type),
 
                                   tk.Label(self.dmx_tab, text = ""),
@@ -531,12 +527,6 @@ class RDMNotebook(object):
         print index
         self.slot_menu.add_item("Slot Number %d" % index,
                         lambda i = index:self._display_slot_info(i, param_dict))
-    self.slot_offset.set(param_dict.get("SLOT_INFO", {}).get("slot_offset", "N/A"))
-    self.slot_type.set(param_dict.get("SLOT_INFO", {}).get("slot_type", "N/A"))
-    self.slot_label_id.set(param_dict.get("SLOT_INFO", {}).get("slot_label_id", "N/A"))
-    # I'm not sure how to deal with this pid...
-    self.default_slot_offset.set("N/A")
-    self.default_slot_value.set("N/A")
     print "DMX Rendered"
 
   def RenderSensorInformation(self, param_dict):
@@ -668,12 +658,18 @@ class RDMNotebook(object):
   # ============================ RDM Set Methods ===============================
   # ============================================================================
 
-  def PersonalityCallback(self, personality, param_dict):
+  def PersonalityCallback(self, param_dict):
+    personality = param_dict['DEVICE_INFO']['current_personality']
     slots_required = param_dict.get("DMX_PERSONALITY_DESCRIPTION", 
                                     {})[personality].get(
                                     "slots_required", 
                                     "N/A")
     self._display_personality_decription(slots_required, personality)
+    self.slot_menu.clear_menu()
+    for index in xrange(slots_required):
+      self.slot_menu.add_item('Slot %d' % index, 
+                              lambda i=index: self._display_slot_info(i, param_dict))
+
 
   def _set_display_invert(self, invert):
     self._controller.SetDisplayInvert(invert)
@@ -755,7 +751,18 @@ class RDMNotebook(object):
   def _display_slot_info(self, slot_number, param_dict):
     """
     """
-    self.slot_name.set(param_dict.get("SLOT_DESCRIPTION", {}).get(slot_number, "N/A"))
+    print param_dict['SLOT_INFO']
+    print param_dict['SLOT_DESCRIPTION']
+    self.slot_name.set('Name: %s' % param_dict.get('SLOT_DESCRIPTION', {}).get('name', "N/A"))
+    TYPE = RDMConstants.SLOT_TYPE_TO_NAME[
+          param_dict.get('SLOT_INFO', {})[slot_number].get('slot_type', "N/A")
+          ].replace('_', ' ')
+    self.slot_type.set('Type: %s' % TYPE)
+    LABEL_ID = RDMConstants.SLOT_DEFINITION_TO_NAME[
+        param_dict.get('SLOT_INFO', {})[slot_number].get('slot_label_id', "N/A")
+        ].replace('_', ' ')
+    self.slot_label_id.set('Description: %s' % LABEL_ID)
+    print 'line 763'
 
   def _display_personality_decription(self, slots_required, personality):
     self.slot_required.set("Slots Required: %s" % slots_required)

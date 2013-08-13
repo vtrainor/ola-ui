@@ -195,11 +195,10 @@ class GetSlotInfo(GetRDMAction):
     if succeeded:
       slots = self._data.setdefault(self.PID, {})
       for slot in value["slots"]:
-        slots[slot["slot_offset"]] = {"slot_type":
-                                                     slot["slot_type"],
-                                                     "slot_label_id":
-                                                     slot["slot_label_id"]
-                                                     }
+        slots[slot["slot_offset"]] = {
+                                      "slot_type": slot["slot_type"],
+                                      "slot_label_id": slot["slot_label_id"]
+                                     }
 
 class GetSlotDescription(GetRDMAction):
   """
@@ -213,9 +212,7 @@ class GetSlotDescription(GetRDMAction):
 
   def UpdateDict(self, succeeded, value):
     if succeeded:
-      index = value["slot_number"]
-      slots = self._data.setdefault(self.PID, {})
-      slots[index] = {value["name"]}
+      self._data[self.PID] = value
 
 class GetDefaultSlotValue(GetRDMAction):
   """
@@ -494,11 +491,10 @@ class SetDMXPersonality(SetRDMAction):
   '''
   PID = 'DMX_PERSONALITY'
 
-  def ShouldExecute(self):
-    return self.PID not in self._data
-
   def UpdateDict(self, succeeded, value):
     if succeeded:
-      print value
+      print self._data[self.PID]
+      self._data['DEVICE_INFO']['current_personality'] = value
+      self._data['DEVICE_INFO']['dmx_footprint'] = self._data['DMX_PERSONALITY_DESCRIPTION'][value]['slots_required']
     else:
       print 'failure to set'
