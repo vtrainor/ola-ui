@@ -314,11 +314,12 @@ class RDMNotebook(object):
     self.power_state = tk.StringVar(self.setting_tab)
 
     # Widgets
-    self.lamp_state_menu = tk.OptionMenu(self.setting_tab,
-                                                      self.lamp_state.get(), "")
-    self.lamp_on_mode_menu = tk.OptionMenu(self.setting_tab,
+    self.lamp_state_menu = RDMMenu(self.setting_tab,
+                                   'Lamp state not supported.',
+                                   'Choose lamp state')
+    self.lamp_on_mode_menu = RDMMenu(self.setting_tab,
                                                     self.lamp_on_mode.get(), "")
-    self.power_state_menu = tk.OptionMenu(self.setting_tab,
+    self.power_state_menu = RDMMenu(self.setting_tab,
                                                     self.power_state.get(), "")
 
     self.objects["POWER_LAMP_SETTINGS"] = [tk.Label(self.setting_tab,

@@ -498,7 +498,7 @@ class DisplayApp(object):
       return
     flow_actions = []
     data = self._uid_dict[self.cur_uid]
-    flow_actions.append(actions.SetDMXPersonality(data, self.ola_thread.rdm_get, personality))
+    flow_actions.append(actions.SetDMXPersonality(data, self.ola_thread.rdm_set, personality))
     flow_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
     # dmx_actions.append(actions.GetDefaultSlotValue(data, 
     #                                                 self.ola_thread.rdm_get))
@@ -506,18 +506,11 @@ class DisplayApp(object):
                 self.universe.get(),
                 self.cur_uid,
                 flow_actions,
-                lambda b, s: self._personality_callback(uid, b, s))
+                lambda : self._personality_callback())
     flow.Run()
 
-  def _personality_callback(self, uid, succeeded, data):
-    if succeeded:
-      self._uid_dict[uid]['DEVICE_INFO']['current_personality'] = personality
-      self._uid_dict[uid]['DMX_PERSONALITY']['current_personality'] = personality
-
-      self._notebook.PersonalityCallback(personality, 
-                                         self._uid_dict[uid])
-    else:
-      print '!!Error: RDM set for DMX Personality failed!!'
+  def _personality_callback(self):
+    pass
 
   def SetDisplayLevel(self, level):
     if self.cur_uid is None:

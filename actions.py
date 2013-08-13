@@ -500,3 +500,5 @@ class SetDMXPersonality(SetRDMAction):
   def UpdateDict(self, succeeded, value):
     if succeeded:
       print value
+    else:
+      print 'failure to set'
