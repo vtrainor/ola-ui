@@ -444,36 +444,42 @@ class RDMNotebook(object):
   # ========================= Information Rendering ============================
 
   def RenderBasicInformation(self, param_dict):
-    """
-    """
+    '''
+    Uses the data in param_dict to display the DMX information for the device
+    Called when the tab is selected, or the device changed.
+    Ultimate callback function for control flow, 'GetBasicInformation'.
+
+    Args:
+      param_dict: dictionary of pids for the current uid. In the form:
+                                                                    {PID: data}
+
+          NOTE: data may be in the form of a int, string or dict and is treated
+              differently in each case.
+    '''
     self.protocol_version.set("Version %d.%d" % (
-                          param_dict["DEVICE_INFO"]["protocol_major"], 
-                          param_dict["DEVICE_INFO"]["protocol_minor"]
-                          ))
+        param_dict["DEVICE_INFO"]["protocol_major"], 
+        param_dict["DEVICE_INFO"]["protocol_minor"]))
     self.device_model.set(param_dict["DEVICE_INFO"]["device_model"])
     self.device_model.set("%s (%d)" % (
                           param_dict.get("DEVICE_MODEL_DESCRIPTION", 'N/A'),
-                          param_dict["DEVICE_INFO"]["device_model"]
-                          ))
+                          param_dict["DEVICE_INFO"]["device_model"]))
     index = param_dict["DEVICE_INFO"]["product_category"]
     self.product_category.set(RDMConstants.PRODUCT_CATEGORY_TO_NAME.get(index, 
-    																											"").replace("_"," "))
+        "").replace("_"," "))
     self.sub_device_count.set(param_dict["DEVICE_INFO"]["sub_device_count"])
 
     self.software_version.set("%s (%d)" % (
-                          param_dict.get("SOFTWARE_VERSION_LABEL", "N/A"),
-                          param_dict["DEVICE_INFO"]["software_version"]
-                          ))
+                              param_dict.get("SOFTWARE_VERSION_LABEL", "N/A"),
+                              param_dict["DEVICE_INFO"]["software_version"]))
     self.sub_device_count.set(param_dict["DEVICE_INFO"]["sub_device_count"])
     if "PRODUCT_DETAIL_ID_LIST" in param_dict:
       ids = param_dict["PRODUCT_DETAIL_ID_LIST"]
       names = ', '.join(RDMConstants.PRODUCT_DETAIL_IDS_TO_NAME[id]
-      																		 			for id in ids).replace("_", " ")
+                        for id in ids).replace("_", " ")
       self.product_detail_ids.set(names)
     self.manufacturer_label.set(param_dict.get("MANUFACTURER_LABEL", "N/A"))
     self.device_label.set(param_dict.get("DEVICE_LABEL", "N/A"))
     self.factory_defaults.set(param_dict.get("FACTORY_DEFAULTS", "N/A"))
-      # self.factory_defaults_button(Checkbutton)
     boot_software = 'N/A'
     boot_software_version = param_dict.get('BOOT_SOFTWARE_VERSION')
     boot_software_label = param_dict.get('BOOT_SOFTWARE_LABEL')
@@ -488,8 +494,18 @@ class RDMNotebook(object):
     return
 
   def RenderDMXInformation(self, param_dict):
-    """
-    """
+    '''
+    Uses the data in param_dict to display the DMX information for the device
+    Called when the tab is selected, or the device changed.
+    Ultimate callback function for control flow, 'GetDMXInformation'.
+
+    Args:
+      param_dict: dictionary of pids for the current uid. In the form:
+                                                                    {PID: data}
+
+          NOTE: data may be in the form of a int, string or dict and is treated
+              differently in each case.
+    '''
     print "param_dict: %s" % param_dict
     device_info = param_dict["DEVICE_INFO"]
     self.dmx_personality_menu.clear_menu()
@@ -497,11 +513,13 @@ class RDMNotebook(object):
     self._display_personality_decription('N/A', 'N/A')
     if "DMX_PERSONALITY_DESCRIPTION" in param_dict:
       pers_desc = param_dict["DMX_PERSONALITY_DESCRIPTION"]
-      for pers_id, data in param_dict["DMX_PERSONALITY_DESCRIPTION"].iteritems():
+      descriptions = param_dict["DMX_PERSONALITY_DESCRIPTION"].iteritems()
+      for pers_id, data in descriptions:
         self.dmx_personality_menu.add_item(self._get_personality_string(data),
-                  lambda i = pers_id:self._controller.SetPersonality(i))
+            lambda i = pers_id:self._controller.SetPersonality(i))
       personality = device_info['current_personality']
-      self.dmx_personality_menu.set(self._get_personality_string(pers_desc[personality]))
+      self.dmx_personality_menu.set(self._get_personality_string(
+          pers_desc[personality]))
       s = pers_desc[personality]['slots_required']
       p = personality
       self._display_personality_decription(s, p)
@@ -518,28 +536,21 @@ class RDMNotebook(object):
       print slot_info
       for index in xrange(param_dict["DEVICE_INFO"]["dmx_footprint"]):
         self.slot_menu.add_item("Slot Number %d" % index,
-                        lambda i = index:self._display_slot_info(i, param_dict))
-    print "DMX Rendered"
+            lambda i = index:self._display_slot_info(i, param_dict))
 
   def RenderSensorInformation(self, param_dict):
     '''
-    2 dictionaries of values per sensor_number
-      1. SENSOR_VALUE
-      2. SENSOR_DEFINITION
+    Uses the data in param_dict to display the DMX information for the device
+    Called when the tab is selected, or the device changed.
+    Ultimate callback function for control flow, 'GetSensorInformation'.
 
-    the sensor number will be sensor_menu.get()
-    don't set the sensor_number upon rendering the tab
-      -> wait for user input to display the sensor information
+    Args:
+      param_dict: dictionary of pids for the current uid. In the form:
+                                                                    {PID: data}
+
+          NOTE: data may be in the form of a int, string or dict and is treated
+              differently in each case.
     '''
-    # the display sensor info method should take 2 dictionaries
-    # one for definition and one for value
-    # these disctionaries should default to none
-    # in sensor display create a check for if each dict is None
-    # if that dictionary is None skip to next check
-    # otherwise display  the information in that dict
-    # then go to the next check
-    # to _controller.GetSensorValue(index)
-    print "rendering sensor information..."
     self.sensor_menu.clear_menu()
     self.sensor_type.set('')
     self.sensor_unit.set('')
@@ -556,26 +567,25 @@ class RDMNotebook(object):
       for index, sensor in param_dict['SENSOR_DEFINITION'].iteritems():
         sensor_name = sensor['name']
         self.sensor_menu.add_item('%s' % sensor_name,
-                                lambda i=index: self._populate_sensor_tab(i))
+                                  lambda i=index: self._populate_sensor_tab(i))
     else: 
       self.sensor_menu.clear_menu()
       return
-
-    # need second control flows for sensor tab 
-
-    # if "DMX_PERSONALITY_DESCRIPTION" in param_dict:
-    #   pers_desc = param_dict["DMX_PERSONALITY_DESCRIPTION"]
-    #   for pers_id, data in param_dict["DMX_PERSONALITY_DESCRIPTION"].iteritems():
-    #     self.dmx_personality_menu.add_item(self._get_personality_string(data),
-    #               lambda i = pers_id:self._controller.SetPersonality(i))
-    #   personality = device_info['current_personality']
-    #   self.dmx_personality_menu.set(self._get_personality_string(pers_desc[personality]))
-    #   s = pers_desc[personality]['slots_required']
-    #   p = personality
-    #   self._display_personality_decription(s, p)
    
 
   def RenderSettingInformation(self, param_dict):
+    '''
+    Uses the data in param_dict to display the DMX information for the device
+    Called when the tab is selected, or the device changed.
+    Ultimate callback function for control flow, 'GetSettingsInformation'.
+
+    Args:
+      param_dict: dictionary of pids for the current uid. In the form:
+                                                                    {PID: data}
+
+          NOTE: data may be in the form of a int, string or dict and is treated
+              differently in each case.
+    '''
     print "PARAM_DICT: %s" % param_dict
     self.device_hours.set(param_dict.get('DEVICE_HOURS', 'N/A'))
     self.lamp_hours.set(param_dict.get('LAMP_HOURS', 'N/A'))
@@ -589,34 +599,41 @@ class RDMNotebook(object):
       self.lamp_state_menu.config(state = tk.NORMAL)
       for key, value in PIDDict.LAMP_STATE.iteritems():
         self.lamp_state_menu.add_item(value, 
-                                lambda k=key: self._set_lamp_state(k))
+                                      lambda k=key: self._set_lamp_state(k))
     self.lamp_state_menu.set(PIDDict.LAMP_STATE[param_dict['LAMP_STATE']])
     if 'LAMP_ON_MODE' in param_dict:
       self.lamp_on_mode_menu.config(state = tk.NORMAL)
       for key, value in PIDDict.LAMP_ON_MODE.iteritems():
         self.lamp_on_mode_menu.add_item(value, 
-                                lambda k=key: self._set_lamp_on_mode(k))
+                                        lambda k=key: self._set_lamp_on_mode(k))
     self.lamp_on_mode_menu.set(PIDDict.LAMP_ON_MODE[param_dict['LAMP_ON_MODE']])
     if 'POWER_STATE' in param_dict:
       self.power_state_menu.config(state = tk.NORMAL)
       for key, value in PIDDict.POWER_STATE.iteritems():
         self.power_state_menu.add_item(value, 
-                                lambda k=key: self._set_power_state(k))
+                                       lambda k=key: self._set_power_state(k))
     self.power_state_menu.set(PIDDict.POWER_STATE[param_dict['POWER_STATE']])
-    # if "LAMP_ON_MODE" in param_dict:
-    #   self.lamp_on_mode = tk.StringVar(self.setting_tab)
-
-    # if "POWER_STATE" in param_dict:
-    #   self.power_state = tk.StringVar(self.setting_tab)
 
   def RenderConfigInformation(self, param_dict):
+    '''
+    Uses the data in param_dict to display the DMX information for the device
+    Called when the tab is selected, or the device changed.
+    Ultimate callback function for control flow, 'GetConfigInformation'.
+
+    Args:
+      param_dict: dictionary of pids for the current uid. In the form:
+                                                                    {PID: data}
+
+          NOTE: data may be in the form of a int, string or dict and is treated
+              differently in each case.
+    '''
     self.language_menu.clear_menu()
     if 'LANGUAGE_CAPABILITIES' in param_dict:
       self.language_menu.config(state = tk.NORMAL)
       for value in param_dict['LANGUAGE_CAPABILITIES']:
         language = value['language']
         self.language_menu.add_item(language, 
-                                lambda l = language: self._set_language(l))
+                                    lambda l = language: self._set_language(l))
     self.language_menu.set(param_dict.get('LANGUAGE', 'N/A'))
     if "DISPLAY_LEVEL" in param_dict:
       self.display_level.set(param_dict['DISPLAY_LEVEL'])
@@ -626,8 +643,8 @@ class RDMNotebook(object):
       self.display_level_menu.config(state = tk.DISABLED)
 
     if 'DISPLAY_INVERT' in param_dict:
-      self.display_invert.set(PIDDict.DISPLAY_INVERT.values()
-                                                [param_dict['DISPLAY_INVERT']])
+      display_invert = PIDDict.DISPLAY_INVERT [param_dict['DISPLAY_INVERT']]
+      self.display_invert.set(display_invert)
       self.display_invert_menu.config(state = tk.NORMAL)
     else:
       self.display_invert.set('N/A')
@@ -663,13 +680,18 @@ class RDMNotebook(object):
                                                       clock['month'],
                                                       clock['year']
                                                       ))
-    print "Rendering Config...."
 
   # ============================================================================
   # ============================ RDM Set Methods ===============================
   # ============================================================================
 
   def _set_lamp_state(self, state):
+    '''
+    Infternal Function, first function in the 'SetLampState' control flow.
+
+    Args:
+      state: int, see PIDDict.LAMP_STATE for state name.
+    '''
     self._controller.SetLampState(state)
 
   def LampStateCallback(self, state):
@@ -677,6 +699,12 @@ class RDMNotebook(object):
       self.lamp_state_menu.set(PIDDict.LAMP_STATE[state])
 
   def _set_lamp_on_mode(self, mode):
+    '''
+    Infternal Function, first function in the 'SetLampOnMode' control flow.
+
+    Args:
+      state: int, see PIDDict.LAMP_STATE for state name.
+    '''
     self._controller.SetLampOnMode(mode)
 
   def LampOnModeCallback(self, mode):
@@ -684,6 +712,12 @@ class RDMNotebook(object):
       self.lamp_on_mode_menu.set(PIDDict.LAMP_ON_MODE[mode])
 
   def _set_power_state(self, state):
+    '''
+    Infternal Function, first function in the 'SetPowerState' control flow.
+
+    Args:
+      state: int, see PIDDict.LAMP_STATE for state name.
+    '''
     self._controller.SetPowerState(state)
 
   def PowerStateCallback(self, state):
@@ -710,6 +744,12 @@ class RDMNotebook(object):
     return
 
   def _set_display_invert(self, invert):
+    '''
+    Infternal Function, first function in the 'SetDisplayInvert' control flow.
+
+    Args:
+      state: int, see PIDDict.DISPLAY_INVERT for state name.
+    '''
     self._controller.SetDisplayInvert(invert)
     # self._controller.SetDisplayInvert(self.display_invert.get())
 
@@ -718,6 +758,12 @@ class RDMNotebook(object):
       self.display_invert.set(invert)
 
   def _set_pan_invert(self):
+    '''
+    Infternal Function, first function in the 'SetPanInvert' control flow.
+
+    Args:
+      state: boolean, true: inverted, false: normal.
+    '''
     self._controller.SetPanInvert(self.pan_invert.get())
 
   def SetPanInvertComplete(self, invert):
@@ -725,6 +771,12 @@ class RDMNotebook(object):
       self.pan_invert.set(invert)
 
   def _set_tilt_invert(self):
+    '''
+    Infternal Function, first function in the 'SetTiltInvert' control flow.
+
+    Args:
+      state: boolean, true: inverted, false: normal.
+    '''
     self._controller.SetTiltInvert(self.tilt_invert.get())
 
   def SetTiltInvertComplete(self, invert):
@@ -732,6 +784,12 @@ class RDMNotebook(object):
       self.tilt_invert.set(invert)
 
   def _set_pan_tilt_swap(self):
+    '''
+    Infternal Function, irst function in the 'SetPanTiltSwap' control flow.
+
+    Args:
+      state: boolean, true: swapped, false: normal.
+    '''
     self._controller.SetPanTiltSwap(self.pan_tilt_swap.get())
 
   def SetPanTiltSwapComplete(self, swap):

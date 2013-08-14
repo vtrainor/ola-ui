@@ -563,7 +563,7 @@ class DisplayApp(object):
     if self.cur_uid is None:
       return
     uid = self.cur_uid
-    callback = lambda b, s: self._set_lamp_on_mode_complete(uid, state, b, s)
+    callback = lambda b, s: self._set_lamp_on_mode_complete(uid, mode, b, s)
     self.ola_thread.rdm_set(self.universe.get(),
                             uid,
                             0,
