@@ -161,7 +161,6 @@ class RDMNotebook(object):
     self.personality_name = tk.StringVar(self.dmx_tab)
     self.slot_number = tk.StringVar(self.dmx_tab)
     self.slot_name = tk.StringVar(self.dmx_tab)
-    self.slot_offset = tk.StringVar(self.dmx_tab)
     self.slot_type = tk.StringVar(self.dmx_tab)
     self.slot_label_id = tk.StringVar(self.dmx_tab)
     self.default_slot_value = tk.StringVar(self.dmx_tab)
@@ -700,6 +699,10 @@ class RDMNotebook(object):
                                     "N/A")
     self._display_personality_decription(slots_required, personality)
     self.slot_menu.clear_menu()
+    self.slot_name.set('')
+    self.slot_type.set('')
+    self.slot_label_id.set('')
+    self.default_slot_value.set('')
     if 'SLOT_INFO' or 'SLOT_DESCRIPTION' or 'DEFAULT_SLOT_VALUE' in param_dict['PARAM_NAMES']:
       for index in xrange(slots_required):
         self.slot_menu.add_item('Slot %d' % index, 
