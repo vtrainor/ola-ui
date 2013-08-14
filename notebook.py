@@ -692,6 +692,7 @@ class RDMNotebook(object):
       self.power_state_menu.set(PIDDict.POWER_STATE[state])
 
   def PersonalityCallback(self, param_dict):
+    print param_dict
     personality = param_dict['DEVICE_INFO']['current_personality']
     slots_required = param_dict.get("DMX_PERSONALITY_DESCRIPTION", 
                                     {})[personality].get(
@@ -699,9 +700,11 @@ class RDMNotebook(object):
                                     "N/A")
     self._display_personality_decription(slots_required, personality)
     self.slot_menu.clear_menu()
-    for index in xrange(slots_required):
-      self.slot_menu.add_item('Slot %d' % index, 
+    if 'SLOT_INFO' or 'SLOT_DESCRIPTION' or 'DEFAULT_SLOT_VALUE' in param_dict['PARAM_NAMES']:
+      for index in xrange(slots_required):
+        self.slot_menu.add_item('Slot %d' % index, 
                               lambda i=index: self._display_slot_info(i, param_dict))
+    return
 
   def _set_display_invert(self, invert):
     self._controller.SetDisplayInvert(invert)
@@ -783,8 +786,8 @@ class RDMNotebook(object):
   def _display_slot_info(self, slot_number, param_dict):
     """
     """
-    print 'slot_number: %d \n SLOT_INFO: %s \n SLOT_DESCRIPTION %s' % (
-           slot_number, param_dict['SLOT_INFO'], param_dict['SLOT_DESCRIPTION']) 
+    # print 'slot_number: %d \n SLOT_INFO: %s \n SLOT_DESCRIPTION %s' % (
+    #        slot_number, param_dict['SLOT_INFO'], param_dict['SLOT_DESCRIPTION']) 
     self.slot_name.set('Name: %s' % param_dict.get('SLOT_DESCRIPTION', {}).get('name', "N/A"))
     type_name = RDMConstants.SLOT_TYPE_TO_NAME[
           param_dict.get('SLOT_INFO', {})[slot_number].get('slot_type', "N/A")
@@ -798,8 +801,10 @@ class RDMNotebook(object):
         param_dict.get('SLOT_INFO', {})[slot_number].get('slot_label_id', "N/A")
         ].replace('_', ' ')
       self.slot_label_id.set('Slot Label: %s' % label_id)
-    print param_dict['DEFAULT_SLOT_VALUE']
-    self.default_slot_value.set(param_dict.get('DEFAULT_SLOT_VALUE', {})[slot_number])
+    if 'DEFAULT_SLOT_VALUE' in param_dict:
+      print param_dict['DEFAULT_SLOT_VALUE']
+    self.default_slot_value.set('Default Slot Value: %d' %
+                          param_dict.get('DEFAULT_SLOT_VALUE', {})[slot_number])
 
   def _display_personality_decription(self, slots_required, personality):
     self.slot_required.set("Slots Required: %s" % slots_required)

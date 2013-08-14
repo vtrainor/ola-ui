@@ -221,14 +221,13 @@ class GetDefaultSlotValue(GetRDMAction):
     
   def ShouldExecute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return self.PID in self._data["PARAM_NAMES"]
 
   def UpdateDict(self, succeeded, value):
     if succeeded:
+      values = self._data.setdefault(self.PID, {})
       for slot_value in value["slot_values"]:
-        self._data[self.PID][slot_value["slot_offset"]] = slot_value[
-                                                          "default_slot_value"]
+        values[slot_value["slot_offset"]] = slot_value["default_slot_value"]
 
 # ==============================================================================
 # ============================ Get Sensors Info ================================

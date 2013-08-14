@@ -395,7 +395,9 @@ class DisplayApp(object):
                                                   data, 
                                                   self.ola_thread.rdm_get,
                                                   i))
-      print i
+    dmx_actions.append(actions.GetDefaultSlotValue(data, self.ola_thread.rdm_get))
+
+    print i
     # dmx_actions.append(actions.GetDefaultSlotValue(data, 
     #                                                 self.ola_thread.rdm_get))
     flow = controlflow.RDMControlFlow(
