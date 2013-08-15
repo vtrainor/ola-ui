@@ -456,22 +456,24 @@ class RDMNotebook(object):
           NOTE: data may be in the form of a int, string or dict and is treated
               differently in each case.
     '''
-    self.protocol_version.set("Version %d.%d" % (
-        param_dict["DEVICE_INFO"]["protocol_major"], 
-        param_dict["DEVICE_INFO"]["protocol_minor"]))
+    device_info = param_dict["DEVICE_INFO"]
+    self.protocol_version.set(
+        "Version %d.%d" % (
+        device_info["protocol_major"], 
+        device_info["protocol_minor"]))
     self.device_model.set(param_dict["DEVICE_INFO"]["device_model"])
     self.device_model.set("%s (%d)" % (
                           param_dict.get("DEVICE_MODEL_DESCRIPTION", 'N/A'),
-                          param_dict["DEVICE_INFO"]["device_model"]))
-    index = param_dict["DEVICE_INFO"]["product_category"]
+                          device_info["device_model"]))
+    index = device_info["product_category"]
     self.product_category.set(RDMConstants.PRODUCT_CATEGORY_TO_NAME.get(index, 
         "").replace("_"," "))
     self.sub_device_count.set(param_dict["DEVICE_INFO"]["sub_device_count"])
 
     self.software_version.set("%s (%d)" % (
                               param_dict.get("SOFTWARE_VERSION_LABEL", "N/A"),
-                              param_dict["DEVICE_INFO"]["software_version"]))
-    self.sub_device_count.set(param_dict["DEVICE_INFO"]["sub_device_count"])
+                              device_info["software_version"]))
+    self.sub_device_count.set(device_info["sub_device_count"])
     if "PRODUCT_DETAIL_ID_LIST" in param_dict:
       ids = param_dict["PRODUCT_DETAIL_ID_LIST"]
       names = ', '.join(RDMConstants.PRODUCT_DETAIL_IDS_TO_NAME[id]
@@ -513,9 +515,9 @@ class RDMNotebook(object):
     self._display_personality_decription('N/A', 'N/A')
     if "DMX_PERSONALITY_DESCRIPTION" in param_dict:
       pers_desc = param_dict["DMX_PERSONALITY_DESCRIPTION"]
-      descriptions = param_dict["DMX_PERSONALITY_DESCRIPTION"].iteritems()
-      for pers_id, data in descriptions:
-        self.dmx_personality_menu.add_item(self._get_personality_string(data),
+      for pers_id in pers_dec.iteritems():
+        self.dmx_personality_menu.add_item(
+            self._get_personality_string(data),
             lambda i = pers_id:self._controller.SetPersonality(i))
       personality = device_info['current_personality']
       self.dmx_personality_menu.set(self._get_personality_string(
@@ -591,7 +593,6 @@ class RDMNotebook(object):
     self.lamp_hours.set(param_dict.get('LAMP_HOURS', 'N/A'))
     self.device_power_cycles.set(param_dict.get("DEVICE_POWER_CYCLES", "N/A"))
     self.lamp_strikes.set(param_dict.get('LAMP_STRIKES', 'N/A'))
-    # if "LAMP_STATE" in param_dict:
     self.lamp_state_menu.config(state = tk.DISABLED)
     self.lamp_on_mode_menu.config(state = tk.DISABLED)
     self.power_state_menu.config(state = tk.DISABLED)
@@ -687,7 +688,7 @@ class RDMNotebook(object):
 
   def _set_lamp_state(self, state):
     '''
-    Infternal Function, first function in the 'SetLampState' control flow.
+    Internal Function, first function in the 'SetLampState' control flow.
 
     Args:
       state: int, see PIDDict.LAMP_STATE for state name.
@@ -695,6 +696,12 @@ class RDMNotebook(object):
     self._controller.SetLampState(state)
 
   def LampStateCallback(self, state):
+    '''
+    Ultimate callback for, 'SetLampState' control flow.
+
+    Args:
+      state: int, see PIDDict.LAMP_STATE for state name.
+    '''
     if self.lamp_state_menu.get() != PIDDict.LAMP_STATE[state]:
       self.lamp_state_menu.set(PIDDict.LAMP_STATE[state])
 
@@ -703,11 +710,17 @@ class RDMNotebook(object):
     Infternal Function, first function in the 'SetLampOnMode' control flow.
 
     Args:
-      state: int, see PIDDict.LAMP_STATE for state name.
+      mode: int, see PIDDict.LAMP_ON_MODE for mode names.
     '''
     self._controller.SetLampOnMode(mode)
 
   def LampOnModeCallback(self, mode):
+    '''
+    Ulitmate callback for 'SetLampOnMode' control flow
+
+    Args:
+      mode: int, see PIDDict.LAMP_ON_MODE for mode names.
+    '''
     if self.lamp_on_mode_menu.get() != PIDDict.LAMP_ON_MODE[mode]:
       self.lamp_on_mode_menu.set(PIDDict.LAMP_ON_MODE[mode])
 
@@ -721,6 +734,9 @@ class RDMNotebook(object):
     self._controller.SetPowerState(state)
 
   def PowerStateCallback(self, state):
+    '''
+
+    '''
     if self.power_state_menu.get() != PIDDict.POWER_STATE[state]:
       self.power_state_menu.set(PIDDict.POWER_STATE[state])
 
