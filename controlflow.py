@@ -18,32 +18,32 @@ class GetRDMAction(RDMAction):
     self._get_fn = get_fn
     self._get_data = get_data
 
-  def Params(self):
+  def params(self):
     """This method provides the parameters for the GET."""
     return []
 
-  def UpdateDict(succeeded, params):
+  def update_dict(succeeded, params):
     """This method is called when the GET completes."""
     pass
 
-  def ShouldExecute(self):
+  def should_execute(self):
     """This method controls if the action should be skipped."""
     return True
 
-  def Execute(self, universe, uid, on_complete):
+  def execute(self, universe, uid, on_complete):
     """Perform the RDM GET."""
-    if not self.ShouldExecute():
+    if not self.should_execute():
       on_complete()
       return
 
     self._get_fn(
         universe, uid, 0, self.PID,
-        lambda b, s: self._Complete(b, s, on_complete),
+        lambda b, s: self._complete(b, s, on_complete),
         [self._get_data])
 
-  def _Complete(self, succeeded, params, on_complete):
+  def _complete(self, succeeded, params, on_complete):
     """Called when the GET completes."""
-    self.UpdateDict(succeeded, params)
+    self.update_dict(succeeded, params)
     on_complete()
 
 class SetRDMAction(RDMAction):
@@ -59,32 +59,32 @@ class SetRDMAction(RDMAction):
     self._set_fn = set_fn
     self._set_data = set_data
 
-  def Params(self):
+  def params(self):
     """This method provides the parameters for the SET."""
     return []
 
-  def UpdateDict(succeeded, params):
+  def update_dict(succeeded, params):
     """This method is called when the SET completes."""
     pass
 
-  def ShouldExecute(self):
+  def should_execute(self):
     """This method controls if the action should be skipped."""
     return True
 
-  def Execute(self, universe, uid, on_complete):
+  def execute(self, universe, uid, on_complete):
     """Perform the RDM GET."""
-    if not self.ShouldExecute():
+    if not self.should_execute():
       on_complete()
       return
 
     self._set_fn(
         universe, uid, 0, self.PID,
-        lambda b, s: self._Complete(b, s, on_complete),
+        lambda b, s: self._complete(b, s, on_complete),
         [self._set_data])
 
-  def _Complete(self, succeeded, params, on_complete):
+  def _complete(self, succeeded, params, on_complete):
     """Called when the GET completes."""
-    self.UpdateDict(succeeded, self._set_data)
+    self.update_dict(succeeded, self._set_data)
     on_complete()
 
 class GetIdentify(GetRDMAction):
@@ -94,7 +94,7 @@ class GetIdentify(GetRDMAction):
   """
   PID = "IDENTIFY_DEVICE"
 
-  def UpdateDict(self, succeeded, params):
+  def update_dict(self, succeeded, params):
     if succeeded:
       self._data[self.PID] = params['identify_state']
 
@@ -113,66 +113,66 @@ class RDMControlFlow(object):
     self._actions = deque(actions)
     self._on_complete = on_complete
 
-  def Run(self):
+  def run(self):
     """Run the control flow."""
-    self._PerformNextAction()
+    self._perform_next_action()
 
-  def _PerformNextAction(self):
+  def _perform_next_action(self):
     if self._actions:
       # run next action
       action = self._actions.popleft()
-      action.Execute(self._universe, self._uid, self._PerformNextAction)
+      action.execute(self._universe, self._uid, self._perform_next_action)
     else:
       self._on_complete()
 
 # --------------------
+# !! Should I just delete all of this? !!
 # example code
 
-def on_complete():
-  print 'control flow completed'
+# def on_complete():
+#   print 'control flow completed'
 
-def get_fn(universe, uid, sub_device, pid, callback):
-  # This just simulates a RDM GET for now
-  print 'GET %s %s %d %s' % (universe, uid, sub_device, pid)
-  if pid == 'IDENTIFY_DEVICE':
-    callback(True, {'identify_state': True})
-  elif pid == 'DEVICE_INFO':
-    callback(True, {})
-  else:
-    callback(False, {})
+# def get_fn(universe, uid, sub_device, pid, callback):
+#   # This just simulates a RDM GET for now
+#   print 'GET %s %s %d %s' % (universe, uid, sub_device, pid)
+#   if pid == 'IDENTIFY_DEVICE':
+#     callback(True, {'identify_state': True})
+#   elif pid == 'DEVICE_INFO':
+#     callback(True, {})
+#   else:
+#     callback(False, {})
 
+# def test():
+#   uid = None
+#   data = {}
+#   flow = RDMControlFlow(
+#       1,
+#       uid,
+#       [
+#         GetIdentify(data, get_fn),
+#         GetDeviceInfo(data, get_fn)
 
-def test():
-  uid = None
-  data = {}
-  flow = RDMControlFlow(
-      1,
-      uid,
-      [
-        GetIdentify(data, get_fn),
-        GetDeviceInfo(data, get_fn)
-
-      ],
-      on_complete)
-  flow.Run()
-  print data
+#       ],
+#       on_complete)
+#   flow.Run()
+#   print data
   
-  print ''
-  print 'Running again...'
+#   print ''
+#   print 'Running again...'
 
-  flow = RDMControlFlow(
-      1,
-      uid,
-      [
-        GetIdentify(data, get_fn),
-        GetDeviceInfo(data, get_fn)
+#   flow = RDMControlFlow(
+#       1,
+#       uid,
+#       [
+#         GetIdentify(data, get_fn),
+#         GetDeviceInfo(data, get_fn)
 
-      ],
-      on_complete)
-  flow.Run()
+#       ],
+#       on_complete)
+#   flow.Run()
 
-def main():
-  test()
+# def main():
+#   test()
 
-if __name__  ==  "__main__":
-  main()
+# if __name__  ==  "__main__":
+#   main()

@@ -25,12 +25,12 @@ from rdm_menu import RDMMenu
   - fetch device info if we don't already have it
   - call notebook.Update()
   - notebook.Update looks at the current selected tab, and then calls one of:
-    - GetBasicInformation()
-    - GetDMXInformation()
+    - get_basic_information()
+    - get_dmx_information()
     - GetSensorInformation()
 
  Each of these send the necessary to build a dictionary (pid_info) for the tab.
- For example, GetBasicInformation() would do:
+ For example, get_basic_information() would do:
     GET PRODUCT_DETAIL_ID_LIST
     GET -PRODUCT_DETAIL_ID_LIST
     GET MANUFACTURER_LABEL
@@ -54,69 +54,66 @@ class Controller(object):
   def __init__(self, app):
     self._app = app
 
-  def GetBasicInformation(self):
+  def get_basic_information(self):
     '''
     '''
-    self._app.GetBasicInformation()
+    self._app.get_basic_information()
 
-  def GetDMXInformation(self):
+  def get_dmx_information(self):
     '''
     '''
-    self._app.GetDMXInformation()
+    self._app.get_dmx_information()
 
-  def SetDMXFootprint(self):
-    self._app.SetDMXFootprint()
+  def get_sensor_value(self, sensor_number):
+    self._app.get_sensor_value(sensor_number)
 
-  def GetSensorValue(self, sensor_number):
-    self._app.GetSensorValue(sensor_number)
-
-  def GetSensorDefinitions(self):
-    self._app.GetSensorDefinitions()
+  def get_sensor_definitions(self):
+    self._app.get_sensor_definitions()
 
   # def RecordSensors():
 
-  def GetSettingInformation(self):
-    self._app.GetSettingInformation()
+  def get_setting_information(self):
+    self._app.get_setting_information()
 
-  def GetConfigInformation(self):
-    self._app.GetConfigInformation()
+  def get_config_information(self):
+    self._app.get_config_information()
 
-  def SetDeviceLabel(self, label):
+  def set_device_label(self, label):
     self._app.set_device_label(label)
 
   def SetSetStartAddress(self, index):
     pass
 
-  def SetPersonality(self, index):
-    self._app.SetPersonality(index)
+  def set_dmx_personality(self, index):
+    self._app.set_dmx_personality(index)
   # Additional methods will be added later
 
-  def SetLampState(self, state):
-    self._app.SetLampState(state)
+  def set_lamp_state(self, state):
+    self._app.set_lamp_state(state)
 
-  def SetLampOnMode(self, mode):
-    self._app.SetLampOnMode(mode)
+  def set_lamp_on_mode(self, mode):
+    self._app.set_lamp_on_mode(mode)
 
-  def SetPowerState(self, state):
-    self._app.SetPowerState(state)
+  def set_power_state(self, state):
+    self._app.set_power_state(state)
 
-  def SetLanguage(self, language):
-    self._app.SetLanguage(language)
+  def set_language(self, language):
+    self._app.set_language(language)
 
-  def SetDisplayInvert(self, invert):
-    self._app.SetDisplayInvert(invert)
+  def set_display_invert(self, invert):
+    self._app.set_display_invert(invert)
 
-  def SetDisplayLevel(self, level):
-    self._app.SetDisplayLevel(level)
+  def set_display_level(self, level):
+    self._app.set_display_level(level)
 
-  def SetPanInvert(self, invert):
-    self._app.SetPanInvert(invert)
+  def set_pan_invert(self, invert):
+    self._app.set_pan_invert(invert)
 
-  def SetTiltInvert(self, invert):
-    self._app.SetTiltInvert(invert)
+  def set_tilt_invert(self, invert):
+    self._app.set_tilt_invert(invert)
 
-  def SetPanTiltSwap(self, swap):
-    self._app.SetPanTiltSwap(swap)
+  def set_pan_tilt_swap(self, swap):
+    self._app.set_pan_tilt_swap(swap)
 
 # ==============================================================================
 # ============================ Universe Class ==================================
@@ -255,7 +252,7 @@ class DisplayApp(object):
                             actions.GetDeviceInfo(data, self.ola_thread.rdm_get)
                             ],
                             self._device_changed_complete)
-    flow.Run()
+    flow.run()
 
   def _device_changed_complete(self):
     self._uid_dict[self.cur_uid]['PARAM_NAMES'] = set()
@@ -308,7 +305,7 @@ class DisplayApp(object):
       print 'Automatic discovery is off.'
   
   def _upon_discover(self, status, uids, universe_id):
-    ' callback for client.RunRDMDiscovery. '
+    ' callback for client.runRDMDiscovery. '
     if self.universe.get() != universe_id:
       return
     self.universe_dict[universe_id].set_uids(uids)
@@ -331,7 +328,7 @@ class DisplayApp(object):
       return
     self.ola_thread.rdm_set(self.universe.get(), self.cur_uid, 0, 
               'IDENTIFY_DEVICE', 
-              lambda b, s, uid = self.cur_uid:self._rdm_set_complete(uid, b, s), 
+              lambda b, s, uid = self.cur_uid:self._set_identify_complete(uid, b, s), 
               [self.id_state.get()])
 
   def _add_device(self, uid, succeeded, data):
@@ -346,15 +343,15 @@ class DisplayApp(object):
 
 
 
-  def _rdm_set_complete(self, uid, succeded, value):
+  def _set_identify_complete(self, uid, succeded, value):
     ''' callback for the rdm_set in identify. '''
-    print 'value: %s' % value
-    print 'rdm set complete'
+    print 'identify %s' % value
+    self._uid_dict[self.cur_uid] = value
 
   # ============================================================================
   # ============================ RDM Gets ======================================
 
-  def GetBasicInformation(self):
+  def get_basic_information(self):
     if self.cur_uid is None:
       print 'you need to select a device'
       return
@@ -372,9 +369,9 @@ class DisplayApp(object):
                   actions.GetBootSoftwareVersion(data, self.ola_thread.rdm_get)
                   ],
                   self.UpdateBasicInformation)
-    flow.Run()
+    flow.run()
 
-  def GetDMXInformation(self):
+  def get_dmx_information(self):
 
     if self.cur_uid is None:
       print 'you need to select a device.'
@@ -405,9 +402,9 @@ class DisplayApp(object):
                 self.cur_uid,
                 dmx_actions,
                 self.UpdateDmxInformation)
-    flow.Run()
+    flow.run()
 
-  def GetSensorDefinitions(self):
+  def get_sensor_definitions(self):
     if self.cur_uid is None:
       return
     sensor_actions = []
@@ -422,9 +419,9 @@ class DisplayApp(object):
                   self.cur_uid,
                   sensor_actions,
                   self.UpdateSensorInformation)
-    flow.Run()
+    flow.run()
 
-  def GetSensorValue(self, sensor_number):
+  def get_sensor_value(self, sensor_number):
     if self.cur_uid is None:
       return
     sensor_actions = []
@@ -438,9 +435,9 @@ class DisplayApp(object):
                   self.cur_uid,
                   sensor_actions,
                   lambda: self.DisplaySensorData(sensor_number))
-    flow.Run()
+    flow.run()
 
-  def GetSettingInformation(self):
+  def get_setting_information(self):
 
     if self.cur_uid is None:
       print 'you need to select a device'
@@ -459,9 +456,9 @@ class DisplayApp(object):
                   actions.GetPowerState(data, self.ola_thread.rdm_get),
                   ],
                   self.UpdateSettingInformation)
-    flow.Run()
+    flow.run()
 
-  def GetConfigInformation(self):
+  def get_config_information(self):
 
     if self.cur_uid is None:
       print 'you need to select a device'
@@ -481,7 +478,7 @@ class DisplayApp(object):
                   actions.GetRealTimeClock(data, self.ola_thread.rdm_get)
                   ],
                   self.UpdateConfigInformation)
-    flow.Run()
+    flow.run()
   
   # ============================ Notebook Updates ==============================
 
@@ -505,7 +502,7 @@ class DisplayApp(object):
 
   # ============================ RDM Sets ======================================
 
-  def SetPersonality(self, personality):
+  def set_dmx_personality(self, personality):
     if self.cur_uid is None:
       return
     flow_actions = []
@@ -519,14 +516,14 @@ class DisplayApp(object):
                 self.universe.get(),
                 self.cur_uid,
                 flow_actions,
-                lambda : self._personality_callback())
-    flow.Run()
+                lambda : self._set_dmx_personality_complete())
+    flow.run()
 
-  def _personality_callback(self):
-    self._notebook.PersonalityCallback(self._uid_dict[self.cur_uid])
+  def _set_dmx_personality_complete(self):
+    self._notebook.set_dmx_personality_complete(self._uid_dict[self.cur_uid])
     pass
 
-  def SetDisplayLevel(self, level):
+  def set_display_level(self, level):
     if self.cur_uid is None:
       return
     uid = self.cur_uid
@@ -542,7 +539,7 @@ class DisplayApp(object):
       self._uid_dict[uid]['DISPLAY_LEVEL'] = level
       self._notebook.DisplayLevelCallback(level)
 
-  def SetLampState(self, state):
+  def set_lamp_state(self, state):
     if self.cur_uid is None:
       return
     uid = self.cur_uid
@@ -557,9 +554,9 @@ class DisplayApp(object):
   def _set_lamp_state_complete(self, uid, state, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['LAMP_STATE'] = state
-      self._notebook.LampStateCallback(state)
+      self._notebook.set_lamp_state_complete(state)
 
-  def SetLampOnMode(self, mode):
+  def set_lamp_on_mode(self, mode):
     if self.cur_uid is None:
       return
     uid = self.cur_uid
@@ -576,7 +573,7 @@ class DisplayApp(object):
       self._uid_dict[uid]['LAMP_ON_MODE'] = mode
       self._notebook.LampOnModeCallback(mode)
 
-  def SetPowerState(self, state):
+  def set_power_state(self, state):
     if self.cur_uid is None:
       return
     uid = self.cur_uid
@@ -593,7 +590,7 @@ class DisplayApp(object):
       self._uid_dict[uid]['POWER_STATE'] = state
       self._notebook.PowerStateCallback(state)
 
-  def SetLanguage(self, language):
+  def set_language(self, language):
     if self.cur_uid is None:
       return
     uid = self.cur_uid
@@ -607,9 +604,9 @@ class DisplayApp(object):
   def _language_complete(self, uid, language, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['LANGUAGE'] = language
-      self._notebook.SetLanguageComplete(PIDDict.LAMP_STATE[language])
+      self._notebook.set_languageComplete(PIDDict.LAMP_STATE[language])
 
-  def SetDisplayInvert(self, invert):
+  def set_display_invert(self, invert):
     if self.cur_uid is None:
       return
     uid = self.cur_uid
@@ -623,9 +620,9 @@ class DisplayApp(object):
   def _display_invert_complete(self, uid, invert, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['DISPLAY_INVERT'] = invert
-      self._notebook.SetDisplayInvertComplete(invert)
+      self._notebook.set_display_invertComplete(invert)
 
-  def SetPanInvert(self, invert):
+  def set_pan_invert(self, invert):
     if self.cur_uid is None:
       return
     uid = self.cur_uid
@@ -639,9 +636,9 @@ class DisplayApp(object):
   def _pan_invert_complete(self, uid, invert, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['PAN_INVERT'] = invert
-      self._notebook.SetPanInvertComplete(invert)
+      self._notebook.set_pan_invertComplete(invert)
 
-  def SetTiltInvert(self, invert):
+  def set_tilt_invert(self, invert):
     if self.cur_uid is None:
       return
     uid = self.cur_uid
@@ -655,9 +652,9 @@ class DisplayApp(object):
   def _tilt_invert_complete(self, uid, invert, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['TILT_INVERT'] = invert
-      self._notebook.SetTiltInvertComplete(invert)
+      self._notebook.set_tilt_invertComplete(invert)
 
-  def SetPanTiltSwap(self, swap):
+  def set_pan_tilt_swap(self, swap):
     if self.cur_uid is None:
       return
     uid = self.cur_uid
@@ -671,7 +668,7 @@ class DisplayApp(object):
   def _pan_tilt_swap_complete(self, uid, swap, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['PAN_TILT_SWAP'] = swap
-      self._notebook.SetPanTiltSwapComplete(swap)
+      self._notebook.set_pan_tilt_swapComplete(swap)
 
   # ================================ Callbacks =================================
 
