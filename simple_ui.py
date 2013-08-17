@@ -389,7 +389,7 @@ class DisplayApp(object):
       dmx_actions.append(actions.GetPersonalityDescription(
                                                   data, 
                                                   self.ola_thread.rdm_get, 
-                                                  i + 1))
+                                                  [i + 1]))
     dmx_actions.append(actions.GetStartAddress(data, self.ola_thread.rdm_get))
     dmx_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
     print 'dmx_footprint: %d' % data['DEVICE_INFO']['dmx_footprint']
@@ -397,7 +397,7 @@ class DisplayApp(object):
       dmx_actions.append(actions.GetSlotDescription(
                                                   data, 
                                                   self.ola_thread.rdm_get,
-                                                  i))
+                                                  [i]))
     dmx_actions.append(actions.GetDefaultSlotValue(data, self.ola_thread.rdm_get))
 
     print i
@@ -418,7 +418,7 @@ class DisplayApp(object):
     for i in xrange(data['DEVICE_INFO']['sensor_count']):
       sensor_actions.append(actions.GetSensorDefinition(data, 
                                                         self.ola_thread.rdm_get,
-                                                        i))
+                                                        [i]))
                         
     flow = controlflow.RDMControlFlow(
                   self.universe.get(),
@@ -434,7 +434,7 @@ class DisplayApp(object):
     data = self._uid_dict[self.cur_uid]
     sensor_actions = [actions.GetSensorValue(data,
                                                  self.ola_thread.rdm_get,
-                                                 sensor_number)]
+                                                 [sensor_number])]
                         
     flow = controlflow.RDMControlFlow(
                   self.universe.get(),
@@ -514,10 +514,10 @@ class DisplayApp(object):
     flow_actions = []
     data = self._uid_dict[self.cur_uid]
     flow_actions.append(actions.SetDMXPersonality(data, self.ola_thread.rdm_set,
-                                                  personality))
+                                                  [personality]))
     flow_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
     flow_actions.append(actions.GetSlotDescription(
-        data, self.ola_thread.rdm_get, personality))
+        data, self.ola_thread.rdm_get, [personality]))
     flow_actions.append(actions.GetDefaultSlotValue(
         data, self.ola_thread.rdm_get))
 

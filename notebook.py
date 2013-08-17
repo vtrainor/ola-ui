@@ -272,6 +272,10 @@ class RDMNotebook(object):
 
                               tk.Label(self.sensor_tab, text = ""),
                               tk.Label(self.sensor_tab,
+                                        textvariable = self.supports_lowest_highest),                              
+
+                              tk.Label(self.sensor_tab, text = ""),
+                              tk.Label(self.sensor_tab,
                                             textvariable = self.present_value),
 
                               tk.Label(self.sensor_tab, text = ""),
@@ -599,19 +603,19 @@ class RDMNotebook(object):
       for key, value in PIDDict.LAMP_STATE.iteritems():
         self.lamp_state_menu.add_item(value, 
                                       lambda k=key: self._set_lamp_state(k))
-    self.lamp_state_menu.set(PIDDict.LAMP_STATE[param_dict['LAMP_STATE']])
+      self.lamp_state_menu.set(PIDDict.LAMP_STATE[param_dict['LAMP_STATE']])
     if 'LAMP_ON_MODE' in param_dict:
       self.lamp_on_mode_menu.config(state = tk.NORMAL)
       for key, value in PIDDict.LAMP_ON_MODE.iteritems():
         self.lamp_on_mode_menu.add_item(value, 
                                         lambda k=key: self._set_lamp_on_mode(k))
-    self.lamp_on_mode_menu.set(PIDDict.LAMP_ON_MODE[param_dict['LAMP_ON_MODE']])
+      self.lamp_on_mode_menu.set(PIDDict.LAMP_ON_MODE[param_dict['LAMP_ON_MODE']])
     if 'POWER_STATE' in param_dict:
       self.power_state_menu.config(state = tk.NORMAL)
       for key, value in PIDDict.POWER_STATE.iteritems():
         self.power_state_menu.add_item(value, 
                                        lambda k=key: self._set_power_state(k))
-    self.power_state_menu.set(PIDDict.POWER_STATE[param_dict['POWER_STATE']])
+      self.power_state_menu.set(PIDDict.POWER_STATE[param_dict['POWER_STATE']])
 
   def render_config_information(self, param_dict):
     '''
@@ -919,9 +923,9 @@ class RDMNotebook(object):
                                                definition['normal_max']))
     self.supports_recording.set(
         'Supports Recording: %s' %
-        PIDDict.RECORDED_SUPPORTED & definition['supports_recording'])
+        bool(PIDDict.RECORDED_SUPPORTED & definition['supports_recording']))
     self.supports_lowest_highest.set('Supports Lowest/Highest: %s' %
-        PIDDict.LOWEST_HIGHEST_SUPPORTED & definition['supports_recording'])
+        bool(PIDDict.LOWEST_HIGHEST_SUPPORTED & definition['supports_recording']))
 
     if 'SENSOR_VALUE' in param_dict:
       value = param_dict['SENSOR_VALUE'][sensor_number]

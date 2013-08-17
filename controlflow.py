@@ -7,7 +7,7 @@ class RDMAction(object):
 
 class GetRDMAction(RDMAction):
   """An action which performs an RDM GET."""
-  def __init__(self, data_dict, get_fn, get_data = None):
+  def __init__(self, data_dict, get_fn, get_data = []):
     """Create a new GET action.
 
     Args:
@@ -17,10 +17,6 @@ class GetRDMAction(RDMAction):
     self._data = data_dict
     self._get_fn = get_fn
     self._get_data = get_data
-
-  def params(self):
-    """This method provides the parameters for the GET."""
-    return []
 
   def update_dict(succeeded, params):
     """This method is called when the GET completes."""
@@ -39,7 +35,7 @@ class GetRDMAction(RDMAction):
     self._get_fn(
         universe, uid, 0, self.PID,
         lambda b, s: self._complete(b, s, on_complete),
-        [self._get_data])
+        self._get_data)
 
   def _complete(self, succeeded, params, on_complete):
     """Called when the GET completes."""
@@ -48,7 +44,7 @@ class GetRDMAction(RDMAction):
 
 class SetRDMAction(RDMAction):
   """An action which performs an RDM GET."""
-  def __init__(self, data_dict, set_fn, set_data = None):
+  def __init__(self, data_dict, set_fn, set_data = []):
     """Create a new GET action.
 
     Args:
@@ -58,10 +54,6 @@ class SetRDMAction(RDMAction):
     self._data = data_dict
     self._set_fn = set_fn
     self._set_data = set_data
-
-  def params(self):
-    """This method provides the parameters for the SET."""
-    return []
 
   def update_dict(succeeded, params):
     """This method is called when the SET completes."""
@@ -80,23 +72,12 @@ class SetRDMAction(RDMAction):
     self._set_fn(
         universe, uid, 0, self.PID,
         lambda b, s: self._complete(b, s, on_complete),
-        [self._set_data])
+        self._set_data)
 
   def _complete(self, succeeded, params, on_complete):
     """Called when the GET completes."""
     self.update_dict(succeeded, self._set_data)
     on_complete()
-
-class GetIdentify(GetRDMAction):
-  """An example GET IDENTIFY_DEVICE action.
-
-  This action always executes, since we want the latest information.
-  """
-  PID = "IDENTIFY_DEVICE"
-
-  def update_dict(self, succeeded, params):
-    if succeeded:
-      self._data[self.PID] = params['identify_state']
 
 class RDMControlFlow(object):
   """Create a new Control Flow.
@@ -119,7 +100,6 @@ class RDMControlFlow(object):
 
   def _perform_next_action(self):
     if self._actions:
-      # run next action
       action = self._actions.popleft()
       action.execute(self._universe, self._uid, self._perform_next_action)
     else:
