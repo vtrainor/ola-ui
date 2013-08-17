@@ -23,8 +23,8 @@ from rdm_menu import RDMMenu
  When a UID is selected:
   - fetch supported params if we don't already have it
   - fetch device info if we don't already have it
-  - call notebook.Update()
-  - notebook.Update looks at the current selected tab, and then calls one of:
+  - call notebook.update()
+  - notebook.update looks at the current selected tab, and then calls one of:
     - get_basic_information()
     - get_dmx_information()
     - GetSensorInformation()
@@ -38,7 +38,7 @@ from rdm_menu import RDMMenu
     GET BOOT_SOFTWARE_VERSION_ID
     GET BOOT_SOFTWARE_VERSION_LABEL
 
-  Once the dict is built, we call notebook.RenderBasicInformation(pid_info)
+  Once the dict is built, we call notebook.render_basic_information(pid_info)
   which then updates all the widgets.
 '''
 
@@ -114,6 +114,9 @@ class Controller(object):
 
   def set_pan_tilt_swap(self, swap):
     self._app.set_pan_tilt_swap(swap)
+
+  def record_sensor(self, sensor_number):
+    self._app.record_sensor(sensor_number)
 
 # ==============================================================================
 # ============================ Universe Class ==================================
@@ -261,7 +264,7 @@ class DisplayApp(object):
       if pid is not None:
         self._uid_dict[self.cur_uid]['PARAM_NAMES'].add(pid.name)
     print 'Device selected: %s' % self._uid_dict[self.cur_uid]
-    self._notebook.Update()
+    self._notebook.update()
 
   def _get_identify_complete(self, uid, succeeded, value):
     ''' Callback for rdm_get in device_selected.
@@ -368,7 +371,7 @@ class DisplayApp(object):
                   actions.GetBootSoftwareLabel(data, self.ola_thread.rdm_get),
                   actions.GetBootSoftwareVersion(data, self.ola_thread.rdm_get)
                   ],
-                  self.UpdateBasicInformation)
+                  self.update_basic_information)
     flow.run()
 
   def get_dmx_information(self):
@@ -401,7 +404,7 @@ class DisplayApp(object):
                 self.universe.get(),
                 self.cur_uid,
                 dmx_actions,
-                self.UpdateDmxInformation)
+                self.update_dmx_information)
     flow.run()
 
   def get_sensor_definitions(self):
@@ -418,7 +421,7 @@ class DisplayApp(object):
                   self.universe.get(),
                   self.cur_uid,
                   sensor_actions,
-                  self.UpdateSensorInformation)
+                  self.update_sensor_information)
     flow.run()
 
   def get_sensor_value(self, sensor_number):
@@ -434,7 +437,7 @@ class DisplayApp(object):
                   self.universe.get(),
                   self.cur_uid,
                   sensor_actions,
-                  lambda: self.DisplaySensorData(sensor_number))
+                  lambda: self.display_sensor_data(sensor_number))
     flow.run()
 
   def get_setting_information(self):
@@ -455,7 +458,7 @@ class DisplayApp(object):
                   actions.GetPowerCycles(data, self.ola_thread.rdm_get),
                   actions.GetPowerState(data, self.ola_thread.rdm_get),
                   ],
-                  self.UpdateSettingInformation)
+                  self.update_setting_information)
     flow.run()
 
   def get_config_information(self):
@@ -477,28 +480,28 @@ class DisplayApp(object):
                   actions.GetPanTiltSwap(data, self.ola_thread.rdm_get),
                   actions.GetRealTimeClock(data, self.ola_thread.rdm_get)
                   ],
-                  self.UpdateConfigInformation)
+                  self.update_config_information)
     flow.run()
   
   # ============================ Notebook Updates ==============================
 
-  def UpdateBasicInformation(self):
-    self._notebook.RenderBasicInformation(self._uid_dict[self.cur_uid])
+  def update_basic_information(self):
+    self._notebook.render_basic_information(self._uid_dict[self.cur_uid])
 
-  def UpdateDmxInformation(self):
-    self._notebook.RenderDMXInformation(self._uid_dict[self.cur_uid])
+  def update_dmx_information(self):
+    self._notebook.render_dmx_information(self._uid_dict[self.cur_uid])
 
-  def UpdateSensorInformation(self):
-    self._notebook.RenderSensorInformation(self._uid_dict[self.cur_uid])
+  def update_sensor_information(self):
+    self._notebook.render_sensor_information(self._uid_dict[self.cur_uid])
 
-  def DisplaySensorData(self,sensor_number):
-    self._notebook.DisplaySensorData(self._uid_dict[self.cur_uid],sensor_number)
+  def display_sensor_data(self,sensor_number):
+    self._notebook.display_sensor_data(self._uid_dict[self.cur_uid],sensor_number)
 
-  def UpdateSettingInformation(self):
-    self._notebook.RenderSettingInformation(self._uid_dict[self.cur_uid])
+  def update_setting_information(self):
+    self._notebook.render_setting_information(self._uid_dict[self.cur_uid])
 
-  def UpdateConfigInformation(self):
-    self._notebook.RenderConfigInformation(self._uid_dict[self.cur_uid])
+  def update_config_information(self):
+    self._notebook.render_config_information(self._uid_dict[self.cur_uid])
 
   # ============================ RDM Sets ======================================
 
@@ -507,10 +510,13 @@ class DisplayApp(object):
       return
     flow_actions = []
     data = self._uid_dict[self.cur_uid]
-    flow_actions.append(actions.SetDMXPersonality(data, self.ola_thread.rdm_set, personality))
+    flow_actions.append(actions.SetDMXPersonality(data, self.ola_thread.rdm_set,
+                                                  personality))
     flow_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
-    flow_actions.append(actions.GetSlotDescription(data, self.ola_thread.rdm_get, personality))
-    flow_actions.append(actions.GetDefaultSlotValue(data, self.ola_thread.rdm_get))
+    flow_actions.append(actions.GetSlotDescription(
+        data, self.ola_thread.rdm_get, personality))
+    flow_actions.append(actions.GetDefaultSlotValue(
+        data, self.ola_thread.rdm_get))
 
     flow = controlflow.RDMControlFlow(
                 self.universe.get(),
@@ -537,7 +543,7 @@ class DisplayApp(object):
   def _display_level_complete(self, uid, level, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['DISPLAY_LEVEL'] = level
-      self._notebook.DisplayLevelCallback(level)
+      self._notebook.set_display_level_complete(level)
 
   def set_lamp_state(self, state):
     if self.cur_uid is None:
@@ -670,6 +676,17 @@ class DisplayApp(object):
       self._uid_dict[uid]['PAN_TILT_SWAP'] = swap
       self._notebook.set_pan_tilt_swapComplete(swap)
 
+  def record_sensor(self, sensor_number):
+    self.ola_thread.rdm_set(self.universe.get(),
+                            self.cur_uid,
+                            0,
+                            'RECORD_SENSORS',
+                            lambda b, s: self.record_sensors_complete(b, s),
+                            [sensor_number])
+
+  def record_sensors_complete(self, succeeded, data):
+    if succeeded:
+      print 'Sensors Recorded'
   # ================================ Callbacks =================================
 
 
@@ -695,7 +712,7 @@ class DisplayApp(object):
       print 'failed'
     # store the results in the uid dict
     self.root.update_idletasks()
-    self._notebook.Update()
+    self._notebook.update()
 
   def _add_device_to_menu(self, uid):
     label = self._uid_dict[uid]['DEVICE_LABEL']

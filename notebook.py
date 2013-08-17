@@ -234,9 +234,10 @@ class RDMNotebook(object):
     self.recorded = tk.StringVar(self.sensor_tab)
 
     # Widgets
-    self.sensor_menu = RDMMenu(self.sensor_tab,
-                                        "Sensor information not provided.",
-                                        "Choose Sensor")
+    self.sensor_menu = RDMMenu(
+        self.sensor_tab, "Sensor information not provided.", "Choose Sensor")
+    self.record_sensor_button = tk.Button(
+        self.sensor_tab, text = "Record Sensors")
 
     self.objects["SENSORS"] = [tk.Label(self.sensor_tab,
                                                         text = "Choose Sensor"),
@@ -280,7 +281,10 @@ class RDMNotebook(object):
 
                               tk.Label(self.sensor_tab, text = ""),
                               tk.Label(self.sensor_tab,
-                                                  textvariable = self.recorded)
+                                                  textvariable = self.recorded),
+
+                              tk.Label(self.sensor_tab, text = ""),
+                              self.record_sensor_button
                               ]
 
   def _init_setting(self):
@@ -414,7 +418,7 @@ class RDMNotebook(object):
   # ============================== Update Tabs =================================
   # ============================================================================
 
-  def Update(self):
+  def update(self):
     index = self._notebook.index('current')
     print 'The selected tab changed to %d' % index
     if index == 0:
@@ -430,7 +434,7 @@ class RDMNotebook(object):
 
   # ========================= Information Rendering ============================
 
-  def RenderBasicInformation(self, param_dict):
+  def render_basic_information(self, param_dict):
     '''
     Uses the data in param_dict to display the DMX information for the device
     Called when the tab is selected, or the device changed.
@@ -482,7 +486,7 @@ class RDMNotebook(object):
     self.boot_software.set(boot_software)
     return
 
-  def RenderDMXInformation(self, param_dict):
+  def render_dmx_information(self, param_dict):
     '''
     Uses the data in param_dict to display the DMX information for the device
     Called when the tab is selected, or the device changed.
@@ -528,7 +532,7 @@ class RDMNotebook(object):
         self.slot_menu.add_item("Slot Number %d" % index,
             lambda i = index:self._display_slot_info(i, param_dict))
 
-  def RenderSensorInformation(self, param_dict):
+  def render_sensor_information(self, param_dict):
     '''
     Uses the data in param_dict to display the DMX information for the device
     Called when the tab is selected, or the device changed.
@@ -563,7 +567,7 @@ class RDMNotebook(object):
       return
    
 
-  def RenderSettingInformation(self, param_dict):
+  def render_setting_information(self, param_dict):
     '''
     Uses the data in param_dict to display the DMX information for the device
     Called when the tab is selected, or the device changed.
@@ -603,7 +607,7 @@ class RDMNotebook(object):
                                        lambda k=key: self._set_power_state(k))
     self.power_state_menu.set(PIDDict.POWER_STATE[param_dict['POWER_STATE']])
 
-  def RenderConfigInformation(self, param_dict):
+  def render_config_information(self, param_dict):
     '''
     Uses the data in param_dict to display the DMX information for the device
     Called when the tab is selected, or the device changed.
@@ -807,16 +811,19 @@ class RDMNotebook(object):
     if self.language_menu.get() != language:
       self.language_menu.set(language)
 
+  def record_sensor(self, sensor_number):
+    self._controller.record_sensor(sensor_number)
+
   # ============================================================================
   # ========================== Internal Methods ================================
   # ============================================================================
 
   def _tab_changed(self, event):
     '''
-    Method bound to tab change evet, calls self.Update
+    Method bound to tab change evet, calls self.update
     '''
     # Note that this will be called when the program starts
-    self.Update()
+    self.update()
 
   def _grid_info(self, obj_list):
     """
@@ -887,7 +894,8 @@ class RDMNotebook(object):
   def _populate_sensor_tab(self, sensor_number):
     self._controller.get_sensor_value(sensor_number)
 
-  def DisplaySensorData(self, param_dict, sensor_number):
+  def display_sensor_data(self, param_dict, sensor_number):
+    self.record_sensor_button.config(command = lambda: self.record_sensor(sensor_number))
     definition = param_dict['SENSOR_DEFINITION'][sensor_number]
     TYPE = RDMConstants.SENSOR_TYPE_TO_NAME[definition['type']].replace("_", " ")
     UNIT = RDMConstants.UNIT_TO_NAME[definition['unit']].replace("_", " ")
@@ -909,7 +917,7 @@ class RDMNotebook(object):
       self.highest.set('Highest Value: %d' % value['highest'])
       self.recorded.set('Recorded Value: %d' % value['recorded'])
 
-  def DisplayLevelCallback(self, level):
+  def set_display_level(self, level):
     if level != self.display_level_menu.get():
       pass
       # self.display_level_menu.set(level)
