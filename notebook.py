@@ -226,6 +226,7 @@ class RDMNotebook(object):
     self.sensor_range = tk.StringVar(self.sensor_tab)
     self.normal_range = tk.StringVar(self.sensor_tab)
     self.supports_recording = tk.StringVar(self.sensor_tab)
+    self.supports_lowest_highest = tk.StringVar(self.sensor_tab)
     self.sensor_name = tk.StringVar(self.sensor_tab)
     self.sensor_number = tk.StringVar(self.sensor_tab)
     self.present_value = tk.StringVar(self.sensor_tab)
@@ -916,9 +917,12 @@ class RDMNotebook(object):
                                                definition['range_max']))
     self.normal_range.set('Normal Range: %d - %d' % (definition['normal_min'], 
                                                definition['normal_max']))
-    self.supports_recording.set('Supports Recording: %s' %
-                          PIDDict.SENSOR_VALUE[definition['supports_recording']]
-                                               )
+    self.supports_recording.set(
+        'Supports Recording: %s' %
+        PIDDict.RECORDED_SUPPORTED & definition['supports_recording'])
+    self.supports_lowest_highest.set('Supports Lowest/Highest: %s' %
+        PIDDict.LOWEST_HIGHEST_SUPPORTED & definition['supports_recording'])
+
     if 'SENSOR_VALUE' in param_dict:
       value = param_dict['SENSOR_VALUE'][sensor_number]
       self.present_value.set('Value: %d' % value['present_value'])
