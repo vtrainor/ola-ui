@@ -237,7 +237,9 @@ class RDMNotebook(object):
     self.sensor_menu = RDMMenu(
         self.sensor_tab, "Sensor information not provided.", "Choose Sensor")
     self.record_sensor_button = tk.Button(
-        self.sensor_tab, text = "Record Sensors")
+        self.sensor_tab, text = "Record Sensor")
+    self.clear_sensor_button = tk.Button(
+        self.sensor_tab, text = "Clear Sensor")
 
     self.objects["SENSORS"] = [tk.Label(self.sensor_tab,
                                                         text = "Choose Sensor"),
@@ -284,7 +286,10 @@ class RDMNotebook(object):
                                                   textvariable = self.recorded),
 
                               tk.Label(self.sensor_tab, text = ""),
-                              self.record_sensor_button
+                              self.record_sensor_button,
+
+                              tk.Label(self.sensor_tab, text = ""),
+                              self.clear_sensor_button
                               ]
 
   def _init_setting(self):
@@ -814,6 +819,9 @@ class RDMNotebook(object):
   def record_sensor(self, sensor_number):
     self._controller.record_sensor(sensor_number)
 
+  def clear_sensor(self, sensor_number):
+    self._controller.clear_sensor(sensor_number)
+
   # ============================================================================
   # ========================== Internal Methods ================================
   # ============================================================================
@@ -896,6 +904,7 @@ class RDMNotebook(object):
 
   def display_sensor_data(self, param_dict, sensor_number):
     self.record_sensor_button.config(command = lambda: self.record_sensor(sensor_number))
+    self.clear_sensor_button.config(command = lambda: self.clear_sensor(sensor_number))
     definition = param_dict['SENSOR_DEFINITION'][sensor_number]
     TYPE = RDMConstants.SENSOR_TYPE_TO_NAME[definition['type']].replace("_", " ")
     UNIT = RDMConstants.UNIT_TO_NAME[definition['unit']].replace("_", " ")

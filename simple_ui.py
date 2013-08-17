@@ -118,6 +118,9 @@ class Controller(object):
   def record_sensor(self, sensor_number):
     self._app.record_sensor(sensor_number)
 
+  def clear_sensor(self, sensor_number):
+    self._app.clear_sensor(sensor_number)
+
 # ==============================================================================
 # ============================ Universe Class ==================================
 # ==============================================================================
@@ -681,13 +684,26 @@ class DisplayApp(object):
                             self.cur_uid,
                             0,
                             'RECORD_SENSORS',
-                            lambda b, s: self.record_sensors_complete(b, s),
+                            lambda b, s: self.record_sensor_complete(b, s),
+                            [sensor_number])
+  
+  def record_sensor_complete(self, succeeded, data):
+    if succeeded:
+      print 'Sensor recorded'
+
+  def clear_sensor(self, sensor_number):
+    self.ola_thread.rdm_set(self.universe.get(),
+                            self.cur_uid,
+                            0,
+                            'SENSOR_VALUE',
+                            lambda b, s: self.clear_sensor_complete(b, s),
                             [sensor_number])
 
-  def record_sensors_complete(self, succeeded, data):
+  def clear_sensor_complete(self, succeeded, data):
     if succeeded:
-      print 'Sensors Recorded'
-  # ================================ Callbacks =================================
+      print 'Sensor cleared.'
+
+    # ================================ Callbacks =================================
 
 
   def set_device_label(self, label):
