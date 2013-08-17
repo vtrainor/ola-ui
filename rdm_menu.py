@@ -7,19 +7,17 @@ class RDMMenu(object):
     self.root = master
     self.empty_label = empty_label
     self.full_label = full_label
-
     self.variable = tk.StringVar(self.root)
     self.menu = tk.OptionMenu(self.root, self.variable, '')
-    
     self.clear_menu()
-    
+
   def get(self):
     '''
     Returns:
       current string value of the StringVar
     '''
     return self.variable.get()
-    
+
   def set(self, value):
     '''
     sets the string var to value
@@ -27,19 +25,18 @@ class RDMMenu(object):
     print "setting to: %s" % value
     self.variable.set(value)
     self.root.update_idletasks()
-    
+
   def pack(self, *args, **kwargs):
     '''
     see tkinter pack
     '''
     self.menu.pack(*args, **kwargs)
-    
+
   def grid(self, *args, **kwargs):
     '''
     see tkinter grid
     '''
     self.menu.grid(*args, **kwargs)
-  
 
   def clear_menu(self):
     '''
