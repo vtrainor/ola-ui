@@ -63,53 +63,32 @@ class RDMNotebook(object):
                                               variable = self.factory_defaults)
     
     self.device_label_button = tk.Button(self.info_tab, 
-                                        text = "Update Device Label",
-                                        command = self.device_label_set)
-    self.objects["PRODUCT_INFO"] = [tk.Label(self.info_tab,
-                                                     text = "RDM Protocol Version"),
-                            tk.Label(self.info_tab,
-                                          textvariable = self.protocol_version),
-
-                            tk.Label(self.info_tab, text = "Device Model"),
-                            tk.Label(self.info_tab,
-                                              textvariable = self.device_model),
-
-                            tk.Label(self.info_tab, text = "Product Category:"),
-                            tk.Label(self.info_tab,
-                                          textvariable = self.product_category),
-
-                            tk.Label(self.info_tab, text = "Software Version:"),
-                            tk.Label(self.info_tab,
-                                          textvariable = self.software_version),
-
-                            tk.Label(self.info_tab, text = "Product Details:"),
-                            tk.Label(self.info_tab, 
-                                        textvariable = self.product_detail_ids),
-
-                            tk.Label(self.info_tab, text = "Sub-Device Count"),
-                            tk.Label(self.info_tab,
-                                          textvariable = self.sub_device_count),
-
-                            tk.Label(self.info_tab, text = "Manufacturer:"),
-                            tk.Label(self.info_tab,
-                                        textvariable = self.manufacturer_label),
-
-                            tk.Label(self.info_tab, text = "Device Label:"),
-                            tk.Entry(self.info_tab,
-                                              textvariable = self.device_label),
-
-                            tk.Label(self.info_tab, text = "Factory Defaults:"),
-                            tk.Checkbutton(self.info_tab,
-                                              variable = self.factory_defaults),
-
-                            tk.Label(self.info_tab,
-                                              text = "Boot Software Version:"),
-                            tk.Label(self.info_tab,
-                                            textvariable = self.boot_software),
-
-                            self.device_label_button,
-                            tk.Label(self.info_tab, text = "")
-                            ]
+                                         text = "Update Device Label",
+                                         command = self.device_label_set)
+    self.objects["PRODUCT_INFO"] = [
+        tk.Label(self.info_tab, text = "RDM Protocol Version"),
+        tk.Label(self.info_tab, textvariable = self.protocol_version),
+        tk.Label(self.info_tab, text = "Device Model"),
+        tk.Label(self.info_tab, textvariable = self.device_model),
+        tk.Label(self.info_tab, text = "Product Category:"),
+        tk.Label(self.info_tab, textvariable = self.product_category),
+        tk.Label(self.info_tab, text = "Software Version:"),
+        tk.Label(self.info_tab, textvariable = self.software_version),
+        tk.Label(self.info_tab, text = "Product Details:"),
+        tk.Label(self.info_tab, textvariable = self.product_detail_ids),
+        tk.Label(self.info_tab, text = "Sub-Device Count"),
+        tk.Label(self.info_tab, textvariable = self.sub_device_count),
+        tk.Label(self.info_tab, text = "Manufacturer:"),
+        tk.Label(self.info_tab, textvariable = self.manufacturer_label),
+        tk.Label(self.info_tab, text = "Device Label:"),
+        tk.Entry(self.info_tab, textvariable = self.device_label),
+        tk.Label(self.info_tab, text = "Factory Defaults:"),
+        tk.Checkbutton(self.info_tab, variable = self.factory_defaults),
+        tk.Label(self.info_tab, text = "Boot Software Version:"),
+        tk.Label(self.info_tab, textvariable = self.boot_software),
+        self.device_label_button,
+        tk.Label(self.info_tab, text = "")
+                                   ]
 
   def _init_dmx(self):
     """
@@ -126,54 +105,37 @@ class RDMNotebook(object):
     self.default_slot_value = tk.StringVar(self.dmx_tab)
 
     # Widgets
-    self.start_address_entry = tk.Entry(self.dmx_tab,
-                                          textvariable = self.dmx_start_address)
-    self.dmx_personality_menu = RDMMenu(self.dmx_tab,
-                                        "Personality description not supported.",
-                                        "")
-    self.slot_menu = RDMMenu(self.dmx_tab,
-                             "No slot description.",
-                             "Choose Slot")
+    self.start_address_entry = tk.Entry(
+        self.dmx_tab, textvariable = self.dmx_start_address)
+    self.dmx_personality_menu = RDMMenu(
+        self.dmx_tab, "Personality description not supported.", "")
+    self.slot_menu = RDMMenu(
+        self.dmx_tab, "No slot description.", "Choose Slot")
 
-    self.objects["DMX512_SETUP"] = [tk.Label(self.dmx_tab,
-                                                      text = "DMX Footprint:"),
-                                  tk.Label(self.dmx_tab,
-                                            textvariable = self.dmx_footprint),
-
-                                  tk.Label(self.dmx_tab,
-                                                  text = "DMX Start Address:"),
-                                  self.start_address_entry,
-
-                                  tk.Label(self.dmx_tab,
-                                                text = "Current Personality:"),
-                                  self.dmx_personality_menu,
-
-                                  tk.Label(self.dmx_tab, text = ""),
-                                  tk.Label(self.dmx_tab,
-                                            textvariable = self.slot_required),
-
-                                  tk.Label(self.dmx_tab, text = ""),
-                                  tk.Label(self.dmx_tab,
-                                          textvariable = self.personality_name),
-
-                                  tk.Label(self.dmx_tab, text = "Slot Info:"),
-                                  self.slot_menu,
-
-                                  tk.Label(self.dmx_tab, text = ""),
-                                  tk.Label(self.dmx_tab,
-                                                textvariable = self.slot_name),
-
-                                  tk.Label(self.dmx_tab, text = ""),
-                                  tk.Label(self.dmx_tab,
-                                                textvariable = self.slot_type),
-
-                                  tk.Label(self.dmx_tab, text = ""),
-                                  tk.Label(self.dmx_tab,
-                                            textvariable = self.slot_label_id),
-
-                                  tk.Label(self.dmx_tab, text = ""),
-                                  tk.Label(self.dmx_tab,
-                                        textvariable = self.default_slot_value)
+    self.objects["DMX512_SETUP"] = [
+        tk.Label(self.dmx_tab, text = "DMX Footprint:"),
+        tk.Label(self.dmx_tab, textvariable = self.dmx_footprint),
+        tk.Label(self.dmx_tab, text = "DMX Start Address:"),
+        self.start_address_entry,
+        tk.Button(self.dmx_tab, text = 'Set Start Address', 
+                  command = self.set_start_address),
+        tk.Label(self.dmx_tab, text = ""),
+        tk.Label(self.dmx_tab, text = "Current Personality:"),
+        self.dmx_personality_menu,
+        tk.Label(self.dmx_tab, text = ""),
+        tk.Label(self.dmx_tab, textvariable = self.slot_required),
+        tk.Label(self.dmx_tab, text = ""),
+        tk.Label(self.dmx_tab, textvariable = self.personality_name),
+        tk.Label(self.dmx_tab, text = "Slot Info:"),
+        self.slot_menu,
+        tk.Label(self.dmx_tab, text = ""),
+        tk.Label(self.dmx_tab, textvariable = self.slot_name),
+        tk.Label(self.dmx_tab, text = ""),
+        tk.Label(self.dmx_tab, textvariable = self.slot_type),
+        tk.Label(self.dmx_tab, text = ""),
+        tk.Label(self.dmx_tab, textvariable = self.slot_label_id),
+        tk.Label(self.dmx_tab, text = ""),
+        tk.Label(self.dmx_tab, textvariable = self.default_slot_value)
                                   ]
 
   def _init_sensor(self):
@@ -284,12 +246,10 @@ class RDMNotebook(object):
                                     'Power state not supported.',
                                     '')
 
-    self.objects["POWER_LAMP_SETTINGS"] = [tk.Label(self.setting_tab,
-                                                        text = "Device Hours:"),
-                                          tk.Label(self.setting_tab,
-                                              textvariable = self.device_hours),
-
-                                          tk.Label(self.setting_tab,
+    self.objects["POWER_LAMP_SETTINGS"] = [
+        tk.Label(self.setting_tab, text = "Device Hours:"),
+        tk.Label(self.setting_tab, textvariable = self.device_hours),
+        tk.Label(self.setting_tab,
                                                 text = "Device Power Cycles:"),
                                           tk.Label(self.setting_tab, 
                                             textvariable = self.device_power_cycles),
@@ -652,6 +612,12 @@ class RDMNotebook(object):
   # ============================================================================
   # ============================ RDM Set Methods ===============================
   # ============================================================================
+  def set_start_address(self):
+    '''
+    start of control flow for setting the dmx_start_address of a device.
+    '''
+    start_address = self.dmx_start_address.get()
+    self._controller.set_start_address(start_address)
 
   def _set_lamp_state(self, state):
     '''

@@ -492,8 +492,9 @@ class SetDMXPersonality(SetRDMAction):
 
   def update_dict(self, succeeded, value):
     if succeeded:
-      print self._data[self.PID]
-      self._data['DEVICE_INFO']['current_personality'] = value
-      self._data['DEVICE_INFO']['dmx_footprint'] = self._data['DMX_PERSONALITY_DESCRIPTION'][value]['slots_required']
+      print 'hello %s' % self._data['DMX_PERSONALITY_DESCRIPTION']
+      print 'meow %s' % value
+      self._data['DEVICE_INFO']['current_personality'] = value[0]
+      self._data['DEVICE_INFO']['dmx_footprint'] = self._data['DMX_PERSONALITY_DESCRIPTION'][value[0]]['slots_required']
     else:
-      print 'failure to set'
+      print value
