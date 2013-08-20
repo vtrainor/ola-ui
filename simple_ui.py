@@ -595,7 +595,7 @@ class DisplayApp(object):
   def _set_lamp_on_mode_complete(self, uid, mode, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['LAMP_ON_MODE'] = mode
-      self._notebook.LampOnModeCallback(mode)
+      self._notebook.set_lamp_on_mode_complete(mode)
 
   def set_power_state(self, state):
     if self._cur_uid is None:
@@ -612,7 +612,7 @@ class DisplayApp(object):
   def _set_power_state_complete(self, uid, state, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['POWER_STATE'] = state
-      self._notebook.PowerStateCallback(state)
+      self._notebook.set_power_state_complete(state)
 
   def set_language(self, language):
     if self._cur_uid is None:
@@ -628,7 +628,7 @@ class DisplayApp(object):
   def _language_complete(self, uid, language, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['LANGUAGE'] = language
-      self._notebook.set_languageComplete(PIDDict.LAMP_STATE[language])
+      self._notebook.set_language_complete(PIDDict.LAMP_STATE[language])
 
   def set_display_invert(self, invert):
     if self._cur_uid is None:
@@ -660,7 +660,7 @@ class DisplayApp(object):
   def _pan_invert_complete(self, uid, invert, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['PAN_INVERT'] = invert
-      self._notebook.set_pan_invertComplete(invert)
+      self._notebook.set_pan_invert_complete(invert)
 
   def set_tilt_invert(self, invert):
     if self._cur_uid is None:
@@ -696,8 +696,7 @@ class DisplayApp(object):
 
   def record_sensor(self, sensor_number):
     self.ola_thread.rdm_set(self.universe.get(),
-                            self._cur_uid
-                      ,
+                            self._cur_uid,
                             0,
                             'RECORD_SENSORS',
                             lambda b, s: self.record_sensor_complete(b, s),
@@ -709,8 +708,7 @@ class DisplayApp(object):
 
   def clear_sensor(self, sensor_number):
     self.ola_thread.rdm_set(self.universe.get(),
-                            self._cur_uid
-                      ,
+                            self._cur_uid,
                             0,
                             'SENSOR_VALUE',
                             lambda b, s: self.clear_sensor_complete(b, s),
@@ -737,10 +735,8 @@ class DisplayApp(object):
   def set_device_label_complete(self, uid, label, succeeded, data):
 
     if succeeded:
-      index = self._uid_dict[self._cur_uid
-]['index']
-      self._uid_dict[self._cur_uid
-]['DEVICE_LABEL'] = label
+      index = self._uid_dict[self._cur_uid]['index']
+      self._uid_dict[self._cur_uid]['DEVICE_LABEL'] = label
       self.device_menu.entryconfigure(index, label = '%s (%s)'%(
                   self._uid_dict[uid]['DEVICE_LABEL'], uid))
     else:

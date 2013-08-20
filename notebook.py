@@ -645,7 +645,7 @@ class RDMNotebook(object):
     Args:
       mode: int, see PIDDict.LAMP_ON_MODE for mode names.
     '''
-    self._controller.set_lamp_on_mode()
+    self._controller.set_lamp_on_mode(mode)
 
   def set_lamp_on_mode_complete(self, mode):
     '''
