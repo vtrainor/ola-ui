@@ -33,50 +33,10 @@ class RDMNotebook(object):
     self._init_setting()
     self.config_tab = self._create_tab("config_tab", "Configuration")
     self._init_config()
-    self.pid_location_dict = {"PRODUCT_INFO": {"DEVICE_INFO": [0,1,2,3,4,5,6,7,
-                                                              8,9],
-                                      "PRODUCT_DETAIL_ID_LIST": [10,11],
-                                      "DEVICE_MODEL_DESCRIPTION": [3],
-                                      "MANUFACTURER_LABEL": [12,13],
-                                      "DEVICE_LABEL": [14,15],
-                                      "FACTORY_DEFAULTS": [16,17],
-                                      "SOFTWARE_VERSION_LABEL": [7],
-                                      "BOOT_SOFTWARE_VERSION_ID": [18,19],
-                                      "BOOT_SOFTWARE_VERSION_LABEL": [19]
-                              },
-                              "DMX512_SETUP": {"DEVICE_INFO": [0,1,2,3,4,5],
-                                      "DMX_PERSONALITY": [4,5],
-                                      "DMX_PERSONALITY_DESCRIPTION": [4,5,6,7,
-                                                                      8,9],
-                                      "DMX_START_ADDRESS": [3],
-                                      "SLOT_INFO": [10,11,13],
-                                      "SLOT_DESCRIPTION": [10,11,15,17,19],
-                                      "DEFAULT_SLOT_VALUE": [20,22,23]
-                              },
-                              "SENSORS": {"SENSOR_DEFINITION": [0,1,3,5,7,9,11,
-                                                                13,15],
-                                      "SENSOR_VALUE": [16,17,19,21,23,25,27],
-                                      "RECORD_SENSORS": []
-                              },
-                              "POWER_LAMP_SETTINGS": {"DEVICE_HOURS": [0,1],
-                                      "LAMP_HOURS": [2,3],
-                                      "LAMP_STRIKES": [4,5],
-                                      "LAMP_STATE": [6,7],
-                                      "LAMP_ON_MODE": [8,9],
-                                      "DEVICE_POWER_CYCLES": [10,11],
-                                      "POWER_STATE": [12,13]
-                              },
-                              "CONFIGURATION": {"LANGUAGE_CAPABILITIES": [0,1],
-                                      "LANGUAGE": [0,1],
-                                      "DISPLAY_INVERT": [2,3],
-                                      "DISPLAY_LEVEL": [4,5],
-                                      "PAN_INVERT": [6,7],
-                                      "TILT_INVERT": [8,9],
-                                      "PAN_TILT_SWAP": [10,11],
-                                      "REAL_TIME_CLOCK": [12,13]
-                              }}
-    for key in self.pid_location_dict.keys():
-        self._grid_info(self.objects[key])
+    tabs = ["PRODUCT_INFO", "DMX512_SETUP", "SENSORS",
+         "POWER_LAMP_SETTINGS", "CONFIGURATION"]
+    for tab in tabs:
+        self._grid_info(self.objects[tab])
     self._notebook.pack(side = self.side)
 
 # ==============================================================================
@@ -238,9 +198,11 @@ class RDMNotebook(object):
     self.sensor_menu = RDMMenu(
         self.sensor_tab, "Sensor information not provided.", "Choose Sensor")
     self.record_sensor_button = tk.Button(
-        self.sensor_tab, text = "Record Sensor")
+        self.sensor_tab, text = "Record Sensor", state = tk.DISABLED)
     self.clear_sensor_button = tk.Button(
-        self.sensor_tab, text = "Clear Sensor")
+        self.sensor_tab, text = 'Clear Sensor', state = tk.DISABLED)
+    self.refresh_sensor_button = tk.Button(
+        self.sensor_tab, text = 'Refresh', state = tk.DISABLED)
 
     self.objects["SENSORS"] = [tk.Label(self.sensor_tab,
                                                         text = "Choose Sensor"),
@@ -294,7 +256,10 @@ class RDMNotebook(object):
                               self.record_sensor_button,
 
                               tk.Label(self.sensor_tab, text = ""),
-                              self.clear_sensor_button
+                              self.clear_sensor_button,
+
+                              tk.Label(self.sensor_tab, text = ""),
+                              self.refresh_sensor_button
                               ]
 
   def _init_setting(self):
@@ -908,8 +873,13 @@ class RDMNotebook(object):
     self._controller.get_sensor_value(sensor_number)
 
   def display_sensor_data(self, param_dict, sensor_number):
-    self.record_sensor_button.config(command = lambda: self.record_sensor(sensor_number))
-    self.clear_sensor_button.config(command = lambda: self.clear_sensor(sensor_number))
+    self.record_sensor_button.config(
+        command = lambda: self.record_sensor(sensor_number), state = tk.NORMAL)
+    self.clear_sensor_button.config(
+        command = lambda: self.clear_sensor(sensor_number), state = tk.NORMAL)
+    self.refresh_sensor_button.config(
+        command = lambda: self._populate_sensor_tab(sensor_number), 
+        state = tk.NORMAL)
     definition = param_dict['SENSOR_DEFINITION'][sensor_number]
     TYPE = RDMConstants.SENSOR_TYPE_TO_NAME[definition['type']].replace("_", " ")
     UNIT = RDMConstants.UNIT_TO_NAME[definition['unit']].replace("_", " ")
