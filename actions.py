@@ -492,9 +492,18 @@ class SetDMXPersonality(SetRDMAction):
 
   def update_dict(self, succeeded, value):
     if succeeded:
-      print 'hello %s' % self._data['DMX_PERSONALITY_DESCRIPTION']
-      print 'meow %s' % value
-      self._data['DEVICE_INFO']['current_personality'] = value[0]
-      self._data['DEVICE_INFO']['dmx_footprint'] = self._data['DMX_PERSONALITY_DESCRIPTION'][value[0]]['slots_required']
+      i = value[0]
+      self._data['DEVICE_INFO']['current_personality'] = i
+      dmx_footprint = self._data['DMX_PERSONALITY_DESCRIPTION'][i]['slots_required']
+      self._data['DEVICE_INFO']['dmx_footprint'] = dmx_footprint
     else:
       print value
+
+class SetSensorValue(SetRDMAction):
+  '''
+  '''
+  PID = 'SENSOR_VALUE'
+
+  def update_dict(self, succeeded, value):
+    if succeeded:
+      print 'set complete'

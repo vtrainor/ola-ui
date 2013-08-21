@@ -18,27 +18,29 @@ class RDMNotebook(object):
     self._notebook = ttk.Notebook(self.root, name="nb", height=height,
                                   width=width)
     self._notebook.bind('<<NotebookTabChanged>>', self._tab_changed)
-    self.populate_defaults()  
+    self.populate_defaults()
 
   def populate_defaults(self):
     """ creates the default frames. """
-    # create and populate the three default tabs
     self.info_tab = self._create_tab("info_tab", "Device Information")
     self._init_info()
     self.dmx_tab = self._create_tab("dmx_tab", "DMX512 Setup")
     self._init_dmx()
     self.sensor_tab = self._create_tab("sensor_tab", "Sensors")
     self._init_sensor()
-    self.setting_tab = self._create_tab("setting_tab", "Power and Lamp Settings")
+    self.setting_tab = self._create_tab("setting_tab", 
+                                        "Power and Lamp Settings")
     self._init_setting()
     self.config_tab = self._create_tab("config_tab", "Configuration")
     self._init_config()
     tabs = ["PRODUCT_INFO", "DMX512_SETUP", "SENSORS",
-         "POWER_LAMP_SETTINGS", "CONFIGURATION"]
+            "POWER_LAMP_SETTINGS", "CONFIGURATION"]
     for tab in tabs:
-        self._grid_info(self.objects[tab])
+      self._grid_info(self.objects[tab])
     self._notebook.pack(side = self.side)
 
+  def activate(self):
+    pass
 # ==============================================================================
 # ============================ Tab Inits =======================================
 # ==============================================================================
@@ -56,12 +58,11 @@ class RDMNotebook(object):
     self.manufacturer_label = tk.StringVar(self.info_tab)
     self.device_label = tk.StringVar(self.info_tab)
     self.boot_software = tk.StringVar(self.info_tab)
-
     # Widgets:
+    #device label entry boc value should be capped at 32
     self.factory_defaults = tk.BooleanVar(self.info_tab)
-    self.factory_defaults_button = tk.Checkbutton(self.info_tab,
-                                              variable = self.factory_defaults)
-    
+    self.factory_defaults_button = tk.Checkbutton(
+        self.info_tab, variable = self.factory_defaults)
     self.device_label_button = tk.Button(self.info_tab, 
                                          text = "Update Device Label",
                                          command = self.device_label_set)
@@ -87,8 +88,8 @@ class RDMNotebook(object):
         tk.Label(self.info_tab, text = "Boot Software Version:"),
         tk.Label(self.info_tab, textvariable = self.boot_software),
         self.device_label_button,
-        tk.Label(self.info_tab, text = "")
-                                   ]
+        tk.Label(self.info_tab, text = ""),
+    ]
 
   def _init_dmx(self):
     """
@@ -103,10 +104,10 @@ class RDMNotebook(object):
     self.slot_type = tk.StringVar(self.dmx_tab)
     self.slot_label_id = tk.StringVar(self.dmx_tab)
     self.default_slot_value = tk.StringVar(self.dmx_tab)
-
     # Widgets
     self.start_address_entry = tk.Entry(
         self.dmx_tab, textvariable = self.dmx_start_address)
+    # validatecommand make sure between 1 and 512
     self.dmx_personality_menu = RDMMenu(
         self.dmx_tab, "Personality description not supported.", "")
     self.slot_menu = RDMMenu(
@@ -135,8 +136,8 @@ class RDMNotebook(object):
         tk.Label(self.dmx_tab, text = ""),
         tk.Label(self.dmx_tab, textvariable = self.slot_label_id),
         tk.Label(self.dmx_tab, text = ""),
-        tk.Label(self.dmx_tab, textvariable = self.default_slot_value)
-                                  ]
+        tk.Label(self.dmx_tab, textvariable = self.default_slot_value),
+    ]
 
   def _init_sensor(self):
     """
@@ -155,78 +156,53 @@ class RDMNotebook(object):
     self.lowest = tk.StringVar(self.sensor_tab)
     self.highest = tk.StringVar(self.sensor_tab)
     self.recorded = tk.StringVar(self.sensor_tab)
-
     # Widgets
     self.sensor_menu = RDMMenu(
         self.sensor_tab, "Sensor information not provided.", "Choose Sensor")
     self.record_sensor_button = tk.Button(
-        self.sensor_tab, text = "Record Sensor", state = tk.DISABLED)
+        self.sensor_tab, text="Record Sensor", state=tk.DISABLED)
     self.clear_sensor_button = tk.Button(
-        self.sensor_tab, text = 'Clear Sensor', state = tk.DISABLED)
+        self.sensor_tab, text='Clear Sensor', state=tk.DISABLED)
     self.refresh_sensor_button = tk.Button(
-        self.sensor_tab, text = 'Refresh', state = tk.DISABLED)
+        self.sensor_tab, text = 'Refresh', state=tk.DISABLED)
 
-    self.objects["SENSORS"] = [tk.Label(self.sensor_tab,
-                                                        text = "Choose Sensor"),
-                              self.sensor_menu,
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              tk.Label(self.sensor_tab,
-                                              textvariable = self.sensor_type),
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              tk.Label(self.sensor_tab,
-                                              textvariable = self.sensor_unit),
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              tk.Label(self.sensor_tab,
-                                            textvariable = self.sensor_prefix),
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              tk.Label(self.sensor_tab,
-                                              textvariable = self.sensor_range),
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              tk.Label(self.sensor_tab,
-                                              textvariable = self.normal_range),
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              tk.Label(self.sensor_tab,
-                                        textvariable = self.supports_recording),
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              tk.Label(self.sensor_tab,
-                                        textvariable = self.supports_lowest_highest),                              
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              tk.Label(self.sensor_tab,
-                                            textvariable = self.present_value),
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              tk.Label(self.sensor_tab,
-                                                    textvariable = self.lowest),
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              tk.Label(self.sensor_tab,
-                                                  textvariable = self.highest),
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              tk.Label(self.sensor_tab,
-                                                  textvariable = self.recorded),
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              self.record_sensor_button,
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              self.clear_sensor_button,
-
-                              tk.Label(self.sensor_tab, text = ""),
-                              self.refresh_sensor_button
-                              ]
+    self.objects["SENSORS"] = [
+        tk.Label(self.sensor_tab, text = "Choose Sensor"),
+        self.sensor_menu,
+        tk.Label(self.sensor_tab, text = ""),
+        tk.Label(self.sensor_tab, textvariable = self.sensor_type),
+        tk.Label(self.sensor_tab, text = ""),
+        tk.Label(self.sensor_tab, textvariable = self.sensor_unit),
+        tk.Label(self.sensor_tab, text = ""),
+        tk.Label(self.sensor_tab, textvariable = self.sensor_prefix),
+        tk.Label(self.sensor_tab, text = ""),
+        tk.Label(self.sensor_tab, textvariable = self.sensor_range),
+        tk.Label(self.sensor_tab, text = ""),
+        tk.Label(self.sensor_tab, textvariable = self.normal_range),
+        tk.Label(self.sensor_tab, text = ""),
+        tk.Label(self.sensor_tab, textvariable = self.supports_recording),
+        tk.Label(self.sensor_tab, text = ""),
+        tk.Label(self.sensor_tab, textvariable = self.supports_lowest_highest),                              
+        tk.Label(self.sensor_tab, text = ""),
+        tk.Label(self.sensor_tab, textvariable = self.present_value),
+        tk.Label(self.sensor_tab, text = ""),
+        tk.Label(self.sensor_tab, textvariable = self.lowest),
+        tk.Label(self.sensor_tab, text = ""),
+        tk.Label(self.sensor_tab, textvariable = self.highest),
+        tk.Label(self.sensor_tab, text = ""),
+        tk.Label(self.sensor_tab, textvariable = self.recorded),
+        tk.Label(self.sensor_tab, text = ""),
+        self.record_sensor_button,
+        tk.Label(self.sensor_tab, text = ""),
+        self.clear_sensor_button,
+        tk.Label(self.sensor_tab, text = ""),
+        self.refresh_sensor_button
+    ]
 
   def _init_setting(self):
     """
     """
+    # sText Varibles
     self.device_hours = tk.StringVar(self.setting_tab)
     self.lamp_hours = tk.StringVar(self.setting_tab)
     self.lamp_strikes = tk.StringVar(self.setting_tab)
@@ -234,7 +210,6 @@ class RDMNotebook(object):
     self.lamp_on_mode = tk.StringVar(self.setting_tab)
     self.device_power_cycles = tk.StringVar(self.setting_tab)
     self.power_state = tk.StringVar(self.setting_tab)
-
     # Widgets
     self.lamp_state_menu = RDMMenu(self.setting_tab,
                                    'Lamp state not supported.',
@@ -249,33 +224,19 @@ class RDMNotebook(object):
     self.objects["POWER_LAMP_SETTINGS"] = [
         tk.Label(self.setting_tab, text = "Device Hours:"),
         tk.Label(self.setting_tab, textvariable = self.device_hours),
-        tk.Label(self.setting_tab,
-                                                text = "Device Power Cycles:"),
-                                          tk.Label(self.setting_tab, 
-                                            textvariable = self.device_power_cycles),
-
-                                          tk.Label(self.setting_tab,
-                                                          text = "Lamp Hours:"),
-                                          tk.Label(self.setting_tab,
-                                                textvariable = self.lamp_hours),
-
-                                          tk.Label(self.setting_tab,
-                                                        text = "Lamp Strikes:"),
-                                          tk.Label(self.setting_tab,
-                                              textvariable = self.lamp_strikes),
-
-                                          tk.Label(self.setting_tab,
-                                                          text = "Lamp State:"),
-                                          self.lamp_state_menu,
-
-                                          tk.Label(self.setting_tab,
-                                                        text = "Lamp On Mode:"),
-                                          self.lamp_on_mode_menu,
-
-                                          tk.Label(self.setting_tab,
-                                                        text = "Power State:"),
-                                          self.power_state_menu
-                                          ]
+        tk.Label(self.setting_tab, text = "Device Power Cycles:"),
+        tk.Label(self.setting_tab, textvariable = self.device_power_cycles),
+        tk.Label(self.setting_tab, text = "Lamp Hours:"),
+        tk.Label(self.setting_tab, textvariable = self.lamp_hours),
+        tk.Label(self.setting_tab, text = "Lamp Strikes:"),
+        tk.Label(self.setting_tab, textvariable = self.lamp_strikes),
+        tk.Label(self.setting_tab, text = "Lamp State:"),
+        self.lamp_state_menu,
+        tk.Label(self.setting_tab, text = "Lamp On Mode:"),
+        self.lamp_on_mode_menu,
+        tk.Label(self.setting_tab, text = "Power State:"),
+        self.power_state_menu
+    ]
 
   def _init_config(self):
     """
@@ -287,20 +248,23 @@ class RDMNotebook(object):
     self.tilt_invert = tk.BooleanVar(self.config_tab)
     self.pan_tilt_swap = tk.BooleanVar(self.config_tab)
     self.real_time_clock = tk.StringVar(self.config_tab)
-
     # Widgets
-    self.language_menu = RDMMenu(self.config_tab, "Languages not supported.", "")
+    self.language_menu = RDMMenu(
+        self.config_tab, "Languages not supported.", "")
     self.display_invert_menu = tk.OptionMenu(self.config_tab,
                                             self.display_invert, 
                                             *PIDDict.DISPLAY_INVERT.values(),
                                             command = self._set_display_invert)
-    self.display_level_menu = tk.Scale(self.config_tab, from_ = 0, to = 255, 
-                                  variable = self.display_level,
-                                  orient = tk.HORIZONTAL,
-                                  command = self._controller.set_display_level,
-                                  length = 255, 
-                                  state = tk.DISABLED,
-                                  tickinterval = 255)
+    self.display_level_menu = tk.Scale(
+        self.config_tab, 
+        from_ = 0, 
+        to = 255, 
+        variable=self.display_level,
+        orient=tk.HORIZONTAL, 
+        command = self._controller.set_display_level,
+        length = 255, 
+        state = tk.DISABLED, 
+        tickinterval = 255)
     self.pan_invert_button = tk.Checkbutton(self.config_tab,
                                             variable = self.pan_invert,
                                             command = self._set_pan_invert,
@@ -309,46 +273,29 @@ class RDMNotebook(object):
                                              variable = self.tilt_invert,
                                              command = self._set_tilt_invert,
                                              state = tk.DISABLED)
-    self.pan_tilt_swap_button = tk.Checkbutton(self.config_tab,
-                                               variable = self.pan_tilt_swap,
-                                               command = self._set_pan_tilt_swap,
-                                               state = tk.DISABLED)
+    self.pan_tilt_swap_button = tk.Checkbutton(
+      self.config_tab,
+        variable = self.pan_tilt_swap,
+        command = self._set_pan_tilt_swap,
+        state = tk.DISABLED)
+    self.objects["CONFIGURATION"] = [
+        tk.Label(self.config_tab, text = "Device Language:"),
+        self.language_menu,
+        tk.Label(self.config_tab, text = "Display Invert:"),
+        self.display_invert_menu,
+        tk.Label(self.config_tab, text = "Display Level:"),
+        self.display_level_menu,
+        tk.Label(self.config_tab, text = "Pan Invert:"),
+        self.pan_invert_button,
+        tk.Label(self.config_tab, text = "Tilt Invert:"),
+        self.tilt_invert_button,
+        tk.Label(self.config_tab, text = "Pan Tilt Swap"),
+        self.pan_tilt_swap_button,
+        tk.Label(self.config_tab, text = "Real Time Clock"),
+        tk.Label(self.config_tab, textvariable = self.real_time_clock) 
+    ]
 
 
-    self.objects["CONFIGURATION"] = [tk.Label(self.config_tab,
-                                                    text = "Device Language:"),
-                                    self.language_menu,
-
-                                    tk.Label(self.config_tab,
-                                                      text = "Display Invert:"),
-                                    self.display_invert_menu,
-
-                                    tk.Label(self.config_tab, 
-                                                      text = "Display Level:"),
-                                    self.display_level_menu,
-
-                                    tk.Label(self.config_tab,
-                                                          text = "Pan Invert:"),
-                                    self.pan_invert_button,
-
-                                    tk.Label(self.config_tab,
-                                                        text = "Tilt Invert:"),
-                                    self.tilt_invert_button,
-
-                                    tk.Label(self.config_tab,
-                                                        text = "Pan Tilt Swap"),
-                                    self.pan_tilt_swap_button,
-
-                                    tk.Label(self.config_tab,
-                                                      text = "Real Time Clock"),
-                                    tk.Label(self.config_tab,
-                                            textvariable = self.real_time_clock) 
-                                   ]
-
-  def device_label_set(self):
-    """
-    """
-    self._controller.SetDeviceLabel(self.device_label.get())
   # ============================================================================
   # ============================== Update Tabs =================================
   # ============================================================================
@@ -417,9 +364,7 @@ class RDMNotebook(object):
       boot_software =  boot_software_label
     elif boot_software_version:
       boot_software =  boot_software_version
-
     self.boot_software.set(boot_software)
-    return
 
   def render_dmx_information(self, param_dict):
     '''
@@ -461,10 +406,9 @@ class RDMNotebook(object):
       self.dmx_start_address.set(start_address)
       self.start_address_entry.config(state = tk.NORMAL)
     if "SLOT_INFO" in param_dict:
-      slot_info = param_dict["SLOT_INFO"]
-      print slot_info
       for index in xrange(param_dict["DEVICE_INFO"]["dmx_footprint"]):
-        self.slot_menu.add_item("Slot Number %d" % index,
+        self.slot_menu.add_item(
+            "Slot Number %d" % index,
             lambda i = index:self._display_slot_info(i, param_dict))
 
   def render_sensor_information(self, param_dict):
@@ -480,7 +424,6 @@ class RDMNotebook(object):
           NOTE: data may be in the form of a int, string or dict and is treated
               differently in each case.
     '''
-    self.sensor_menu.clear_menu()
     self.sensor_type.set('')
     self.sensor_unit.set('')
     self.sensor_prefix.set('')
@@ -492,14 +435,10 @@ class RDMNotebook(object):
     self.highest.set('')
     self.recorded.set('')
     sensor_info = {}
-    if 'SENSOR_DEFINITION' in param_dict:
-      for index, sensor in param_dict['SENSOR_DEFINITION'].iteritems():
-        sensor_name = sensor['name']
-        self.sensor_menu.add_item('%s' % sensor_name,
-                                  lambda i=index: self._populate_sensor_tab(i))
-    else: 
-      self.sensor_menu.clear_menu()
-      return
+    self.sensor_menu.clear_menu()
+    for index, sensor in param_dict.get('SENSOR_DEFINITION', {}).iteritems():
+      self.sensor_menu.add_item('%s' % sensor['name'],
+                                lambda i=index: self._populate_sensor_tab(i))
    
 
   def render_setting_information(self, param_dict):
@@ -523,18 +462,22 @@ class RDMNotebook(object):
     self.lamp_state_menu.config(state = tk.DISABLED)
     self.lamp_on_mode_menu.config(state = tk.DISABLED)
     self.power_state_menu.config(state = tk.DISABLED)
+
     if 'LAMP_STATE' in param_dict:
       self.lamp_state_menu.config(state = tk.NORMAL)
       for key, value in PIDDict.LAMP_STATE.iteritems():
-        self.lamp_state_menu.add_item(value, 
-                                      lambda k=key: self._set_lamp_state(k))
+        self.lamp_state_menu.add_item(
+            value, lambda k=key: self._controller.set_lamp_state(k))
       self.lamp_state_menu.set(PIDDict.LAMP_STATE[param_dict['LAMP_STATE']])
+
     if 'LAMP_ON_MODE' in param_dict:
       self.lamp_on_mode_menu.config(state = tk.NORMAL)
       for key, value in PIDDict.LAMP_ON_MODE.iteritems():
         self.lamp_on_mode_menu.add_item(value, 
                                         lambda k=key: self._set_lamp_on_mode(k))
-      self.lamp_on_mode_menu.set(PIDDict.LAMP_ON_MODE[param_dict['LAMP_ON_MODE']])
+      self.lamp_on_mode_menu.set(
+          PIDDict.LAMP_ON_MODE[param_dict['LAMP_ON_MODE']])
+
     if 'POWER_STATE' in param_dict:
       self.power_state_menu.config(state = tk.NORMAL)
       for key, value in PIDDict.POWER_STATE.iteritems():
@@ -563,6 +506,7 @@ class RDMNotebook(object):
         self.language_menu.add_item(language, 
                                     lambda l = language: self._set_language(l))
     self.language_menu.set(param_dict.get('LANGUAGE', 'N/A'))
+
     if "DISPLAY_LEVEL" in param_dict:
       self.display_level.set(param_dict['DISPLAY_LEVEL'])
       self.display_level_menu.config(state = tk.NORMAL)
@@ -598,7 +542,7 @@ class RDMNotebook(object):
     else:
       self.pan_tilt_swap.set(False)
       self.pan_tilt_swap_button.config(state = tk.DISABLED)
-      
+
     if 'REAL_TIME_CLOCK' in param_dict:
       clock = param_dict['REAL_TIME_CLOCK']
       self.real_time_clock.set("%d:%d:%d %d/%d/%d" % (clock['hour'],
@@ -612,6 +556,11 @@ class RDMNotebook(object):
   # ============================================================================
   # ============================ RDM Set Methods ===============================
   # ============================================================================
+  def device_label_set(self):
+    """
+    """
+    self._controller.SetDeviceLabel(self.device_label.get())
+
   def set_start_address(self):
     '''
     start of control flow for setting the dmx_start_address of a device.
@@ -619,14 +568,14 @@ class RDMNotebook(object):
     start_address = self.dmx_start_address.get()
     self._controller.set_start_address(start_address)
 
-  def _set_lamp_state(self, state):
-    '''
-    Internal Function, first function in the 'SetLampState' control flow.
+  # def _set_lamp_state(self, state):
+  #   '''
+  #   Internal Function, first function in the 'SetLampState' control flow.
 
-    Args:
-      state: int, see PIDDict.LAMP_STATE for state name.
-    '''
-    self._controller.set_lamp_state(state)
+  #   Args:
+  #     state: int, see PIDDict.LAMP_STATE for state name.
+  #   '''
+  #   self._controller.set_lamp_state(state)
 
   def set_lamp_state_complete(self, state):
     '''
@@ -764,7 +713,7 @@ class RDMNotebook(object):
 
   def _tab_changed(self, event):
     '''
-    Method bound to tab change evet, calls self.update
+    Method bound to tab change event, calls self.update
     '''
     # Note that this will be called when the program starts
     self.update()
@@ -774,8 +723,8 @@ class RDMNotebook(object):
     places the widgets subject to change upon completion of controlflows
     """
     obj_list.reverse()
-    for r in range((len(obj_list)+1)/2):
-      for c in range(2):
+    for r in xrange((len(obj_list) + 1) / 2):
+      for c in xrange(2):
         obj_list.pop().grid(row=r, column=c)
 
   def _create_tab(self, tab_name, tab_label=None):
@@ -794,21 +743,21 @@ class RDMNotebook(object):
           tab: the Frame
     """
     if tab_label is None:
-        tab_label = tab_name
-    tab = tk.Frame(self._notebook, name = tab_name)
-    self._notebook.add(tab, text = tab_label)
+      tab_label = tab_name
+    tab = tk.Frame(self._notebook, name=tab_name)
+    self._notebook.add(tab, text=tab_label)
     return tab
 
   def _display_slot_info(self, slot_number, param_dict):
     """
     """
-    # print 'slot_number: %d \n SLOT_INFO: %s \n SLOT_DESCRIPTION %s' % (
-    #        slot_number, param_dict['SLOT_INFO'], param_dict['SLOT_DESCRIPTION']) 
-    self.slot_name.set('Name: %s' % param_dict.get('SLOT_DESCRIPTION', {}).get('name', "N/A"))
+    self.slot_name.set('Name: %s' % 
+        param_dict.get('SLOT_DESCRIPTION', {}).get('name', "N/A"))
     type_name = RDMConstants.SLOT_TYPE_TO_NAME[
           param_dict.get('SLOT_INFO', {})[slot_number].get('slot_type', "N/A")
           ].replace('_', ' ')
     self.slot_type.set('Type: %s' % type_name)
+
     if param_dict['SLOT_INFO'][slot_number]['slot_type'] != 0:
       self.slot_label_id.set('Primary Slot Index: %d' % param_dict.get(
                       'SLOT_INFO', {})[slot_number].get('slot_label_id', "N/A"))
@@ -817,6 +766,7 @@ class RDMNotebook(object):
         param_dict.get('SLOT_INFO', {})[slot_number].get('slot_label_id', "N/A")
         ].replace('_', ' ')
       self.slot_label_id.set('Slot Label: %s' % label_id)
+
     if 'DEFAULT_SLOT_VALUE' in param_dict:
       print param_dict['DEFAULT_SLOT_VALUE']
     self.default_slot_value.set('Default Slot Value: %d' %
@@ -826,15 +776,9 @@ class RDMNotebook(object):
     self.slot_required.set("Slots Required: %s" % slots_required)
     self.personality_name.set("Personality ID: %s" % personality)
 
-  def _display_sensor_information(self, sensor_dict):
-    pass
-
   def _get_personality_string(self, personality):
     return '%s (%d)' % (personality['name'], personality['slots_required'])
 
-  # def _set_display_level(self):
-  #   level = self.display_level_menu.get()
-  #   self._controller.SetDisplayLevel(level)
   def _populate_sensor_tab(self, sensor_number):
     self._controller.get_sensor_value(sensor_number)
 
@@ -855,8 +799,9 @@ class RDMNotebook(object):
     self.sensor_prefix.set('Prefix: %s' % PREFIX)
     self.sensor_range.set('Range: %d - %d' % (definition['range_min'], 
                                                definition['range_max']))
-    self.normal_range.set('Normal Range: %d - %d' % (definition['normal_min'], 
-                                               definition['normal_max']))
+    self.normal_range.set(
+        'Normal Range: %d - %d' % 
+        (definition['normal_min'], definition['normal_max']))
     self.supports_recording.set(
         'Supports Recording: %s' %
         bool(PIDDict.RECORDED_SUPPORTED & definition['supports_recording']))
@@ -869,24 +814,3 @@ class RDMNotebook(object):
       self.lowest.set('Lowest Value: %d' % value['lowest'])
       self.highest.set('Highest Value: %d' % value['highest'])
       self.recorded.set('Recorded Value: %d' % value['recorded'])
-
-  def set_display_level(self, level):
-    if level != self.display_level_menu.get():
-      pass
-      # self.display_level_menu.set(level)
-  # ============================== Main Loop ===================================
-
-  def main(self):
-    """ Main method for Notebook class. """
-    self.root.mainloop()
-
-if __name__ == "__main__":
-  ui = simple_ui.DisplayApp()
-
-  master = tk.Frame(root, name="master", width = 200, heigh = 200)
-  master.pack(fill=tk.BOTH) # fill both sides of the parent
-
-  root.title("EZ") # title for top-level window
-
-  nb = RDMNotebook(master, ui)
-  nb.main()

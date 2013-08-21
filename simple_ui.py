@@ -70,8 +70,6 @@ class Controller(object):
   def get_sensor_definitions(self):
     self._app.get_sensor_definitions()
 
-  # def RecordSensors():
-
   def get_setting_information(self):
     self._app.get_setting_information()
 
@@ -241,6 +239,8 @@ class DisplayApp(object):
       Args: 
         uid: the uid of the newly selected device
     '''
+    if self._cur_uid is None:
+      self._notebook.activate()
     if uid == self._cur_uid:
       print 'Already Selected'
       return
@@ -250,13 +250,11 @@ class DisplayApp(object):
                   lambda b, s, uid = uid:self._get_identify_complete(uid, b, s))
     data = self._uid_dict[uid]
     flow = controlflow.RDMControlFlow(
-                            self.universe.get(), 
-                            uid, 
-                            [
-                            actions.GetSupportedParams(data, self.ola_thread.rdm_get),
-                            actions.GetDeviceInfo(data, self.ola_thread.rdm_get)
-                            ],
-                            self._device_changed_complete)
+        self.universe.get(), uid, [
+            actions.GetSupportedParams(data, self.ola_thread.rdm_get),
+            actions.GetDeviceInfo(data, self.ola_thread.rdm_get)
+        ],
+        self._device_changed_complete)
     flow.run()
 
   def _device_changed_complete(self):
@@ -264,8 +262,7 @@ class DisplayApp(object):
     for pid_key in self._uid_dict[self._cur_uid]['SUPPORTED_PARAMETERS']:
       pid = self._pid_store.GetPid(pid_key)
       if pid is not None:
-        self._uid_dict[self._cur_uid
-  ]['PARAM_NAMES'].add(pid.name)
+        self._uid_dict[self._cur_uid]['PARAM_NAMES'].add(pid.name)
     print 'Device selected: %s' % self._uid_dict[self._cur_uid]
     self._notebook.update()
 
@@ -399,11 +396,9 @@ class DisplayApp(object):
                                                   data, 
                                                   self.ola_thread.rdm_get,
                                                   [i]))
-    dmx_actions.append(actions.GetDefaultSlotValue(data, self.ola_thread.rdm_get))
-
+    dmx_actions.append(
+        actions.GetDefaultSlotValue(data, self.ola_thread.rdm_get))
     print i
-    # dmx_actions.append(actions.GetDefaultSlotValue(data, 
-    #                                                 self.ola_thread.rdm_get))
     flow = controlflow.RDMControlFlow(
                 self.universe.get(),
                 self._cur_uid,
@@ -434,8 +429,8 @@ class DisplayApp(object):
     sensor_actions = []
     data = self._uid_dict[self._cur_uid]
     sensor_actions = [actions.GetSensorValue(data,
-                                                 self.ola_thread.rdm_get,
-                                                 [sensor_number])]
+                                             self.ola_thread.rdm_get,
+                                             [sensor_number])]
                         
     flow = controlflow.RDMControlFlow(
                   self.universe.get(),
@@ -707,12 +702,20 @@ class DisplayApp(object):
       print 'Sensor recorded'
 
   def clear_sensor(self, sensor_number):
-    self.ola_thread.rdm_set(self.universe.get(),
-                            self._cur_uid,
-                            0,
-                            'SENSOR_VALUE',
-                            lambda b, s: self.clear_sensor_complete(b, s),
-                            [sensor_number])
+    sensor_actions = []
+    data = self._uid_dict[self._cur_uid]
+    sensor_actions.append(actions.SetSensorValue(
+        data, self.ola_thread.rdm_set, [sensor_number]))
+    sensor_actions.append(actions.GetSensorValue(
+        data, self.ola_thread.rdm_get, [sensor_number]))
+    sensor_actions.append(actions.GetSensorDefinition(
+        data, self.ola_thread.rdm_get, [sensor_number]))
+    flow = controlflow.RDMControlFlow(
+                  self.universe.get(),
+                  self._cur_uid,
+                  sensor_actions,
+                  lambda: self.display_sensor_data(sensor_number))
+    flow.run()
 
   def clear_sensor_complete(self, succeeded, data):
     if succeeded:
