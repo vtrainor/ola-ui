@@ -26,6 +26,12 @@ class GetRDMAction(RDMAction):
     """This method controls if the action should be skipped."""
     return True
 
+  def pid_supported(self):
+    if self.PID in self._data['PARAM_NAMES']:
+      return True
+    else:
+      return False
+
   def execute(self, universe, uid, on_complete):
     """Perform the RDM GET."""
     if not self.should_execute():

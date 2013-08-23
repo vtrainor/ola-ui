@@ -118,6 +118,9 @@ class Controller(object):
   def clear_sensor(self, sensor_number):
     self._app.clear_sensor(sensor_number)
 
+  def start_address_valid(self, address):
+    return self._app.start_address_valid(address)
+
 # ==============================================================================
 # ============================ Universe Class ==================================
 # ==============================================================================
@@ -525,9 +528,12 @@ class DisplayApp(object):
     data = self._uid_dict[self._cur_uid]
     flow_actions.append(actions.SetDMXPersonality(data, self.ola_thread.rdm_set,
                                                   [personality]))
-    flow_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
-    flow_actions.append(actions.GetSlotDescription(
-        data, self.ola_thread.rdm_get, [personality]))
+    for slot in (self._uid_dict[self._cur_uid]['DMX_PERSONALITY_DESCRIPTION']
+                 [personality]['slots_required']):
+      flow_actions.append(actions.GetSlotDescription(
+          data, self.ola_thread.rdm_get, [slot]))
+    flow_actions.append(actions.GetSlotInfo(
+        data, self.ola_thread.rdm_get))
     flow_actions.append(actions.GetDefaultSlotValue(
         data, self.ola_thread.rdm_get))
 
@@ -720,6 +726,9 @@ class DisplayApp(object):
   def clear_sensor_complete(self, succeeded, data):
     if succeeded:
       print 'Sensor cleared.'
+
+  def start_address_valid(self, address):
+    return True
 
     # ================================ Callbacks =================================
 

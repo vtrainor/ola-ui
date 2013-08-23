@@ -64,8 +64,11 @@ class OLAThread(threading.Thread):
 
   def rdm_set(self, universe, uid, sub_device, pid, callback, data):
     """ Executes, in the ola thread, the setting of an rdm variable. """
-    self._ss.Execute(lambda:self._rdm_set(universe,uid,sub_device,pid,
+    try:
+      self._ss.Execute(lambda:self._rdm_set(universe,uid,sub_device,pid,
                                           callback,data))
+    except: 
+      print 'could not set %s to %s' % (pid, data[0])
 
   def add_event(self, mili_secs, callback):
     """ creates an event that will happen after the specified number of mili 
@@ -105,8 +108,11 @@ class OLAThread(threading.Thread):
   def _rdm_set(self,universe,uid,sub_device,pid,callback,data):
     """ This method is only run in the OLA thread. """
     print "set %s, %s" % (uid, pid)
-    self._rdm_api.Set(universe,uid,sub_device,self._pid_store.GetName(pid),
-                      lambda r,d,e:self.complete_set(callback,r,d,e),data)
+    try:
+      self._rdm_api.Set(universe,uid,sub_device,self._pid_store.GetName(pid),
+                        lambda r,d,e:self.complete_set(callback,r,d,e),data)
+    except:
+      print 'unable to set %s to %s' % (pid, data[0])
 
   def complete_get(self,callback,response,data,unpack_exception):
     """ Checks if the get was a success, calls the callback from run_get. """

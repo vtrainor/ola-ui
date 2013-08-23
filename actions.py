@@ -41,8 +41,7 @@ class GetProductDetailIds(GetRDMAction):
     
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -56,8 +55,7 @@ class GetDeviceModel(GetRDMAction):
     
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -70,8 +68,7 @@ class GetManufacturerLabel(GetRDMAction):
     
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -84,8 +81,7 @@ class GetFactoryDefaults(GetRDMAction):
     
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -111,8 +107,7 @@ class GetBootSoftwareVersion(GetRDMAction):
     
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -125,8 +120,7 @@ class GetBootSoftwareLabel(GetRDMAction):
     
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -143,8 +137,7 @@ class GetDmxPersonality(GetRDMAction):
     
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -157,7 +150,8 @@ class GetPersonalityDescription(GetRDMAction):
     
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID in self._data["PARAM_NAMES"])
+    return self.pid_supported()
+
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -174,8 +168,7 @@ class GetStartAddress(GetRDMAction):
     
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -188,8 +181,7 @@ class GetSlotInfo(GetRDMAction):
     
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -202,17 +194,18 @@ class GetSlotInfo(GetRDMAction):
 
 class GetSlotDescription(GetRDMAction):
   """
+  note that this pid takes a slot number
   """
   PID = "SLOT_DESCRIPTION"
     
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return self.pid_supported()
 
   def update_dict(self, succeeded, value):
-    if succeeded:
-      self._data[self.PID] = value
+    slots = self._data.setdefault(self.PID, {})
+    print 'slots: %s' % slots
+    slots[value['slot_number']] = value['name']
 
 class GetDefaultSlotValue(GetRDMAction):
   """
@@ -221,7 +214,7 @@ class GetDefaultSlotValue(GetRDMAction):
     
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return self.PID in self._data["PARAM_NAMES"]
+    return self.pid_supported()
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -240,7 +233,7 @@ class GetSensorDefinition(GetRDMAction):
     
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID in self._data["PARAM_NAMES"])
+    return self.pid_supported()
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -274,8 +267,7 @@ class GetDeviceHours(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -288,8 +280,7 @@ class GetLampHours(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -302,8 +293,7 @@ class GetLampStrikes(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -316,8 +306,7 @@ class GetLampState(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -330,8 +319,7 @@ class GetLampOnMode(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -344,8 +332,7 @@ class GetPowerCycles(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -358,8 +345,7 @@ class GetPowerState(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -376,8 +362,7 @@ class GetLanguageCapabilities(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -390,8 +375,7 @@ class GetLanguage(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -404,8 +388,7 @@ class GetDisplayInvert(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -418,8 +401,7 @@ class GetDisplayLevel(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -432,8 +414,7 @@ class GetPanInvert(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -446,8 +427,7 @@ class GetTiltInvert(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -460,8 +440,7 @@ class GetPanTiltSwap(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:
@@ -474,8 +453,7 @@ class GetRealTimeClock(GetRDMAction):
 
   def should_execute(self):
     """" Skip this action if we already have the supported params"""
-    return (self.PID not in self._data 
-                            and self.PID in self._data["PARAM_NAMES"])
+    return (self.PID not in self._data and self.pid_supported())
 
   def update_dict(self, succeeded, value):
     if succeeded:

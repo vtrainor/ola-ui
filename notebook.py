@@ -17,6 +17,7 @@ class RDMNotebook(object):
     self.pid_location_dict = {}
     self._notebook = ttk.Notebook(self.root, name="nb", height=height,
                                   width=width)
+    # self._notebook.config(state = tk.DISABLED)
     self._notebook.bind('<<NotebookTabChanged>>', self._tab_changed)
     self.populate_defaults()
 
@@ -96,7 +97,7 @@ class RDMNotebook(object):
     """
     # Text Variables
     self.dmx_footprint = tk.StringVar(self.dmx_tab)
-    self.dmx_start_address = tk.StringVar(self.dmx_tab)
+    self.dmx_start_address = tk.IntVar(self.dmx_tab)
     self.slot_required = tk.StringVar(self.dmx_tab)
     self.personality_name = tk.StringVar(self.dmx_tab)
     self.slot_number = tk.StringVar(self.dmx_tab)
@@ -106,7 +107,8 @@ class RDMNotebook(object):
     self.default_slot_value = tk.StringVar(self.dmx_tab)
     # Widgets
     self.start_address_entry = tk.Entry(
-        self.dmx_tab, textvariable = self.dmx_start_address)
+        self.dmx_tab, textvariable = self.dmx_start_address,
+        validatecommand = self._start_address_valid)
     # validatecommand make sure between 1 and 512
     self.dmx_personality_menu = RDMMenu(
         self.dmx_tab, "Personality description not supported.", "")
@@ -400,7 +402,7 @@ class RDMNotebook(object):
     self.dmx_footprint.set(param_dict["DEVICE_INFO"]["dmx_footprint"])
     start_address = param_dict["DEVICE_INFO"]["dmx_start_address"]
     if start_address == 0xffff:
-      self.dmx_start_address.set('N/A')
+      self.dmx_start_address.set(0)
       self.start_address_entry.config(state = tk.DISABLED)
     else:
       self.dmx_start_address.set(start_address)
@@ -718,6 +720,12 @@ class RDMNotebook(object):
     # Note that this will be called when the program starts
     self.update()
 
+  def _start_address_valid(self, vlaue):
+    if value > 512 or value < 1:
+      return False
+    else:
+     return self._controller.start_address_valid(value)
+
   def _grid_info(self, obj_list):
     """
     places the widgets subject to change upon completion of controlflows
@@ -752,7 +760,7 @@ class RDMNotebook(object):
     """
     """
     self.slot_name.set('Name: %s' % 
-        param_dict.get('SLOT_DESCRIPTION', {}).get('name', "N/A"))
+        param_dict.get('SLOT_DESCRIPTION', {}).get('slot_number', "N/A"))
     type_name = RDMConstants.SLOT_TYPE_TO_NAME[
           param_dict.get('SLOT_INFO', {})[slot_number].get('slot_type', "N/A")
           ].replace('_', ' ')
