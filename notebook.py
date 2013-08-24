@@ -97,7 +97,7 @@ class RDMNotebook(object):
     """
     # Text Variables
     self.dmx_footprint = tk.StringVar(self.dmx_tab)
-    self.dmx_start_address = tk.IntVar(self.dmx_tab)
+    self.dmx_start_address = tk.StringVar(self.dmx_tab)
     self.slot_required = tk.StringVar(self.dmx_tab)
     self.personality_name = tk.StringVar(self.dmx_tab)
     self.slot_number = tk.StringVar(self.dmx_tab)
@@ -109,6 +109,9 @@ class RDMNotebook(object):
     self.start_address_entry = tk.Entry(
         self.dmx_tab, textvariable = self.dmx_start_address,
         validatecommand = self._start_address_valid)
+    self.start_address_button = tk.Button(self.dmx_tab, 
+        text = 'Set Start Address', 
+        command = self.set_start_address)
     # validatecommand make sure between 1 and 512
     self.dmx_personality_menu = RDMMenu(
         self.dmx_tab, "Personality description not supported.", "")
@@ -120,9 +123,8 @@ class RDMNotebook(object):
         tk.Label(self.dmx_tab, textvariable = self.dmx_footprint),
         tk.Label(self.dmx_tab, text = "DMX Start Address:"),
         self.start_address_entry,
-        tk.Button(self.dmx_tab, text = 'Set Start Address', 
-                  command = self.set_start_address),
         tk.Label(self.dmx_tab, text = ""),
+        self.start_address_button,
         tk.Label(self.dmx_tab, text = "Current Personality:"),
         self.dmx_personality_menu,
         tk.Label(self.dmx_tab, text = ""),
@@ -402,11 +404,13 @@ class RDMNotebook(object):
     self.dmx_footprint.set(param_dict["DEVICE_INFO"]["dmx_footprint"])
     start_address = param_dict["DEVICE_INFO"]["dmx_start_address"]
     if start_address == 0xffff:
-      self.dmx_start_address.set(0)
-      self.start_address_entry.config(state = tk.DISABLED)
+      self.dmx_start_address.set('N/A')
+      self.start_address_entry.config(state=tk.DISABLED)
+      self.start_address_button.config(state=tk.DISABLED)
     else:
       self.dmx_start_address.set(start_address)
-      self.start_address_entry.config(state = tk.NORMAL)
+      self.start_address_entry.config(state=tk.NORMAL)
+      self.start_address_button.config(state=tk.NORMAL)
     if "SLOT_INFO" in param_dict:
       for index in xrange(param_dict["DEVICE_INFO"]["dmx_footprint"]):
         self.slot_menu.add_item(
@@ -567,7 +571,7 @@ class RDMNotebook(object):
     '''
     start of control flow for setting the dmx_start_address of a device.
     '''
-    start_address = self.dmx_start_address.get()
+    start_address = int(self.dmx_start_address.get())
     self._controller.set_start_address(start_address)
 
   # def _set_lamp_state(self, state):
