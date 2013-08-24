@@ -1,6 +1,7 @@
 from ola.ClientWrapper import ClientWrapper, SelectServer
 from ola.OlaClient import OlaClient, OLADNotRunningException
 import threading
+import ola.PidStore
 import time
 from ola.RDMAPI import RDMAPI
 
@@ -106,7 +107,7 @@ class OLAThread(threading.Thread):
     try:
       self._rdm_api.Set(universe,uid,sub_device,self._pid_store.GetName(pid),
                         lambda r,d,e:self.complete_set(callback,r,d,e),data)
-    except ArgsValidationError:
+    except ola.PidStore.ArgsValidationError:
       print 'unable to set %s to %s' % (pid, data[0])
       callback(False, '')
       
