@@ -110,16 +110,15 @@ class OLAThread(threading.Thread):
     except ola.PidStore.ArgsValidationError:
       print 'unable to set %s to %s' % (pid, data[0])
       callback(False, '')
-      
 
   def complete_get(self,callback,response,data,unpack_exception):
     """ Checks if the get was a success, calls the callback from run_get. """
     # need to do something with unpack_exception here
     # if ACK timer then schedule event in n milisecs
     if response.WasAcked()==False:
-      callback(False,'')
+      callback(str(unpack_exception), None)
     else:
-      callback(True, data)
+      callback(None, data)
     # Section 8 of the standard (8.3)
     # need pid and uid so I can keep track of messages
     # ask Simon for sample code
@@ -154,9 +153,9 @@ class OLAThread(threading.Thread):
     print 'RDM set completed'
     # need to do something with the unpack_exception here
     if response.WasAcked()==False:
-      callback(False,str(unpack_exception))
+      callback(str(unpack_exception), None)
     else:
-      callback(True,data)
+      callback(None, data)
 
 if __name__ == '__main__':
   print 'olathreading'

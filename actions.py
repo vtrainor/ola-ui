@@ -16,11 +16,11 @@ class GetDeviceInfo(GetRDMAction):
     print self._data
     return self.PID not in self._data
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetSupportedParams(GetRDMAction):
   """
@@ -31,11 +31,11 @@ class GetSupportedParams(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = set(p['param_id'] for p in value['params'])
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 # ==============================================================================
 # ============================ Get Basic Info ==================================
@@ -48,12 +48,12 @@ class GetProductDetailIds(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID]= set(
                             data['detail_id'] for data in value['detail_ids'])
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetDeviceModel(GetRDMAction):
   """
@@ -64,11 +64,11 @@ class GetDeviceModel(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["description"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetManufacturerLabel(GetRDMAction):
   """
@@ -79,11 +79,11 @@ class GetManufacturerLabel(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["label"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetFactoryDefaults(GetRDMAction):
   """
@@ -94,11 +94,11 @@ class GetFactoryDefaults(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["using_defaults"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetSoftwareVersion(GetRDMAction):
   """
@@ -109,11 +109,11 @@ class GetSoftwareVersion(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["label"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetBootSoftwareVersion(GetRDMAction):
   """
@@ -124,11 +124,11 @@ class GetBootSoftwareVersion(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["version"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetBootSoftwareLabel(GetRDMAction):
   """
@@ -139,11 +139,11 @@ class GetBootSoftwareLabel(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return (self.PID not in self._data and self.pid_supported())
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["label"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 # ==============================================================================
 # ============================ Get DMX Info ====================================
@@ -158,11 +158,11 @@ class GetDmxPersonality(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetPersonalityDescription(GetRDMAction):
   """
@@ -173,14 +173,14 @@ class GetPersonalityDescription(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       index = value["personality"]
       personalities = self._data.setdefault(self.PID, {})
       personalities[index] = {"slots_required":value["slots_required"],
                                      "name":value["name"]}
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetStartAddress(GetRDMAction):
   """
@@ -191,11 +191,11 @@ class GetStartAddress(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["dmx_address"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetSlotInfo(GetRDMAction):
   """
@@ -206,8 +206,8 @@ class GetSlotInfo(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       slots = self._data.setdefault(self.PID, {})
       for slot in value["slots"]:
         slots[slot["slot_offset"]] = {
@@ -215,7 +215,7 @@ class GetSlotInfo(GetRDMAction):
                                       "slot_label_id": slot["slot_label_id"]
                                      }
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetSlotDescription(GetRDMAction):
   """
@@ -227,13 +227,13 @@ class GetSlotDescription(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       slots = self._data.setdefault(self.PID, {})
       print 'slots: %s' % slots
       slots[value['slot_number']] = value['name']
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetDefaultSlotValue(GetRDMAction):
   """
@@ -244,13 +244,13 @@ class GetDefaultSlotValue(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       values = self._data.setdefault(self.PID, {})
       for slot_value in value["slot_values"]:
         values[slot_value["slot_offset"]] = slot_value["default_slot_value"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 # ==============================================================================
 # ============================ Get Sensors Info ================================
@@ -265,13 +265,13 @@ class GetSensorDefinition(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       index = value['sensor_number']
       sensor_info = self._data.setdefault(self.PID, {})
       sensor_info[index] = value
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetSensorValue(GetRDMAction):
   """
@@ -282,13 +282,13 @@ class GetSensorValue(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       index = value['sensor_number']
       sensor_info = self._data.setdefault(self.PID, {})
       sensor_info[index] = value
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 # ==============================================================================
 # ============================ Get Setting Info ================================
@@ -303,11 +303,11 @@ class GetDeviceHours(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["hours"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
  
 class GetLampHours(GetRDMAction):
   """
@@ -318,11 +318,11 @@ class GetLampHours(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["hours"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetLampStrikes(GetRDMAction):
   """
@@ -333,11 +333,11 @@ class GetLampStrikes(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["strikes"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetLampState(GetRDMAction):
   """
@@ -348,11 +348,11 @@ class GetLampState(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["state"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetLampOnMode(GetRDMAction):
   """
@@ -363,11 +363,11 @@ class GetLampOnMode(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["mode"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetPowerCycles(GetRDMAction):
   """
@@ -378,11 +378,11 @@ class GetPowerCycles(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["power_cycles"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetPowerState(GetRDMAction):
   """
@@ -393,11 +393,11 @@ class GetPowerState(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["power_state"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 # ==============================================================================
 # ============================ Get Config Info =================================
@@ -412,11 +412,11 @@ class GetLanguageCapabilities(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["languages"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetLanguage(GetRDMAction):
   """
@@ -427,11 +427,11 @@ class GetLanguage(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["language"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetDisplayInvert(GetRDMAction):
   """
@@ -442,11 +442,11 @@ class GetDisplayInvert(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["invert_status"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetDisplayLevel(GetRDMAction):
   """
@@ -457,11 +457,11 @@ class GetDisplayLevel(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["level"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetPanInvert(GetRDMAction):
   """
@@ -472,11 +472,11 @@ class GetPanInvert(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["invert"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetTiltInvert(GetRDMAction):
   """
@@ -487,11 +487,11 @@ class GetTiltInvert(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["invert"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetPanTiltSwap(GetRDMAction):
   """
@@ -502,11 +502,11 @@ class GetPanTiltSwap(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value["swap"]
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 class GetRealTimeClock(GetRDMAction):
   """
@@ -517,11 +517,11 @@ class GetRealTimeClock(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.PID not in self._data and self.pid_supported()
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       self._data[self.PID] = value
     else:
-      logging.error('failed to get value for %s' % self.PID)
+      logging.error(error)
 
 # ==============================================================================
 # ============================ RDM Set Actions =================================
@@ -532,8 +532,8 @@ class SetDMXPersonality(SetRDMAction):
   '''
   PID = 'DMX_PERSONALITY'
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       i = value[0]
       self._data['DEVICE_INFO']['current_personality'] = i
       dmx_footprint = self._data['DMX_PERSONALITY_DESCRIPTION'][i]['slots_required']
@@ -546,6 +546,6 @@ class SetSensorValue(SetRDMAction):
   '''
   PID = 'SENSOR_VALUE'
 
-  def update_dict(self, succeeded, value):
-    if succeeded:
+  def update_dict(self, error, value):
+    if error is None:
       print 'set complete'

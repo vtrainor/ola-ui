@@ -279,13 +279,15 @@ class DisplayApp(object):
 
     self.ola_thread.fetch_universes(self.fetch_universes_complete)
 
-  def fetch_universes_complete(self, succeeded, universes):
+  def fetch_universes_complete(self, error, universes):
 
-    if succeeded:
+    if error is None:
       for universe in universes:
         self.universe_dict[universe.id] = UniverseObj(universe.id, universe.name)
         self.universe_menu.add_item(universe.name, 
           lambda i = universe.id: self._set_universe(i))
+    else:
+      logging.error(error)
 
   def _set_universe(self, universe_id):
     ' sets the int var self.universe to the value of i '
@@ -336,11 +338,11 @@ class DisplayApp(object):
         :self._set_identify_complete(uid, b, s), 
               [self.id_state.get()])
 
-  def _add_device(self, uid, succeeded, data):
+  def _add_device(self, uid, error, data):
     ''' callback for the rdm_get in upon_discover.
         populates self.device_menu
     '''
-    if succeeded:
+    if error is None:
       self._uid_dict.setdefault(uid, {})['DEVICE_LABEL'] = data['label']
     else:
       self._uid_dict.setdefault(uid, {})['DEVICE_LABEL'] = ''
@@ -529,7 +531,7 @@ class DisplayApp(object):
     data = self._uid_dict[self._cur_uid]
     flow_actions.append(actions.SetDMXPersonality(data, self.ola_thread.rdm_set,
                                                   [personality]))
-    for slot in (self._uid_dict[self._cur_uid]['DMX_PERSONALITY_DESCRIPTION']
+    for slot in xrange(self._uid_dict[self._cur_uid]['DMX_PERSONALITY_DESCRIPTION']
                  [personality]['slots_required']):
       flow_actions.append(actions.GetSlotDescription(
           data, self.ola_thread.rdm_get, [slot]))

@@ -576,7 +576,7 @@ class RDMNotebook(object):
       print 'error'
       # insert entry dialog here
       return
-    if start_address > 512 or start_address < 1:
+    if start_address > 1000 or start_address < 1:
       print 'error'
       #dialog
       return
