@@ -4,6 +4,7 @@
 from controlflow import GetRDMAction
 from controlflow import SetRDMAction
 from ola import PidStore
+import logging
 
 
 class GetDeviceInfo(GetRDMAction):
@@ -203,9 +204,12 @@ class GetSlotDescription(GetRDMAction):
     return self.pid_supported()
 
   def update_dict(self, succeeded, value):
-    slots = self._data.setdefault(self.PID, {})
-    print 'slots: %s' % slots
-    slots[value['slot_number']] = value['name']
+    if succeeded:
+      slots = self._data.setdefault(self.PID, {})
+      print 'slots: %s' % slots
+      slots[value['slot_number']] = value['name']
+    else:
+      logging.error('get slot description failed')
 
 class GetDefaultSlotValue(GetRDMAction):
   """

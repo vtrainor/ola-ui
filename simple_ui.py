@@ -10,6 +10,7 @@ import ttk
 import notebook
 import controlflow
 import actions
+import logging
 from rdm_menu import RDMMenu
 
 '''
@@ -767,6 +768,8 @@ class DisplayApp(object):
     print 'Entering main loop'
     self.root.mainloop()
 
+
 if __name__  ==  '__main__':
-  display  =  DisplayApp(800, 600)
+  logging.basicConfig(level=logging.INFO, format='%(message)s')
+  display = DisplayApp(800, 600)
   display.main()
