@@ -118,9 +118,6 @@ class Controller(object):
   def clear_sensor(self, sensor_number):
     self._app.clear_sensor(sensor_number)
 
-  def start_address_valid(self, address):
-    return self._app.start_address_valid(address)
-
 # ==============================================================================
 # ============================ Universe Class ==================================
 # ==============================================================================
@@ -726,9 +723,6 @@ class DisplayApp(object):
   def clear_sensor_complete(self, succeeded, data):
     if succeeded:
       print 'Sensor cleared.'
-
-  def start_address_valid(self, address):
-    return True
 
     # ================================ Callbacks =================================
 

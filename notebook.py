@@ -107,8 +107,7 @@ class RDMNotebook(object):
     self.default_slot_value = tk.StringVar(self.dmx_tab)
     # Widgets
     self.start_address_entry = tk.Entry(
-        self.dmx_tab, textvariable = self.dmx_start_address,
-        validatecommand = self._start_address_valid)
+        self.dmx_tab, textvariable = self.dmx_start_address)
     self.start_address_button = tk.Button(self.dmx_tab, 
         text = 'Set Start Address', 
         command = self.set_start_address)
@@ -571,7 +570,16 @@ class RDMNotebook(object):
     '''
     start of control flow for setting the dmx_start_address of a device.
     '''
-    start_address = int(self.dmx_start_address.get())
+    try:
+      start_address = int(self.dmx_start_address.get())
+    except ValueError:
+      print 'error'
+      # insert entry dialog here
+      return
+    if start_address > 512 or start_address < 1:
+      print 'error'
+      #dialog
+      return
     self._controller.set_start_address(start_address)
 
   # def _set_lamp_state(self, state):
@@ -723,12 +731,6 @@ class RDMNotebook(object):
     '''
     # Note that this will be called when the program starts
     self.update()
-
-  def _start_address_valid(self, vlaue):
-    if value > 512 or value < 1:
-      return False
-    else:
-     return self._controller.start_address_valid(value)
 
   def _grid_info(self, obj_list):
     """
