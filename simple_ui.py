@@ -276,18 +276,17 @@ class DisplayApp(object):
       self.id_state.set(value['identify_state'])
 
   def fetch_universes(self, callback):
-
     self.ola_thread.fetch_universes(self.fetch_universes_complete)
 
-  def fetch_universes_complete(self, error, universes):
+  def fetch_universes_complete(self, succeeded, universes):
 
-    if error is None:
+    if succeeded:
       for universe in universes:
         self.universe_dict[universe.id] = UniverseObj(universe.id, universe.name)
         self.universe_menu.add_item(universe.name, 
           lambda i = universe.id: self._set_universe(i))
     else:
-      logging.error(error)
+      print 'could not find active universe'
 
   def _set_universe(self, universe_id):
     ' sets the int var self.universe to the value of i '
@@ -347,8 +346,6 @@ class DisplayApp(object):
     else:
       self._uid_dict.setdefault(uid, {})['DEVICE_LABEL'] = ''
     self._add_device_to_menu(uid)
-
-
 
   def _set_identify_complete(self, uid, succeded, value):
     ''' callback for the rdm_set in identify. '''
