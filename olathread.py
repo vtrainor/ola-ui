@@ -116,7 +116,8 @@ class OLAThread(threading.Thread):
     # need to do something with unpack_exception here
     # if ACK timer then schedule event in n milisecs
     if response.WasAcked()==False:
-      callback(str(unpack_exception), None)
+      callback(str(resonse), None)
+      # TODO enhance error handling
     else:
       callback(None, data)
     # Section 8 of the standard (8.3)
@@ -153,7 +154,8 @@ class OLAThread(threading.Thread):
     print 'RDM set completed'
     # need to do something with the unpack_exception here
     if response.WasAcked()==False:
-      callback(str(unpack_exception), None)
+      callback(str(response), None)
+      # TODO enhance error handling
     else:
       callback(None, data)
 
