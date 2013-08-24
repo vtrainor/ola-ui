@@ -27,10 +27,7 @@ class GetRDMAction(RDMAction):
     return True
 
   def pid_supported(self):
-    if self.PID in self._data['PARAM_NAMES']:
-      return True
-    else:
-      return False
+    return self.PID in self._data['PARAM_NAMES']
 
   def execute(self, universe, uid, on_complete):
     """Perform the RDM GET."""

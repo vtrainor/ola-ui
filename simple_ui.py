@@ -514,6 +514,9 @@ class DisplayApp(object):
 
   def _set_address_complete(self, start_address, succeeded, data):
     if succeeded:
+      pid_dict = self._uid_dict[self._cur_uid]
+      pid_dict['DEVICE_INFO']['dmx_start_address'] = start_address
+      pid_dict['DMX_START_ADDRESS'] = start_address
       print 'DMX start address set to %s' % start_address
     else:
       return
