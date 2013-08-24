@@ -19,6 +19,8 @@ class GetDeviceInfo(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetSupportedParams(GetRDMAction):
   """
@@ -32,6 +34,8 @@ class GetSupportedParams(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = set(p['param_id'] for p in value['params'])
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 # ==============================================================================
 # ============================ Get Basic Info ==================================
@@ -48,6 +52,8 @@ class GetProductDetailIds(GetRDMAction):
     if succeeded:
       self._data[self.PID]= set(
                             data['detail_id'] for data in value['detail_ids'])
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetDeviceModel(GetRDMAction):
   """
@@ -61,6 +67,8 @@ class GetDeviceModel(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["description"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetManufacturerLabel(GetRDMAction):
   """
@@ -74,6 +82,8 @@ class GetManufacturerLabel(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["label"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetFactoryDefaults(GetRDMAction):
   """
@@ -87,6 +97,8 @@ class GetFactoryDefaults(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["using_defaults"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetSoftwareVersion(GetRDMAction):
   """
@@ -100,6 +112,8 @@ class GetSoftwareVersion(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["label"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetBootSoftwareVersion(GetRDMAction):
   """
@@ -113,6 +127,8 @@ class GetBootSoftwareVersion(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["version"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetBootSoftwareLabel(GetRDMAction):
   """
@@ -126,6 +142,8 @@ class GetBootSoftwareLabel(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["label"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 # ==============================================================================
 # ============================ Get DMX Info ====================================
@@ -143,6 +161,8 @@ class GetDmxPersonality(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetPersonalityDescription(GetRDMAction):
   """
@@ -153,14 +173,14 @@ class GetPersonalityDescription(GetRDMAction):
     """" Skip this action if we already have the supported params"""
     return self.pid_supported()
 
-
   def update_dict(self, succeeded, value):
     if succeeded:
       index = value["personality"]
       personalities = self._data.setdefault(self.PID, {})
       personalities[index] = {"slots_required":value["slots_required"],
                                      "name":value["name"]}
-      
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetStartAddress(GetRDMAction):
   """
@@ -174,6 +194,8 @@ class GetStartAddress(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["dmx_address"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetSlotInfo(GetRDMAction):
   """
@@ -192,6 +214,8 @@ class GetSlotInfo(GetRDMAction):
                                       "slot_type": slot["slot_type"],
                                       "slot_label_id": slot["slot_label_id"]
                                      }
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetSlotDescription(GetRDMAction):
   """
@@ -209,7 +233,7 @@ class GetSlotDescription(GetRDMAction):
       print 'slots: %s' % slots
       slots[value['slot_number']] = value['name']
     else:
-      logging.error('get slot description failed')
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetDefaultSlotValue(GetRDMAction):
   """
@@ -225,6 +249,8 @@ class GetDefaultSlotValue(GetRDMAction):
       values = self._data.setdefault(self.PID, {})
       for slot_value in value["slot_values"]:
         values[slot_value["slot_offset"]] = slot_value["default_slot_value"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 # ==============================================================================
 # ============================ Get Sensors Info ================================
@@ -244,6 +270,8 @@ class GetSensorDefinition(GetRDMAction):
       index = value['sensor_number']
       sensor_info = self._data.setdefault(self.PID, {})
       sensor_info[index] = value
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetSensorValue(GetRDMAction):
   """
@@ -259,6 +287,8 @@ class GetSensorValue(GetRDMAction):
       index = value['sensor_number']
       sensor_info = self._data.setdefault(self.PID, {})
       sensor_info[index] = value
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 # ==============================================================================
 # ============================ Get Setting Info ================================
@@ -276,6 +306,8 @@ class GetDeviceHours(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["hours"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
  
 class GetLampHours(GetRDMAction):
   """
@@ -289,6 +321,8 @@ class GetLampHours(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["hours"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetLampStrikes(GetRDMAction):
   """
@@ -302,6 +336,8 @@ class GetLampStrikes(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["strikes"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetLampState(GetRDMAction):
   """
@@ -315,6 +351,8 @@ class GetLampState(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["state"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetLampOnMode(GetRDMAction):
   """
@@ -328,6 +366,8 @@ class GetLampOnMode(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["mode"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetPowerCycles(GetRDMAction):
   """
@@ -341,6 +381,8 @@ class GetPowerCycles(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["power_cycles"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetPowerState(GetRDMAction):
   """
@@ -354,6 +396,8 @@ class GetPowerState(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["power_state"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 # ==============================================================================
 # ============================ Get Config Info =================================
@@ -371,6 +415,8 @@ class GetLanguageCapabilities(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["languages"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetLanguage(GetRDMAction):
   """
@@ -384,6 +430,8 @@ class GetLanguage(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["language"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetDisplayInvert(GetRDMAction):
   """
@@ -397,6 +445,8 @@ class GetDisplayInvert(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["invert_status"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetDisplayLevel(GetRDMAction):
   """
@@ -410,6 +460,8 @@ class GetDisplayLevel(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["level"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetPanInvert(GetRDMAction):
   """
@@ -423,6 +475,8 @@ class GetPanInvert(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["invert"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetTiltInvert(GetRDMAction):
   """
@@ -436,6 +490,8 @@ class GetTiltInvert(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["invert"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetPanTiltSwap(GetRDMAction):
   """
@@ -449,6 +505,8 @@ class GetPanTiltSwap(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value["swap"]
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 class GetRealTimeClock(GetRDMAction):
   """
@@ -462,6 +520,8 @@ class GetRealTimeClock(GetRDMAction):
   def update_dict(self, succeeded, value):
     if succeeded:
       self._data[self.PID] = value
+    else:
+      logging.error('failed to get value for %s' % self.PID)
 
 # ==============================================================================
 # ============================ RDM Set Actions =================================
