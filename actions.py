@@ -228,9 +228,8 @@ class GetSlotDescription(GetRDMAction):
     return self.pid_supported()
 
   def update_dict(self, error, value):
+    slots = self._data.setdefault(self.PID, {})
     if error is None:
-      slots = self._data.setdefault(self.PID, {})
-      print 'slots: %s' % slots
       slots[value['slot_number']] = value['name']
     else:
       logging.error(error)

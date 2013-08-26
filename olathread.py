@@ -115,8 +115,8 @@ class OLAThread(threading.Thread):
     """ Checks if the get was a success, calls the callback from run_get. """
     # need to do something with unpack_exception here
     # if ACK timer then schedule event in n milisecs
-    if response.WasAcked()==False:
-      callback(str(resonse), None)
+    if response.WasAcked() == False:
+      callback(str(response), None)
       # TODO enhance error handling
     else:
       callback(None, data)
