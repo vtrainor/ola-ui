@@ -3,7 +3,7 @@ import simple_ui
 import ttk
 import ola.RDMConstants as RDMConstants
 from rdm_menu import RDMMenu
-import pid_dict
+import PIDDict
 
 class RDMNotebook(object):
   def __init__(self, root, controller, width=800, height=500, side=tk.TOP):
@@ -256,7 +256,7 @@ class RDMNotebook(object):
         self.config_tab, "Languages not supported.", "")
     self.display_invert_menu = tk.OptionMenu(self.config_tab,
                                             self.display_invert, 
-                                            *pid_dict.DISPLAY_INVERT.values(),
+                                            *PIDDict.DISPLAY_INVERT.values(),
                                             command = self._set_display_invert)
     self.display_level_menu = tk.Scale(
         self.config_tab, 
@@ -277,10 +277,11 @@ class RDMNotebook(object):
                                              command = self._set_tilt_invert,
                                              state = tk.DISABLED)
     self.pan_tilt_swap_button = tk.Checkbutton(
-      self.config_tab,
+        self.config_tab,
         variable = self.pan_tilt_swap,
         command = self._set_pan_tilt_swap,
-        state = tk.DISABLED)
+        state = tk.DISABLED
+    )
     self.objects["CONFIGURATION"] = [
         tk.Label(self.config_tab, text = "Device Language:"),
         self.language_menu,
@@ -470,25 +471,25 @@ class RDMNotebook(object):
 
     if 'LAMP_STATE' in param_dict:
       self.lamp_state_menu.config(state = tk.NORMAL)
-      for key, value in pid_dict.LAMP_STATE.iteritems():
+      for key, value in PIDDict.LAMP_STATE.iteritems():
         self.lamp_state_menu.add_item(
             value, lambda k=key: self._controller.set_lamp_state(k))
-      self.lamp_state_menu.set(pid_dict.LAMP_STATE[param_dict['LAMP_STATE']])
+      self.lamp_state_menu.set(PIDDict.LAMP_STATE[param_dict['LAMP_STATE']])
 
     if 'LAMP_ON_MODE' in param_dict:
       self.lamp_on_mode_menu.config(state = tk.NORMAL)
-      for key, value in pid_dict.LAMP_ON_MODE.iteritems():
+      for key, value in PIDDict.LAMP_ON_MODE.iteritems():
         self.lamp_on_mode_menu.add_item(value, 
                                         lambda k=key: self._set_lamp_on_mode(k))
       self.lamp_on_mode_menu.set(
-          pid_dict.LAMP_ON_MODE[param_dict['LAMP_ON_MODE']])
+          PIDDict.LAMP_ON_MODE[param_dict['LAMP_ON_MODE']])
 
     if 'POWER_STATE' in param_dict:
       self.power_state_menu.config(state = tk.NORMAL)
-      for key, value in pid_dict.POWER_STATE.iteritems():
+      for key, value in PIDDict.POWER_STATE.iteritems():
         self.power_state_menu.add_item(value, 
                                        lambda k=key: self._set_power_state(k))
-      self.power_state_menu.set(pid_dict.POWER_STATE[param_dict['POWER_STATE']])
+      self.power_state_menu.set(PIDDict.POWER_STATE[param_dict['POWER_STATE']])
 
   def render_config_information(self, param_dict):
     '''
@@ -520,7 +521,7 @@ class RDMNotebook(object):
       self.display_level_menu.config(state = tk.DISABLED)
 
     if 'DISPLAY_INVERT' in param_dict:
-      display_invert = pid_dict.DISPLAY_INVERT [param_dict['DISPLAY_INVERT']]
+      display_invert = PIDDict.DISPLAY_INVERT [param_dict['DISPLAY_INVERT']]
       self.display_invert.set(display_invert)
       self.display_invert_menu.config(state = tk.NORMAL)
     else:
@@ -587,7 +588,7 @@ class RDMNotebook(object):
   #   Internal Function, first function in the 'SetLampState' control flow.
 
   #   Args:
-  #     state: int, see pid_dict.LAMP_STATE for state name.
+  #     state: int, see PIDDict.LAMP_STATE for state name.
   #   '''
   #   self._controller.set_lamp_state(state)
 
@@ -596,17 +597,17 @@ class RDMNotebook(object):
     Ultimate callback for, 'SetLampState' control flow.
 
     Args:
-      state: int, see pid_dict.LAMP_STATE for state name.
+      state: int, see PIDDict.LAMP_STATE for state name.
     '''
-    if self.lamp_state_menu.get() != pid_dict.LAMP_STATE[state]:
-      self.lamp_state_menu.set(pid_dict.LAMP_STATE[state])
+    if self.lamp_state_menu.get() != PIDDict.LAMP_STATE[state]:
+      self.lamp_state_menu.set(PIDDict.LAMP_STATE[state])
 
   def _set_lamp_on_mode(self, mode):
     '''
     Infternal Function, first function in the 'SetLampOnMode' control flow.
 
     Args:
-      mode: int, see pid_dict.LAMP_ON_MODE for mode names.
+      mode: int, see PIDDict.LAMP_ON_MODE for mode names.
     '''
     self._controller.set_lamp_on_mode(mode)
 
@@ -615,17 +616,17 @@ class RDMNotebook(object):
     Ulitmate callback for 'SetLampOnMode' control flow
 
     Args:
-      mode: int, see pid_dict.LAMP_ON_MODE for mode names.
+      mode: int, see PIDDict.LAMP_ON_MODE for mode names.
     '''
-    if self.lamp_on_mode_menu.get() != pid_dict.LAMP_ON_MODE[mode]:
-      self.lamp_on_mode_menu.set(pid_dict.LAMP_ON_MODE[mode])
+    if self.lamp_on_mode_menu.get() != PIDDict.LAMP_ON_MODE[mode]:
+      self.lamp_on_mode_menu.set(PIDDict.LAMP_ON_MODE[mode])
 
   def _set_power_state(self, state):
     '''
     Infternal Function, first function in the 'SetPowerState' control flow.
 
     Args:
-      state: int, see pid_dict.LAMP_STATE for state name.
+      state: int, see PIDDict.LAMP_STATE for state name.
     '''
     self._controller.set_power_state(state)
 
@@ -633,8 +634,8 @@ class RDMNotebook(object):
     '''
 
     '''
-    if self.power_state_menu.get() != pid_dict.POWER_STATE[state]:
-      self.power_state_menu.set(pid_dict.POWER_STATE[state])
+    if self.power_state_menu.get() != PIDDict.POWER_STATE[state]:
+      self.power_state_menu.set(PIDDict.POWER_STATE[state])
 
   def set_dmx_personality_complete(self, param_dict):
     print param_dict
@@ -660,7 +661,7 @@ class RDMNotebook(object):
     Infternal Function, first function in the 'SetDisplayInvert' control flow.
 
     Args:
-      state: int, see pid_dict.DISPLAY_INVERT for state name.
+      state: int, see PIDDict.DISPLAY_INVERT for state name.
     '''
     self._controller.set_display_invert(invert)
     # self._controller.SetDisplayInvert(self.display_invert.get())
@@ -778,7 +779,7 @@ class RDMNotebook(object):
       self.slot_name.set('Name: %s' % slot_name)
     else:
       if param_dict['SLOT_INFO'][slot_number]['slot_type'] == 0:
-        self.slot_name.set('Description: %s' % pid_dict.SLOT_ID_DEFINITIONS.get(
+        self.slot_name.set('Description: %s' % PIDDict.SLOT_ID_DEFINITIONS.get(
             param_dict['SLOT_INFO'][slot_number]['slot_label_id'], 'N/A'))
       else:
           self.slot_name.set('Name: N/A')
@@ -823,9 +824,9 @@ class RDMNotebook(object):
         (definition['normal_min'], definition['normal_max']))
     self.supports_recording.set(
         'Supports Recording: %s' %
-        bool(pid_dict.RECORDED_SUPPORTED & definition['supports_recording']))
+        bool(PIDDict.RECORDED_SUPPORTED & definition['supports_recording']))
     self.supports_lowest_highest.set('Supports Lowest/Highest: %s' %
-        bool(pid_dict.LOWEST_HIGHEST_SUPPORTED & definition['supports_recording']))
+        bool(PIDDict.LOWEST_HIGHEST_SUPPORTED & definition['supports_recording']))
 
     if 'SENSOR_VALUE' in param_dict:
       value = param_dict['SENSOR_VALUE'][sensor_number]
