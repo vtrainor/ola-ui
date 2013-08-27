@@ -677,7 +677,7 @@ class RDMNotebook(object):
     Args:
       state: boolean, true: inverted, false: normal.
     '''
-    self._controller.SetPanInvert(self.pan_invert.get())
+    self._controller.set_pan_invert(self.pan_invert.get())
 
   def set_pan_invert_complete(self, invert):
     if self.pan_invert.get() != invert:
@@ -690,7 +690,7 @@ class RDMNotebook(object):
     Args:
       state: boolean, true: inverted, false: normal.
     '''
-    self._controller.SetTiltInvert(self.tilt_invert.get())
+    self._controller.set_tilt_invert(self.tilt_invert.get())
 
   def set_tilt_invert_complete(self, invert):
     if self.tilt_invert.get() != invert:
@@ -710,7 +710,7 @@ class RDMNotebook(object):
       self.pan_tilt_swap.set(swap)
 
   def _set_language(self, language):
-    self._controller.SetLanguage(language)
+    self._controller.set_language(language)
 
   def set_language_complete(self, language):
     if self.language_menu.get() != language:
