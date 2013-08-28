@@ -104,12 +104,8 @@ class OLAThread(threading.Thread):
   def _rdm_set(self,universe,uid,sub_device,pid,callback,data):
     """ This method is only run in the OLA thread. """
     print "set %s, %s" % (uid, pid)
-    try:
-      self._rdm_api.Set(universe,uid,sub_device,self._pid_store.GetName(pid),
+    self._rdm_api.Set(universe,uid,sub_device,self._pid_store.GetName(pid),
                         lambda r,d,e:self.complete_set(callback,r,d,e),data)
-    except ola.PidStore.ArgsValidationError:
-      print 'unable to set %s to %s' % (pid, data[0])
-      callback(False, '')
 
   def complete_get(self,callback,response,data,unpack_exception):
     """ Checks if the get was a success, calls the callback from run_get. """
@@ -153,7 +149,7 @@ class OLAThread(threading.Thread):
     """ Checks if the set was a success, calls the callback from run_set. """
     print 'RDM set completed'
     # need to do something with the unpack_exception here
-    if response.WasAcked()==False:
+    if response.WasAcked() == False:
       callback(str(response), None)
       # TODO enhance error handling
     else:
