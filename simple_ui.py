@@ -533,7 +533,7 @@ class DisplayApp(object):
                                                   [personality]))
     for slot in xrange(self._uid_dict[self._cur_uid]['DMX_PERSONALITY_DESCRIPTION']
                  [personality]['slots_required']):
-    flow_actions.append(actions.GetSlotDescription(
+      flow_actions.append(actions.GetSlotDescription(
           data, self.ola_thread.rdm_get, [slot]))
     flow_actions.append(actions.GetSlotInfo(
         data, self.ola_thread.rdm_get))
@@ -762,7 +762,10 @@ class DisplayApp(object):
                   self._cur_uid,
                   sensor_actions,
                   lambda: self.display_sensor_data(sensor_number))
-    flow.run()
+    try:
+      flow.run()
+    except:
+      rdm_dialog.Dialog(self.root, 'RECORD_SENSORS', sensor_number)
 
   def clear_sensor_complete(self, succeeded, data):
     if succeeded:
@@ -774,13 +777,16 @@ class DisplayApp(object):
   def set_device_label(self, label):
     uid = self._cur_uid
     callback = (lambda b, s: self.set_device_label_complete(uid, label, b, s))
-    self.ola_thread.rdm_set(self.universe.get(), 
-                                  uid,
-                                  0, 
-                                  'DEVICE_LABEL',
-                                  callback,
-                                  [label]
-                                  )
+    try:
+      self.ola_thread.rdm_set(self.universe.get(), 
+                              uid,
+                              0, 
+                              'DEVICE_LABEL',
+                              callback,
+                              [label]
+                              )
+    except:
+      rdm_dialog.Dialog(self.root, 'DEVICE_LABEL', label)
 
   def set_device_label_complete(self, uid, label, succeeded, data):
 
