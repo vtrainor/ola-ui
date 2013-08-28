@@ -508,9 +508,12 @@ class DisplayApp(object):
       return
     uid = self._cur_uid
     callback = lambda b, s: self._set_address_complete(start_address, b, s)
-    self.ola_thread.rdm_set(
-        self.universe.get(), uid, 0, 'DMX_START_ADDRESS', callback, 
-        [start_address])
+    try:
+      self.ola_thread.rdm_set(
+          self.universe.get(), uid, 0, 'DMX_START_ADDRESS', callback, 
+          [start_address])
+    except:
+      rdm_dialog.Dialog(self.root, 'DMX_START_ADDRESS', start_address)
 
   def _set_address_complete(self, start_address, succeeded, data):
     if succeeded:
@@ -530,19 +533,21 @@ class DisplayApp(object):
                                                   [personality]))
     for slot in xrange(self._uid_dict[self._cur_uid]['DMX_PERSONALITY_DESCRIPTION']
                  [personality]['slots_required']):
-      flow_actions.append(actions.GetSlotDescription(
+    flow_actions.append(actions.GetSlotDescription(
           data, self.ola_thread.rdm_get, [slot]))
     flow_actions.append(actions.GetSlotInfo(
         data, self.ola_thread.rdm_get))
     flow_actions.append(actions.GetDefaultSlotValue(
         data, self.ola_thread.rdm_get))
-
     flow = controlflow.RDMControlFlow(
                 self.universe.get(),
                 self._cur_uid,
                 flow_actions,
                 lambda : self._set_dmx_personality_complete())
-    flow.run()
+    try:
+      flow.run()
+    except:
+      rdm_dialog.Dialog(self.root, 'DMX_PERSONALITY', personality)
 
   def _set_dmx_personality_complete(self):
     self._notebook.set_dmx_personality_complete(self._uid_dict[self._cur_uid])
@@ -553,12 +558,16 @@ class DisplayApp(object):
       return
     uid = self._cur_uid
     callback = lambda b, s: self._display_level_complete(uid, level, b, s)
-    self.ola_thread.rdm_set(self.universe.get(),
-                            uid,
-                            0,
-                            'DISPLAY_LEVEL',
-                            callback,
-                            [level])
+    try:
+      self.ola_thread.rdm_set(self.universe.get(),
+                              uid,
+                              0,
+                              'DISPLAY_LEVEL',
+                              callback,
+                              [level])
+    except:
+      rdm_dialog.Dialog(self.root, 'DISPLAY_LEVEL', level)
+
   def _display_level_complete(self, uid, level, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['DISPLAY_LEVEL'] = level
@@ -569,12 +578,15 @@ class DisplayApp(object):
       return
     uid = self._cur_uid
     callback = lambda b, s: self._set_lamp_state_complete(uid, state, b, s)
-    self.ola_thread.rdm_set(self.universe.get(),
-                            uid,
-                            0,
-                            'LAMP_STATE',
-                            callback,
-                            [state])
+    try:
+      self.ola_thread.rdm_set(self.universe.get(),
+                              uid,
+                              0,
+                              'LAMP_STATE',
+                              callback,
+                              [state])
+    except:
+      rdm_dialog.Dialog(self.root, 'LAMP_STATE', state)
 
   def _set_lamp_state_complete(self, uid, state, succeeded, data):
     if succeeded:
@@ -586,12 +598,15 @@ class DisplayApp(object):
       return
     uid = self._cur_uid
     callback = lambda b, s: self._set_lamp_on_mode_complete(uid, mode, b, s)
-    self.ola_thread.rdm_set(self.universe.get(),
-                            uid,
-                            0,
-                            'LAMP_ON_MODE',
-                            callback,
-                            [mode])
+    try:
+      self.ola_thread.rdm_set(self.universe.get(),
+                              uid,
+                              0,
+                              'LAMP_ON_MODE',
+                              callback,
+                              [mode])
+    except:
+      rdm_dialog.Dialog(self.root, 'LAMP_ON_MODE', mode)
     
   def _set_lamp_on_mode_complete(self, uid, mode, succeeded, data):
     if succeeded:
@@ -603,12 +618,15 @@ class DisplayApp(object):
       return
     uid = self._cur_uid
     callback = lambda b, s: self._set_power_state_complete(uid, state, b, s)
-    self.ola_thread.rdm_set(self.universe.get(),
-                            uid,
-                            0,
-                            'POWER_STATE',
-                            callback,
-                            [state])
+    try:
+      self.ola_thread.rdm_set(self.universe.get(),
+                              uid,
+                              0,
+                              'POWER_STATE',
+                              callback,
+                              [state])
+    except:
+      rdm_dialog.Dialog(self.root, 'POWER_STATE', state)
     
   def _set_power_state_complete(self, uid, state, succeeded, data):
     if succeeded:
@@ -620,12 +638,16 @@ class DisplayApp(object):
       return
     uid = self._cur_uid
     callback = lambda b, s: self._language_complete(uid, language, b, s)
-    self.ola_thread.rdm_set(self.universe.get(),
-                            uid,
-                            0,
-                            'LANGUAGE',
-                            callback,
-                            [language])
+    try:
+      self.ola_thread.rdm_set(self.universe.get(),
+                              uid,
+                              0,
+                              'LANGUAGE',
+                              callback,
+                              [language])
+    except:
+      rdm_dialog.Dialog(self.root, 'LANGUAGE', language)
+
   def _language_complete(self, uid, language, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['LANGUAGE'] = language
@@ -636,12 +658,16 @@ class DisplayApp(object):
       return
     uid = self._cur_uid
     callback = lambda b, s: self._display_invert_complete(uid, invert, b, s)
-    self.ola_thread.rdm_set(self.universe.get(),
-                            uid,
-                            0,
-                            'DISPLAY_INVERT',
-                            callback,
-                            [invert])
+    try:
+      self.ola_thread.rdm_set(self.universe.get(),
+                              uid,
+                              0,
+                              'DISPLAY_INVERT',
+                              callback,
+                              [invert])
+    except:
+      rdm_dialog.Dialog(self.root, 'DISPLAY_INVERT', invert)
+
   def _display_invert_complete(self, uid, invert, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['DISPLAY_INVERT'] = invert
@@ -652,12 +678,16 @@ class DisplayApp(object):
       return
     uid = self._cur_uid
     callback = lambda b, s: self._pan_invert_complete(uid, invert, b, s)
-    self.ola_thread.rdm_set(self.universe.get(),
-                            uid,
-                            0,
-                            'PAN_INVERT',
-                            callback,
-                            [invert])
+    try:
+      self.ola_thread.rdm_set(self.universe.get(),
+                              uid,
+                              0,
+                              'PAN_INVERT',
+                              callback,
+                              [invert])
+    except:
+      rdm_dialog.Dialog(self.root, 'PAN_INVERT', invert)
+
   def _pan_invert_complete(self, uid, invert, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['PAN_INVERT'] = invert
@@ -668,12 +698,16 @@ class DisplayApp(object):
       return
     uid = self._cur_uid
     callback = lambda b, s: self._tilt_invert_complete(uid, invert, b, s)
-    self.ola_thread.rdm_set(self.universe.get(),
-                            uid,
-                            0,
-                            'TILT_INVERT',
-                            callback,
-                            [invert])
+    try:
+      self.ola_thread.rdm_set(self.universe.get(),
+                              uid,
+                              0,
+                              'TILT_INVERT',
+                              callback,
+                              [invert])
+    except:
+      rdm_dialog.Dialog(self.root, 'TILT_INVERT', invert)
+
   def _tilt_invert_complete(self, uid, invert, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['TILT_INVERT'] = invert
@@ -684,24 +718,31 @@ class DisplayApp(object):
       return
     uid = self._cur_uid
     callback = lambda b, s: self._pan_tilt_swap_complete(uid, swap, b, s)
-    self.ola_thread.rdm_set(self.universe.get(),
-                            uid,
-                            0,
-                            'PAN_TILT_SWAP',
-                            callback,
-                            [swap])
+    try:
+      self.ola_thread.rdm_set(self.universe.get(),
+                              uid,
+                              0,
+                              'PAN_TILT_SWAP',
+                              callback,
+                              [swap])
+    except:
+      rdm_dialog.Dialog(self.root, 'PAN_TILT_SWAP', swap)
+
   def _pan_tilt_swap_complete(self, uid, swap, succeeded, data):
     if succeeded:
       self._uid_dict[uid]['PAN_TILT_SWAP'] = swap
       self._notebook.set_pan_tilt_swapComplete(swap)
 
   def record_sensor(self, sensor_number):
-    self.ola_thread.rdm_set(self.universe.get(),
-                            self._cur_uid,
-                            0,
-                            'RECORD_SENSORS',
-                            lambda b, s: self.record_sensor_complete(b, s),
-                            [sensor_number])
+    try:
+      self.ola_thread.rdm_set(self.universe.get(),
+                              self._cur_uid,
+                              0,
+                              'RECORD_SENSORS',
+                              lambda b, s: self.record_sensor_complete(b, s),
+                              [sensor_number])
+    except:
+      rdm_dialog.Dialog(self.root, 'RECORD_SENSORS', sensor_number)
   
   def record_sensor_complete(self, succeeded, data):
     if succeeded:
