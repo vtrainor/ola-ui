@@ -527,16 +527,28 @@ class DisplayApp(object):
   def set_dmx_personality(self, personality):
     if self._cur_uid is None:
       return
-    flow_actions = []
     data = self._uid_dict[self._cur_uid]
-    flow_actions.append(actions.SetDMXPersonality(data, self.ola_thread.rdm_set,
-                                                  [personality]))
+    flow_actions = [actions.SetDMXPersonality(data, self.ola_thread.rdm_set,
+                                                  [personality])]
+    flow = controlflow.RDMControlFlow(
+                self.universe.get(),
+                self._cur_uid,
+                flow_actions,
+                lambda: self._get_slot_info(personality))
+    try:
+      flow.run()
+    except:
+      rdm_dialog.Dialog(self.root, 'DMX_PERSONALITY', personality)
+
+  def _get_slot_info(self, personality):
+    print 'getting slot info...'
+    data = self._uid_dict[self._cur_uid]
+    flow_actions = []
     for slot in xrange(self._uid_dict[self._cur_uid]['DMX_PERSONALITY_DESCRIPTION']
                  [personality]['slots_required']):
       flow_actions.append(actions.GetSlotDescription(
           data, self.ola_thread.rdm_get, [slot]))
-    flow_actions.append(actions.GetSlotInfo(
-        data, self.ola_thread.rdm_get))
+    flow_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
     flow_actions.append(actions.GetDefaultSlotValue(
         data, self.ola_thread.rdm_get))
     flow = controlflow.RDMControlFlow(
@@ -547,11 +559,10 @@ class DisplayApp(object):
     try:
       flow.run()
     except:
-      rdm_dialog.Dialog(self.root, 'DMX_PERSONALITY', personality)
+      rdm_dialog.Dialog(self.root, 'SLOT_INFO', personality)
 
   def _set_dmx_personality_complete(self):
     self._notebook.set_dmx_personality_complete(self._uid_dict[self._cur_uid])
-    pass
 
   def set_display_level(self, level):
     if self._cur_uid is None:
