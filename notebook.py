@@ -3,6 +3,7 @@ import simple_ui
 import ttk
 import ola.RDMConstants as RDMConstants
 from rdm_menu import RDMMenu
+from rdm_dialog import RDMDialog
 import PIDDict
 
 class RDMNotebook(object):
@@ -574,12 +575,14 @@ class RDMNotebook(object):
     try:
       start_address = int(self.dmx_start_address.get())
     except ValueError:
-      print 'error'
-      # insert entry dialog here
+      d = RDMDialog(self.root, "Value must be an int between 1 and 512, inclusive.")
+      self.root.wait_window(d.top)
+      self._notebook.update()
       return
     if start_address > 512 or start_address < 1:
-      print 'error'
-      #dialog
+      d = RDMDialog(self.root, "Start address must be between 1 and 512")
+      self.root.wait_window(d.top)
+      self._notebook.update()
       return
     self._controller.set_start_address(start_address)
 
