@@ -565,7 +565,7 @@ class RDMNotebook(object):
   def device_label_set(self):
     """
     """
-    self._controller.SetDeviceLabel(self.device_label.get())
+    self._controller.set_device_label(self.device_label.get())
 
   def set_start_address(self):
     '''

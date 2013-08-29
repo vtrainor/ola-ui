@@ -521,8 +521,9 @@ class DisplayApp(object):
       pid_dict['DMX_START_ADDRESS'] = start_address
       print 'DMX start address set to %s' % start_address
     else:
-      d = RDMDialog(self.root, 'DMX_START_ADDRESS', start_address)
+      d = RDMDialog(self.root, error)
       self.root.wait_window(d.top)
+      self._notebook.update()
 
   def set_dmx_personality(self, personality):
     if self._cur_uid is None:
@@ -534,29 +535,38 @@ class DisplayApp(object):
                 self.universe.get(),
                 self._cur_uid,
                 flow_actions,
-                lambda: self._get_slot_info(personality))
+                lambda b, s: self._get_slot_info(personality, b, s))
     flow.run()
 
-  def _get_slot_info(self, personality):
+  def _get_slot_info(self, personality, error, data):
     print 'getting slot info...'
-    data = self._uid_dict[self._cur_uid]
-    flow_actions = []
-    for slot in xrange(self._uid_dict[self._cur_uid]['DMX_PERSONALITY_DESCRIPTION']
+    if error is None:
+      data = self._uid_dict[self._cur_uid]
+      flow_actions = []
+      for slot in xrange(self._uid_dict[self._cur_uid]['DMX_PERSONALITY_DESCRIPTION']
                  [personality]['slots_required']):
-      flow_actions.append(actions.GetSlotDescription(
+        flow_actions.append(actions.GetSlotDescription(
           data, self.ola_thread.rdm_get, [slot]))
-    flow_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
-    flow_actions.append(actions.GetDefaultSlotValue(
+      flow_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
+      flow_actions.append(actions.GetDefaultSlotValue(
         data, self.ola_thread.rdm_get))
-    flow = controlflow.RDMControlFlow(
+      flow = controlflow.RDMControlFlow(
                 self.universe.get(),
                 self._cur_uid,
                 flow_actions,
-                lambda : self._set_dmx_personality_complete())
-    flow.run()
+                lambda b, s: self._set_dmx_personality_complete(b, s))
+      flow.run()
+    else:
+      d = RDMDialog(self.root, error)
+      self.root.wait_window(d.top)
+      self._notebook.update()
 
-  def _set_dmx_personality_complete(self):
-    self._notebook.set_dmx_personality_complete(self._uid_dict[self._cur_uid])
+  def _set_dmx_personality_complete(self, error, data):
+    if error is None:
+      self._notebook.set_dmx_personality_complete(self._uid_dict[self._cur_uid])
+    else:
+      d = RDMDialog(self.root, error)
+      self.root.wait_window(d.top)
 
   def set_display_level(self, level):
     if self._cur_uid is None:
@@ -570,10 +580,14 @@ class DisplayApp(object):
                               callback,
                               [level])
 
-  def _display_level_complete(self, uid, level, succeeded, data):
-    if succeeded:
+  def _display_level_complete(self, uid, level, error, data):
+    if error is None:
       self._uid_dict[uid]['DISPLAY_LEVEL'] = level
       self._notebook.set_display_level_complete(level)
+    else:
+      d = RDMDialog(self.root, error)
+      self.root.wait_window(d.top)
+      self._notebook.update()
 
   def set_lamp_state(self, state):
     if self._cur_uid is None:
@@ -587,10 +601,14 @@ class DisplayApp(object):
                               callback,
                               [state])
 
-  def _set_lamp_state_complete(self, uid, state, succeeded, data):
-    if succeeded:
+  def _set_lamp_state_complete(self, uid, state, error, data):
+    if error is None:
       self._uid_dict[uid]['LAMP_STATE'] = state
       self._notebook.set_lamp_state_complete(state)
+    else:
+      d = RDMDialog(self.root, error)
+      self.root.wait_window(d.top)
+      self._notebook.update()
 
   def set_lamp_on_mode(self, mode):
     if self._cur_uid is None:
@@ -604,10 +622,14 @@ class DisplayApp(object):
                               callback,
                               [mode])
     
-  def _set_lamp_on_mode_complete(self, uid, mode, succeeded, data):
-    if succeeded:
+  def _set_lamp_on_mode_complete(self, uid, mode, error, data):
+    if error is None:
       self._uid_dict[uid]['LAMP_ON_MODE'] = mode
       self._notebook.set_lamp_on_mode_complete(mode)
+    else:
+      d = RDMDialog(self.root, error)
+      self.root.wait_window(d.top)
+      self._notebook.update()
 
   def set_power_state(self, state):
     if self._cur_uid is None:
@@ -621,10 +643,14 @@ class DisplayApp(object):
                               callback,
                               [state])
     
-  def _set_power_state_complete(self, uid, state, succeeded, data):
-    if succeeded:
+  def _set_power_state_complete(self, uid, state, error, data):
+    if error is None:
       self._uid_dict[uid]['POWER_STATE'] = state
       self._notebook.set_power_state_complete(state)
+    else:
+      d = RDMDialog(self.root, error)
+      self.root.wait_window(d.top)
+      self._notebook.update()
 
   def set_language(self, language):
     if self._cur_uid is None:
@@ -638,10 +664,14 @@ class DisplayApp(object):
                               callback,
                               [language])
 
-  def _language_complete(self, uid, language, succeeded, data):
-    if succeeded:
+  def _language_complete(self, uid, language, error, data):
+    if error is None:
       self._uid_dict[uid]['LANGUAGE'] = language
       self._notebook.set_language_complete(PIDDict.LAMP_STATE[language])
+    else:
+      d = RDMDialog(self.root, error)
+      self.root.wait_window(d.top)
+      self._notebook.update()
 
   def set_display_invert(self, invert):
     if self._cur_uid is None:
@@ -655,10 +685,14 @@ class DisplayApp(object):
                               callback,
                               [invert])
 
-  def _display_invert_complete(self, uid, invert, succeeded, data):
-    if succeeded:
+  def _display_invert_complete(self, uid, invert, error, data):
+    if error is None:
       self._uid_dict[uid]['DISPLAY_INVERT'] = invert
       self._notebook.set_display_invertComplete(invert)
+    else:
+      d = RDMDialog(self.root, error)
+      self.root.wait_window(d.top)
+      self._notebook.update()
 
   def set_pan_invert(self, invert):
     if self._cur_uid is None:
@@ -672,10 +706,14 @@ class DisplayApp(object):
                               callback,
                               [invert])
 
-  def _pan_invert_complete(self, uid, invert, succeeded, data):
-    if succeeded:
+  def _pan_invert_complete(self, uid, invert, error, data):
+    if error is None:
       self._uid_dict[uid]['PAN_INVERT'] = invert
       self._notebook.set_pan_invert_complete(invert)
+    else:
+      d = RDMDialog(self.root, error)
+      self.root.wait_window(d.top)
+      self._notebook.update()
 
   def set_tilt_invert(self, invert):
     if self._cur_uid is None:
@@ -689,10 +727,14 @@ class DisplayApp(object):
                               callback,
                               [invert])
 
-  def _tilt_invert_complete(self, uid, invert, succeeded, data):
-    if succeeded:
+  def _tilt_invert_complete(self, uid, invert, error, data):
+    if error is None:
       self._uid_dict[uid]['TILT_INVERT'] = invert
       self._notebook.set_tilt_invertComplete(invert)
+    else:
+      d = RDMDialog(self.root, error)
+      self.root.wait_window(d.top)
+      self._notebook.update()
 
   def set_pan_tilt_swap(self, swap):
     if self._cur_uid is None:
@@ -706,10 +748,14 @@ class DisplayApp(object):
                               callback,
                               [swap])
 
-  def _pan_tilt_swap_complete(self, uid, swap, succeeded, data):
-    if succeeded:
+  def _pan_tilt_swap_complete(self, uid, swap, error, data):
+    if error is None:
       self._uid_dict[uid]['PAN_TILT_SWAP'] = swap
       self._notebook.set_pan_tilt_swapComplete(swap)
+    else:
+      d = RDMDialog(self.root, error)
+      self.root.wait_window(d.top)
+      self._notebook.update()
 
   def record_sensor(self, sensor_number):
     self.ola_thread.rdm_set(self.universe.get(),
@@ -719,9 +765,13 @@ class DisplayApp(object):
                               lambda b, s: self.record_sensor_complete(b, s),
                               [sensor_number])
   
-  def record_sensor_complete(self, succeeded, data):
-    if succeeded:
-      print 'Sensor recorded'
+  def record_sensor_complete(self, error, data):
+    if error is None:
+      pass
+    else:
+      d = RDMDialog(self.root, error)
+      self.root.wait_window(d.top)
+      self._notebook.update()
 
   def clear_sensor(self, sensor_number):
     sensor_actions = []
@@ -739,9 +789,13 @@ class DisplayApp(object):
                   lambda: self.display_sensor_data(sensor_number))
     flow.run()
 
-  def clear_sensor_complete(self, succeeded, data):
-    if succeeded:
-      print 'Sensor cleared.'
+  def clear_sensor_complete(self, error, data):
+    if error is None:
+      pass
+    else:
+      d = RDMDialog(self.root, error)
+      self.root.wait_window(d.top)
+      self._notebook.update()
 
     # ================================ Callbacks =================================
 
@@ -757,15 +811,16 @@ class DisplayApp(object):
                               [label]
                               )
 
-  def set_device_label_complete(self, uid, label, succeeded, data):
-
-    if succeeded:
+  def set_device_label_complete(self, uid, label, error, data):
+    if error is None:
       index = self._uid_dict[self._cur_uid]['index']
       self._uid_dict[self._cur_uid]['DEVICE_LABEL'] = label
       self.device_menu.entryconfigure(index, label = '%s (%s)'%(
                   self._uid_dict[uid]['DEVICE_LABEL'], uid))
     else:
-      print 'failed'
+      d = RDMDialog(self.root, error)
+      self.root.wait_window(d.top)
+      self._notebook.update()
     # store the results in the uid dict
     self.root.update_idletasks()
     self._notebook.update()
