@@ -575,25 +575,25 @@ class RDMNotebook(object):
     try:
       start_address = int(self.dmx_start_address.get())
     except ValueError:
-      d = RDMDialog(self.root, "Value must be an int between 1 and 512, inclusive.")
+      d = RDMDialog(self.root, "Start address must be an int between 1 and 512")
       self.root.wait_window(d.top)
       self._notebook.update()
       return
     if start_address > 512 or start_address < 1:
-      d = RDMDialog(self.root, "Start address must be between 1 and 512")
+      d = RDMDialog(self.root, "Start address must be between 1 and 512")    
       self.root.wait_window(d.top)
       self._notebook.update()
       return
     self._controller.set_start_address(start_address)
 
-  # def _set_lamp_state(self, state):
-  #   '''
-  #   Internal Function, first function in the 'SetLampState' control flow.
+  def _set_lamp_state(self, state):
+    '''
+    Internal Function, first function in the 'SetLampState' control flow.
 
-  #   Args:
-  #     state: int, see PIDDict.LAMP_STATE for state name.
-  #   '''
-  #   self._controller.set_lamp_state(state)
+    Args:
+      state: int, see PIDDict.LAMP_STATE for state name.
+    '''
+    self._controller.set_lamp_state(state)
 
   def set_lamp_state_complete(self, state):
     '''
@@ -724,6 +724,11 @@ class RDMNotebook(object):
 
   def clear_sensor(self, sensor_number):
     self._controller.clear_sensor(sensor_number)
+
+  def set_display_level_complete(self, level):
+    if level != self.display_level:
+      self.display_level.set(level)
+    return
 
   # ============================================================================
   # ========================== Internal Methods ================================

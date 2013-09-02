@@ -13,6 +13,7 @@ import actions
 import logging
 from rdm_menu import RDMMenu
 from rdm_dialog import RDMDialog
+import PIDDict
 
 '''
  General control flow:
@@ -667,7 +668,7 @@ class DisplayApp(object):
   def _language_complete(self, uid, language, error, data):
     if error is None:
       self._uid_dict[uid]['LANGUAGE'] = language
-      self._notebook.set_language_complete(PIDDict.LAMP_STATE[language])
+      self._notebook.set_language_complete(language)
     else:
       d = RDMDialog(self.root, error)
       self.root.wait_window(d.top)
@@ -688,7 +689,7 @@ class DisplayApp(object):
   def _display_invert_complete(self, uid, invert, error, data):
     if error is None:
       self._uid_dict[uid]['DISPLAY_INVERT'] = invert
-      self._notebook.set_display_invertComplete(invert)
+      self._notebook.set_display_invert_complete(invert)
     else:
       d = RDMDialog(self.root, error)
       self.root.wait_window(d.top)
