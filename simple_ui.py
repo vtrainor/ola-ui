@@ -242,8 +242,6 @@ class DisplayApp(object):
       Args: 
         uid: the uid of the newly selected device
     '''
-    if self._cur_uid is None:
-      self._notebook.activate()
     if uid == self._cur_uid:
       print 'Already Selected'
       return
@@ -752,7 +750,7 @@ class DisplayApp(object):
   def _pan_tilt_swap_complete(self, uid, swap, error, data):
     if error is None:
       self._uid_dict[uid]['PAN_TILT_SWAP'] = swap
-      self._notebook.set_pan_tilt_swapComplete(swap)
+      self._notebook.set_pan_tilt_swap_complete(swap)
     else:
       d = RDMDialog(self.root, error)
       self.root.wait_window(d.top)

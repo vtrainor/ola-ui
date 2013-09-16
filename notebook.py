@@ -41,14 +41,13 @@ class RDMNotebook(object):
       self._grid_info(self.objects[tab])
     self._notebook.pack(side = self.side)
 
-  def activate(self):
-    pass
 # ==============================================================================
 # ============================ Tab Inits =======================================
 # ==============================================================================
 
   def _init_info(self):
     """
+    initalize the widgets for the info tab
     """
     # Text Variables:
     self.protocol_version = tk.StringVar(self.info_tab)
@@ -95,6 +94,7 @@ class RDMNotebook(object):
 
   def _init_dmx(self):
     """
+    initalize the widgets for the dmx tab
     """
     # Text Variables
     self.dmx_footprint = tk.StringVar(self.dmx_tab)
@@ -145,6 +145,7 @@ class RDMNotebook(object):
 
   def _init_sensor(self):
     """
+    initalize the widgets for the sensor tab
     """
     # Text Variable
     self.sensor_type = tk.StringVar(self.sensor_tab)
@@ -205,6 +206,7 @@ class RDMNotebook(object):
 
   def _init_setting(self):
     """
+    initalize the widgets for the setting tab
     """
     # sText Varibles
     self.device_hours = tk.StringVar(self.setting_tab)
@@ -244,6 +246,7 @@ class RDMNotebook(object):
 
   def _init_config(self):
     """
+    initalize the widgets for the config tab
     """
     # Variables
     self.display_invert = tk.StringVar(self.config_tab)
@@ -306,6 +309,10 @@ class RDMNotebook(object):
   # ============================================================================
 
   def update(self):
+    '''
+    using the value of the current tab (self._notebook.index('current')), calls 
+    the control for obtaining the information for that tab.
+    '''
     index = self._notebook.index('current')
     print 'The selected tab changed to %d' % index
     if index == 0:
@@ -565,6 +572,8 @@ class RDMNotebook(object):
   # ============================================================================
   def device_label_set(self):
     """
+    calls the control flow for setting the device's label to a new value, using
+    the value of self.device_label
     """
     self._controller.set_device_label(self.device_label.get())
 
@@ -700,15 +709,24 @@ class RDMNotebook(object):
       self.tilt_invert.set(invert)
 
   def _set_pan_tilt_swap(self):
-    '''
-    Infternal Function, irst function in the 'SetPanTiltSwap' control flow.
+    """ Swaps the pan and tilt in the device.
 
-    Args:
-      state: boolean, true: swapped, false: normal.
-    '''
+    Calls set_pan_tilt_swap in the controller. The final callback for this
+    control flow is set_pan_tilt_swap_complete (below).
+    """
     self._controller.set_pan_tilt_swap(self.pan_tilt_swap.get())
 
-  def set_pan_tilit_swap_complete(self, swap):
+  def set_pan_tilt_swap_complete(self, swap):
+    """ Sets the value of the pan-tilt-swap Checkbutton
+
+    Only sets the value of the Checkbutton if the current value is does not
+    match the value passed into the method.
+
+    Args:
+      swap: boolean value
+        True, when pan and tilt are swapped
+        False, when they are unswapped, or normal
+    """
     if self.pan_tilt_swap.get() != swap:
       self.pan_tilt_swap.set(swap)
 
@@ -801,10 +819,23 @@ class RDMNotebook(object):
                           param_dict.get('DEFAULT_SLOT_VALUE', {})[slot_number])
 
   def _display_personality_decription(self, slots_required, personality):
+    """ Changes the displayed DMX personality information
+
+    Called after a device's DMX personality has been changed. Changes the values
+    for both the personality name and the number of DMX slots required.
+
+    Args:
+      slots_required: the number of DMX slots required for the new DMX 
+        personality
+      personality: the personality ID for the new DMX personality assigned to
+        the device
+    """
     self.slot_required.set("Slots Required: %s" % slots_required)
     self.personality_name.set("Personality ID: %s" % personality)
 
   def _get_personality_string(self, personality):
+    """ 
+    """
     return '%s (%d)' % (personality['name'], personality['slots_required'])
 
   def _populate_sensor_tab(self, sensor_number):
