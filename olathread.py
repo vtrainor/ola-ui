@@ -82,7 +82,9 @@ class OLAThread(threading.Thread):
     self._ss.AddEvent(mili_secs, callback)
 
   def _run_discovery(self, universe, callback):
-    """ This method is only run in the OLA thread. """
+    """ Runs discovery on the current universe.
+
+    """
     response=self._client.RunRDMDiscovery(universe,True,callback)
     if response==False:
       callback(False,[])
