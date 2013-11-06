@@ -58,13 +58,9 @@ class Controller(object):
     self._app = app
 
   def get_basic_information(self):
-    '''
-    '''
     self._app.get_basic_information()
 
   def get_dmx_information(self):
-    '''
-    '''
     self._app.get_dmx_information()
 
   def get_sensor_value(self, sensor_number):
@@ -125,10 +121,11 @@ class Controller(object):
 # ============================ Universe Class ==================================
 # ==============================================================================
 class UniverseObj(object):
+  ''' The UniverseObj class is used to access infromation for each Universe as
+      the user fetches new universes or switches between Universes in the GUI
+  '''
 
   def __init__(self, uni_id, name):
-    '''
-    '''
     self._id = uni_id 
     self._name = name 
     self._discover = False
@@ -259,6 +256,8 @@ class DisplayApp(object):
     flow.run()
 
   def _device_changed_complete(self):
+    '''called once the control flow created in device_selected completes
+    '''
     self._uid_dict[self._cur_uid]['PARAM_NAMES'] = set()
     for pid_key in self._uid_dict[self._cur_uid]['SUPPORTED_PARAMETERS']:
       pid = self._pid_store.GetPid(pid_key)
@@ -356,6 +355,12 @@ class DisplayApp(object):
   # ============================ RDM Gets ======================================
 
   def get_basic_information(self):
+    ''' creates and calls the action flow for retrieving information for the
+        first tab of the notebook. 
+
+        Triggered by: the control flow class, originally from the notebook
+        initialization and "Device Information" tab selection.
+    '''
     if self._cur_uid is None:
       print 'you need to select a device'
       return
@@ -376,6 +381,12 @@ class DisplayApp(object):
     flow.run()
 
   def get_dmx_information(self):
+    ''' creates and calls the action flow for retrieving information for the
+        second tab of the notebook. 
+
+        Triggered by: the control flow class, originally from the notebook
+        initialization and "DMX512 Information" tab selection.
+    '''
 
     if self._cur_uid is None:
       print 'you need to select a device.'
@@ -407,6 +418,8 @@ class DisplayApp(object):
     flow.run()
 
   def get_sensor_definitions(self):
+    ''' 
+    '''
     if self._cur_uid is None:
       return
     sensor_actions = []
@@ -440,7 +453,12 @@ class DisplayApp(object):
     flow.run()
 
   def get_setting_information(self):
+    ''' creates and calls the action flow for retrieving information for the
+        forth tab of the notebook. 
 
+        Triggered by: the control flow class, originally from the notebook
+        initialization and "Power and Lamp Settings" tab selection.
+    '''
     if self._cur_uid is None:
       print 'you need to select a device'
       return
@@ -461,7 +479,12 @@ class DisplayApp(object):
     flow.run()
 
   def get_config_information(self):
+    ''' creates and calls the action flow for retrieving information for the
+        fifth tab of the notebook. 
 
+        Triggered by: the control flow class, originally from the notebook
+        initialization and "Configure" tab selection.
+    '''
     if self._cur_uid is None:
       print 'you need to select a device'
       return
@@ -529,7 +552,7 @@ class DisplayApp(object):
       return
     data = self._uid_dict[self._cur_uid]
     flow_actions = [actions.SetDMXPersonality(data, self.ola_thread.rdm_set,
-                                                  [personality])]
+                                              [personality])]
     flow = controlflow.RDMControlFlow(
                 self.universe.get(),
                 self._cur_uid,
@@ -542,13 +565,14 @@ class DisplayApp(object):
     if error is None:
       data = self._uid_dict[self._cur_uid]
       flow_actions = []
-      for slot in xrange(self._uid_dict[self._cur_uid]['DMX_PERSONALITY_DESCRIPTION']
-                 [personality]['slots_required']):
+      for slot in xrange(self._uid_dict[self._cur_uid]
+          ['DMX_PERSONALITY_DESCRIPTION']
+          [personality]['slots_required']):
         flow_actions.append(actions.GetSlotDescription(
-          data, self.ola_thread.rdm_get, [slot]))
-      flow_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
-      flow_actions.append(actions.GetDefaultSlotValue(
-        data, self.ola_thread.rdm_get))
+            data, self.ola_thread.rdm_get, [slot]))
+        flow_actions.append(actions.GetSlotInfo(data, self.ola_thread.rdm_get))
+        flow_actions.append(actions.GetDefaultSlotValue(
+            data, self.ola_thread.rdm_get))
       flow = controlflow.RDMControlFlow(
                 self.universe.get(),
                 self._cur_uid,
@@ -741,11 +765,11 @@ class DisplayApp(object):
     uid = self._cur_uid
     callback = lambda b, s: self._pan_tilt_swap_complete(uid, swap, b, s)
     self.ola_thread.rdm_set(self.universe.get(),
-                              uid,
-                              0,
-                              'PAN_TILT_SWAP',
-                              callback,
-                              [swap])
+                            uid,
+                            0,
+                            'PAN_TILT_SWAP',
+                            callback,
+                            [swap])
 
   def _pan_tilt_swap_complete(self, uid, swap, error, data):
     if error is None:
@@ -758,11 +782,11 @@ class DisplayApp(object):
 
   def record_sensor(self, sensor_number):
     self.ola_thread.rdm_set(self.universe.get(),
-                              self._cur_uid,
-                              0,
-                              'RECORD_SENSORS',
-                              lambda b, s: self.record_sensor_complete(b, s),
-                              [sensor_number])
+                            self._cur_uid,
+                            0,
+                            'RECORD_SENSORS',
+                            lambda b, s: self.record_sensor_complete(b, s),
+                            [sensor_number])
   
   def record_sensor_complete(self, error, data):
     if error is None:
@@ -796,7 +820,7 @@ class DisplayApp(object):
       self.root.wait_window(d.top)
       self._notebook.update()
 
-    # ================================ Callbacks =================================
+  # ================================ Callbacks =================================
 
 
   def set_device_label(self, label):

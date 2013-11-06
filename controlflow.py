@@ -156,6 +156,9 @@ class RDMControlFlow(object):
     self._perform_next_action()
 
   def _perform_next_action(self):
+    """ Pops the next action off of the action stack, or completes the action 
+        flow.
+    """
     if self._actions:
       action = self._actions.popleft()
       action.execute(self._universe, self._uid, self._perform_next_action)
