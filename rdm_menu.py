@@ -9,6 +9,7 @@ class RDMMenu(object):
     self.full_label = full_label
     self.variable = tk.StringVar(self.root)
     self.menu = tk.OptionMenu(self.root, self.variable, '')
+    self.menu.configure(width = len(self.empty_label))
     self.clear_menu()
 
   def get(self):
@@ -44,7 +45,7 @@ class RDMMenu(object):
     '''
     self.variable.set(self.empty_label)
     self.menu["menu"].delete(0, tk.END)
-    self.menu.configure(state=tk.DISABLED)
+    self.menu.configure(state=tk.DISABLED, width = len(self.empty_label))
 
   def add_item(self, item, command):
     '''
@@ -56,7 +57,7 @@ class RDMMenu(object):
     '''
     if self.menu['menu'].index('end') is None:
       # If there was nothing in the menu, we enable it and set the text
-      self.menu.configure(state=tk.NORMAL)
+      self.menu.configure(state=tk.NORMAL, width = len(self.full_label))
       self.variable.set(self.full_label)
 
     self.menu["menu"].add_command(
@@ -77,6 +78,7 @@ class RDMMenu(object):
     '''
     print 'Item selected %s' % item
     self.variable.set(item)
+    self.menu.configure(width = len(self.variable.get()))
     command()
 
   def entryconfigure(self, index, *args, **kwargs):

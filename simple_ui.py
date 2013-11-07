@@ -418,7 +418,7 @@ class DisplayApp(object):
     flow.run()
 
   def get_sensor_definitions(self):
-    ''' 
+    ''' gets the sensor definition for each sensor in the sensor count
     '''
     if self._cur_uid is None:
       return
@@ -437,6 +437,13 @@ class DisplayApp(object):
     flow.run()
 
   def get_sensor_value(self, sensor_number):
+    """ gets the sensor value for the currently selected sensor
+
+      Args: sensor_number: the number associated with the currently selected 
+            sensor. 
+
+      call originates in render_sensor_information in the notebook class.
+    """
     if self._cur_uid is None:
       return
     sensor_actions = []
@@ -506,18 +513,15 @@ class DisplayApp(object):
     flow.run()
   
   # ============================ Notebook Updates ==============================
+  # The following methods call into the notebook class and popluate the 
+  # associted tab with RDM information
 
   def update_basic_information(self):
+    # print "uid_dict: %s" % self._uid_dict[self._cur_uid]
     self._notebook.render_basic_information(self._uid_dict[self._cur_uid])
 
   def update_dmx_information(self):
     self._notebook.render_dmx_information(self._uid_dict[self._cur_uid])
-
-  def update_sensor_information(self):
-    self._notebook.render_sensor_information(self._uid_dict[self._cur_uid])
-
-  def display_sensor_data(self,sensor_number):
-    self._notebook.display_sensor_data(self._uid_dict[self._cur_uid],sensor_number)
 
   def update_setting_information(self):
     self._notebook.render_setting_information(self._uid_dict[self._cur_uid])
@@ -525,8 +529,23 @@ class DisplayApp(object):
   def update_config_information(self):
     self._notebook.render_config_information(self._uid_dict[self._cur_uid])
 
+  # the sensor tab is slightly different that those above. The first method
+  # populates (update_sensor_information) the RDM menu on the sensor tab and the
+  # second method displays the values being recorded/sensed by the sensor device 
+  def update_sensor_information(self):
+    self._notebook.render_sensor_information(self._uid_dict[self._cur_uid])
+
+  def display_sensor_data(self,sensor_number):
+    self._notebook.display_sensor_data(
+        self._uid_dict[self._cur_uid],sensor_number)
+
   # ============================ RDM Sets ======================================
   def set_start_address(self, start_address):
+    ''' Sets the start address of the current device.
+
+        Args:
+          start_address: the DMX address that is set as the start address.
+    '''
     if self._cur_uid is None:
       return
     uid = self._cur_uid
@@ -536,6 +555,14 @@ class DisplayApp(object):
         [start_address])
 
   def _set_address_complete(self, start_address, error, data):
+    ''' callback method from the ola call triggered in the above method
+
+        Args:
+          start_address: the new DMX address of the current device
+          error: None, if the ola thread call succeeded, the error returned if
+            the call fails
+          data: 
+    '''
     print 'set start address callback'
     if error is None:
       pid_dict = self._uid_dict[self._cur_uid]
@@ -548,6 +575,12 @@ class DisplayApp(object):
       self._notebook.update()
 
   def set_dmx_personality(self, personality):
+    ''' sets the DMX personality of the current RDM device
+
+        Args:
+          personality: the personality that the device will be set to if the 
+          ola call succeeds
+    '''
     if self._cur_uid is None:
       return
     data = self._uid_dict[self._cur_uid]
@@ -561,6 +594,13 @@ class DisplayApp(object):
     flow.run()
 
   def _get_slot_info(self, personality, error, data):
+    '''
+        Args:
+          personality: the personality of the current device
+          error: the error returned if the previous ola call fails, otherwise
+          this will be None
+          data: 16 bit slot number, data to be passed to the ola thread
+    '''
     print 'getting slot info...'
     if error is None:
       data = self._uid_dict[self._cur_uid]
@@ -585,6 +625,12 @@ class DisplayApp(object):
       self._notebook.update()
 
   def _set_dmx_personality_complete(self, error, data):
+    ''' the final call back from the set DMX personality control flow
+
+        Args:
+          error: None, or the error returned by the ola call
+          data: Not Present
+    '''
     if error is None:
       self._notebook.set_dmx_personality_complete(self._uid_dict[self._cur_uid])
     else:
