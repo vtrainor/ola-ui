@@ -616,7 +616,7 @@ class RDMNotebook(object):
 
   def _set_lamp_on_mode(self, mode):
     '''
-    Infternal Function, first function in the 'SetLampOnMode' control flow.
+    Internal Function, first function in the 'SetLampOnMode' control flow.
 
     Args:
       mode: int, see PIDDict.LAMP_ON_MODE for mode names.
@@ -635,7 +635,7 @@ class RDMNotebook(object):
 
   def _set_power_state(self, state):
     '''
-    Infternal Function, first function in the 'SetPowerState' control flow.
+    Internal Function, first function in the 'SetPowerState' control flow.
 
     Args:
       state: int, see PIDDict.LAMP_STATE for state name.
@@ -643,8 +643,7 @@ class RDMNotebook(object):
     self._controller.set_power_state(state)
 
   def set_power_state_complete(self, state):
-    '''
-
+    ''' 
     '''
     if self.power_state_menu.get() != PIDDict.POWER_STATE[state]:
       self.power_state_menu.set(PIDDict.POWER_STATE[state])
@@ -670,7 +669,7 @@ class RDMNotebook(object):
 
   def _set_display_invert(self, invert):
     '''
-    Infternal Function, first function in the 'SetDisplayInvert' control flow.
+    Internal Function, first function in the 'SetDisplayInvert' control flow.
 
     Args:
       state: int, see PIDDict.DISPLAY_INVERT for state name.
@@ -684,7 +683,7 @@ class RDMNotebook(object):
 
   def _set_pan_invert(self):
     '''
-    Infternal Function, first function in the 'SetPanInvert' control flow.
+    Internal Function, first function in the 'SetPanInvert' control flow.
 
     Args:
       state: boolean, true: inverted, false: normal.
@@ -697,7 +696,7 @@ class RDMNotebook(object):
 
   def _set_tilt_invert(self):
     '''
-    Infternal Function, first function in the 'SetTiltInvert' control flow.
+    Internal Function, first function in the 'SetTiltInvert' control flow.
 
     Args:
       state: boolean, true: inverted, false: normal.

@@ -541,10 +541,12 @@ class DisplayApp(object):
 
   # ============================ RDM Sets ======================================
   def set_start_address(self, start_address):
-    ''' Sets the start address of the current device.
+    ''' RDM set call for DMX_START_ADDRESS
+        call originates from the start address button in the notebook class
 
         Args:
-          start_address: the DMX address that is set as the start address.
+          start_address: INT 16 bit; the DMX address that is set as the start
+              address.
     '''
     if self._cur_uid is None:
       return
@@ -555,13 +557,14 @@ class DisplayApp(object):
         [start_address])
 
   def _set_address_complete(self, start_address, error, data):
-    ''' callback method from the ola call triggered in the above method
-
+    ''' Callback method from DMX_START_ADDRESS RDM set.
+        
         Args:
-          start_address: the new DMX address of the current device
-          error: None, if the ola thread call succeeded, the error returned if
-            the call fails
-          data: 
+          start_address: INT 16 bit; the new DMX start address of the RDM
+              device
+          error: If the RDM set fails, this will be the error returned by OLA
+              otherwise this value will be None 
+          data: Not Present
     '''
     print 'set start address callback'
     if error is None:
@@ -575,12 +578,13 @@ class DisplayApp(object):
       self._notebook.update()
 
   def set_dmx_personality(self, personality):
-    ''' sets the DMX personality of the current RDM device
+    ''' RDM set call for DMX_PERSONALITY
+        call originates from an optionMenu in the DMX tab in the notebook class
 
         Args:
-          personality: the personality that the device will be set to if the 
-          ola call succeeds
+          personaility: INT 8 bit; the new personality for the current device
     '''
+    print "setting DMX persaonality..."
     if self._cur_uid is None:
       return
     data = self._uid_dict[self._cur_uid]
@@ -596,9 +600,9 @@ class DisplayApp(object):
   def _get_slot_info(self, personality, error, data):
     '''
         Args:
-          personality: the personality of the current device
+          personality: INT 8 bit; the personality of the current device
           error: the error returned if the previous ola call fails, otherwise
-          this will be None
+              this will be None
           data: 16 bit slot number, data to be passed to the ola thread
     '''
     print 'getting slot info...'
@@ -625,10 +629,11 @@ class DisplayApp(object):
       self._notebook.update()
 
   def _set_dmx_personality_complete(self, error, data):
-    ''' the final call back from the set DMX personality control flow
-
+    ''' Callback method from DMX_PERSONALITY RDM set.
+        
         Args:
-          error: None, or the error returned by the ola call
+          error: If the RDM set fails, this will be the error returned by OLA
+              otherwise this value will be None 
           data: Not Present
     '''
     if error is None:
@@ -638,6 +643,12 @@ class DisplayApp(object):
       self.root.wait_window(d.top)
 
   def set_display_level(self, level):
+    ''' RDM set call for DISPLAY_LEVEL
+        call originates from a scale in the config tab of the notebook class
+
+        Args:
+          level: INT 8 bit; the new display level for the current device
+    '''
     if self._cur_uid is None:
       return
     uid = self._cur_uid
@@ -650,6 +661,15 @@ class DisplayApp(object):
                               [level])
 
   def _display_level_complete(self, uid, level, error, data):
+    ''' Callback method from DISPLAY_LEVEL RDM set.
+        
+        Args:
+          uid: The uid of the current uid
+          level: INT 8 bit, the new display level of the RDM device
+          error: If the RDM set fails, this will be the error returned by OLA
+              otherwise this value will be None 
+          data: Not Present
+    '''
     if error is None:
       self._uid_dict[uid]['DISPLAY_LEVEL'] = level
       self._notebook.set_display_level_complete(level)
@@ -659,6 +679,13 @@ class DisplayApp(object):
       self._notebook.update()
 
   def set_lamp_state(self, state):
+    ''' RDM set call for LAMP_STATE
+        call originates from an optionMenu in the lamp/power settings tab of the 
+        notebook class
+
+        Args:
+          state: INT [0, 3]; the new lamp state for the RDM device
+    '''
     if self._cur_uid is None:
       return
     uid = self._cur_uid
@@ -671,6 +698,15 @@ class DisplayApp(object):
                               [state])
 
   def _set_lamp_state_complete(self, uid, state, error, data):
+    '''Callback method from LAMP_STATE RDM set.
+
+        Args:
+          uid: The uid of the RDM device
+          state: INT [0, 3]; the new lamp state of the RDM device
+          error: If the RDM set fails, this will be the error returned by OLA
+              otherwise this value will be None 
+          data: Not Present
+    '''
     if error is None:
       self._uid_dict[uid]['LAMP_STATE'] = state
       self._notebook.set_lamp_state_complete(state)
@@ -680,6 +716,13 @@ class DisplayApp(object):
       self._notebook.update()
 
   def set_lamp_on_mode(self, mode):
+    ''' RDM set call for LAMP_ON_MODE
+        call originates from an optionMenu in the lamp/power settings tab of the 
+        notebook class
+
+        Args:
+          mode: INT [0, 3]; the new lamp on mode for the RDM device
+    '''
     if self._cur_uid is None:
       return
     uid = self._cur_uid
@@ -692,6 +735,14 @@ class DisplayApp(object):
                               [mode])
     
   def _set_lamp_on_mode_complete(self, uid, mode, error, data):
+    '''Callback method from LAMP_ON_MODE RDM set.
+        Args:
+          uid: The uid of the RDM device
+          mode: INT [0, 3]; the new lamp on mode of the RDM device
+          error: If the RDM set fails, this will be the error returned by OLA
+              otherwise this value will be None 
+          data: Not Present
+    '''
     if error is None:
       self._uid_dict[uid]['LAMP_ON_MODE'] = mode
       self._notebook.set_lamp_on_mode_complete(mode)
@@ -701,6 +752,13 @@ class DisplayApp(object):
       self._notebook.update()
 
   def set_power_state(self, state):
+    ''' RDM set call for POWER_STATE
+        call originates from an optionMenu in the lamp/power settings tab of the 
+        notebook class
+
+        Args:
+          state: INT {[0,2], 255}; the new power state for the RDM device
+    '''
     if self._cur_uid is None:
       return
     uid = self._cur_uid
@@ -713,6 +771,14 @@ class DisplayApp(object):
                               [state])
     
   def _set_power_state_complete(self, uid, state, error, data):
+    '''Callback method from POWER_STATE RDM set.
+        Args:
+          uid: The uid of the RDM device
+          state: INT {[0,2], 255}; the new power state of the RDM device
+          error: If the RDM set fails, this will be the error returned by OLA
+              otherwise this value will be None 
+          data: Not Present
+    '''
     if error is None:
       self._uid_dict[uid]['POWER_STATE'] = state
       self._notebook.set_power_state_complete(state)
@@ -722,6 +788,13 @@ class DisplayApp(object):
       self._notebook.update()
 
   def set_language(self, language):
+    ''' RDM set call for LANGUAGE
+        call originates from an optionMenu in the config tab of the notebook
+        class
+
+        Args:
+          language: STRING length 2; the new language for the RDM device
+    '''
     if self._cur_uid is None:
       return
     uid = self._cur_uid
@@ -734,6 +807,14 @@ class DisplayApp(object):
                               [language])
 
   def _language_complete(self, uid, language, error, data):
+    '''Callback method from LANGUAGE RDM set.
+        Args:
+          uid: The uid of the RDM device
+          language: STRING length 2; the new language of the RDM device
+          error: If the RDM set fails, this will be the error returned by OLA
+              otherwise this value will be None 
+          data: Not Present
+    '''
     if error is None:
       self._uid_dict[uid]['LANGUAGE'] = language
       self._notebook.set_language_complete(language)
@@ -743,6 +824,13 @@ class DisplayApp(object):
       self._notebook.update()
 
   def set_display_invert(self, invert):
+    ''' RDM set call for DISPLAY_INVERT
+        call originates from an optionMenu in the config tab of the notebook
+        class
+
+        Args:
+          invert: INT [0,2]; the new invert state for the RDM device
+    '''
     if self._cur_uid is None:
       return
     uid = self._cur_uid
@@ -755,6 +843,14 @@ class DisplayApp(object):
                               [invert])
 
   def _display_invert_complete(self, uid, invert, error, data):
+    '''Callback method from DISPLAY_INVERT RDM set.
+        Args:
+          uid: The uid of the RDM device
+          invert: INT [0,2]; the new invert state of the RDM device
+          error: If the RDM set fails, this will be the error returned by OLA
+                 otherwise this value will be None 
+          data: Not Present
+    '''
     if error is None:
       self._uid_dict[uid]['DISPLAY_INVERT'] = invert
       self._notebook.set_display_invert_complete(invert)
@@ -764,6 +860,13 @@ class DisplayApp(object):
       self._notebook.update()
 
   def set_pan_invert(self, invert):
+    ''' RDM set call for PAN_INVERT
+        call originates from a checkbox in the config tab of the notebook
+        class
+
+        Args:
+          invert: BOOL; the new pan invert state for the RDM device
+    '''
     if self._cur_uid is None:
       return
     uid = self._cur_uid
@@ -776,6 +879,14 @@ class DisplayApp(object):
                               [invert])
 
   def _pan_invert_complete(self, uid, invert, error, data):
+    '''Callback method from PAN_INVERT RDM set.
+        Args:
+          uid: The uid of the RDM device
+          invert: BOOL; the new pan invert state of the RDM device
+          error: If the RDM set fails, this will be the error returned by OLA
+                 otherwise this value will be None 
+          data: Not Present
+    '''
     if error is None:
       self._uid_dict[uid]['PAN_INVERT'] = invert
       self._notebook.set_pan_invert_complete(invert)
@@ -785,6 +896,13 @@ class DisplayApp(object):
       self._notebook.update()
 
   def set_tilt_invert(self, invert):
+    ''' RDM set call for TILT_INVERT
+        call originates from a checkbox in the config tab of the notebook
+        class
+
+        Args:
+          invert: BOOL; the new tilt invert state for the RDM device
+    '''
     if self._cur_uid is None:
       return
     uid = self._cur_uid
@@ -797,6 +915,14 @@ class DisplayApp(object):
                               [invert])
 
   def _tilt_invert_complete(self, uid, invert, error, data):
+    '''Callback method from TILT_INVERT RDM set.
+        Args:
+          uid: The uid of the RDM device
+          invert: BOOL; the new tilt invert state of the RDM device
+          error: If the RDM set fails, this will be the error returned by OLA
+                 otherwise this value will be None 
+          data: Not Present
+    '''
     if error is None:
       self._uid_dict[uid]['TILT_INVERT'] = invert
       self._notebook.set_tilt_invertComplete(invert)
@@ -806,6 +932,13 @@ class DisplayApp(object):
       self._notebook.update()
 
   def set_pan_tilt_swap(self, swap):
+    ''' RDM set call for PAN_TILT_SWAP
+        call originates from a checkbox in the config tab of the notebook
+        class
+
+        Args:
+          swap: BOOL; the new pan/tilt swap state of the RDM device
+    '''
     if self._cur_uid is None:
       return
     uid = self._cur_uid
@@ -818,6 +951,14 @@ class DisplayApp(object):
                             [swap])
 
   def _pan_tilt_swap_complete(self, uid, swap, error, data):
+    '''Callback method from PAN_TILT_SWAP RDM set.
+        Args:
+          uid: The uid of the RDM device
+          swap: BOOL; the new pan/tilt swap state of the RDM device
+          error: If the RDM set fails, this will be the error returned by OLA
+                 otherwise this value will be None 
+          data: Not Present
+    '''
     if error is None:
       self._uid_dict[uid]['PAN_TILT_SWAP'] = swap
       self._notebook.set_pan_tilt_swap_complete(swap)
@@ -827,14 +968,29 @@ class DisplayApp(object):
       self._notebook.update()
 
   def record_sensor(self, sensor_number):
+    ''' RDM set call for RECORD_SENSORS
+        call originates from a button in the sensor tab of the notebook
+        class
+
+        Args:
+          sensor_number: INT; the number of the sensor whose values are being
+              recorded
+    '''
     self.ola_thread.rdm_set(self.universe.get(),
                             self._cur_uid,
                             0,
                             'RECORD_SENSORS',
-                            lambda b, s: self.record_sensor_complete(b, s),
+                            lambda b, s: self._record_sensor_complete(b, s),
                             [sensor_number])
   
-  def record_sensor_complete(self, error, data):
+  def _record_sensor_complete(self, error, data):
+    ''' Callback method from RECORD_SENSORS RDM set.
+        
+        Args:
+          error: If the RDM set fails, this will be the error returned by OLA
+              otherwise this value will be None 
+          data: Not Present
+    '''
     if error is None:
       pass
     else:
@@ -843,6 +999,12 @@ class DisplayApp(object):
       self._notebook.update()
 
   def clear_sensor(self, sensor_number):
+    ''' clears the values of the RDM sensor device
+
+        Args:
+          sensor_number: INT; the number of the sensor whose values are being
+              cleared
+    '''
     sensor_actions = []
     data = self._uid_dict[self._cur_uid]
     sensor_actions.append(actions.SetSensorValue(
@@ -858,18 +1020,32 @@ class DisplayApp(object):
                   lambda: self.display_sensor_data(sensor_number))
     flow.run()
 
-  def clear_sensor_complete(self, error, data):
-    if error is None:
-      pass
-    else:
-      d = RDMDialog(self.root, error)
-      self.root.wait_window(d.top)
-      self._notebook.update()
+  # def clear_sensor_complete(self, error, data):
+  #   ''' Callback method from CLEA RDM set.
+        
+  #       Args:
+  #         error: If the RDM set fails, this will be the error returned by OLA
+  #             otherwise this value will be None 
+  #         data: Not Present
+  #   '''
+  #   if error is None:
+  #     pass
+  #   else:
+  #     d = RDMDialog(self.root, error)
+  #     self.root.wait_window(d.top)
+  #     self._notebook.update()
 
   # ================================ Callbacks =================================
 
 
   def set_device_label(self, label):
+    ''' RDM set call for DEVICE_LABEL
+        call originates from a button in the device information tab of the
+        notebook class
+
+        Args:
+          label: STRING maxsize 32; the new device label for the RDM device
+    '''
     uid = self._cur_uid
     callback = (lambda b, s: self.set_device_label_complete(uid, label, b, s))
     self.ola_thread.rdm_set(self.universe.get(), 
@@ -881,6 +1057,15 @@ class DisplayApp(object):
                               )
 
   def set_device_label_complete(self, uid, label, error, data):
+    ''' Callback method from DEVICE_LABEL RDM set.
+
+        Args:
+          uid: The uid of the RDM device
+          label: STRING maxsize 32; the new device label of the RDM device
+          error: If the RDM set fails, this will be the error returned by OLA
+              otherwise this value will be None 
+          data: Not Present
+    '''
     if error is None:
       index = self._uid_dict[self._cur_uid]['index']
       self._uid_dict[self._cur_uid]['DEVICE_LABEL'] = label
@@ -895,6 +1080,12 @@ class DisplayApp(object):
     self._notebook.update()
 
   def _add_device_to_menu(self, uid):
+    ''' adds a device to the device menu at the top of the GUI
+
+        Args:
+          uid: 48-bit Unique ID (UID) consisting of a 16-bit Manufacturer ID 
+              and a 32-bit Device ID
+    '''
     label = self._uid_dict[uid]['DEVICE_LABEL']
     if label == '':
       menu_label = '%s' % uid
