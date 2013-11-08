@@ -260,48 +260,48 @@ class TestBasicInfoGets(unittest.TestCase):
     }
     self.assertEquals(expected_data, data)
 
-  def test_flow(self):
-    data = {'PARAM_NAMES': ['PRODUCT_DETAIL_ID_LIST', 
-                            'DEVICE_MODEL_DESCRIPTION',
-                            'MANUFACTURER_LABEL',
-                            'FACTORY_DEFAULTS',
-                            'BOOT_SOFTWARE_VERSION', 
-                            'BOOT_SOFTWARE_LABEL',
-                           ]
-    }
-    action_list = [ actions.GetProductDetailIds(data, DummyGetDetailIds),
-                    actions.GetDeviceModel(data, DummyGetDeviceModel),
-                    actions.GetManufacturerLabel(data, DummyGetManufacturer),
-                    actions.GetFactoryDefaults(data, DummyGetFactoryDefaults),
-                    actions.GetSoftwareVersion(data, DummyGetSoftwareVersion),
-                    actions.GetBootSoftwareVersion(data, DummyGetBootVersion),
-                    actions.GetBootSoftwareLabel(data, DummyGetBootLabel)
-    ]
-    flow = controlflow.RDMControlFlow(
-        self._universe,
-        self._uid,
-        action_list,
-        self.on_complete)
+  # def test_flow(self):
+  #   data = {'PARAM_NAMES': ['PRODUCT_DETAIL_ID_LIST', 
+  #                           'DEVICE_MODEL_DESCRIPTION',
+  #                           'MANUFACTURER_LABEL',
+  #                           'FACTORY_DEFAULTS',
+  #                           'BOOT_SOFTWARE_VERSION', 
+  #                           'BOOT_SOFTWARE_LABEL',
+  #                          ]
+  #   }
+  #   action_list = [ actions.GetProductDetailIds(data, DummyGetDetailIds),
+  #                   actions.GetDeviceModel(data, DummyGetDeviceModel),
+  #                   actions.GetManufacturerLabel(data, DummyGetManufacturer),
+  #                   actions.GetFactoryDefaults(data, DummyGetFactoryDefaults),
+  #                   actions.GetSoftwareVersion(data, DummyGetSoftwareVersion),
+  #                   actions.GetBootSoftwareVersion(data, DummyGetBootVersion),
+  #                   actions.GetBootSoftwareLabel(data, DummyGetBootLabel)
+  #   ]
+  #   flow = controlflow.RDMControlFlow(
+  #       self._universe,
+  #       self._uid,
+  #       action_list,
+  #       self.on_complete)
 
-    self.assertTrue(self._callback_run)
+  #   self.assertTrue(self._callback_run)
 
-    expected_data = {
-        'PARAM_NAMES': ['PRODUCT_DETAIL_ID_LIST', 
-                        'DEVICE_MODEL_DESCRIPTION',
-                        'MANUFACTURER_LABEL',
-                        'FACTORY_DEFAULTS',
-                        'BOOT_SOFTWARE_VERSION', 
-                        'BOOT_SOFTWARE_LABEL',
-                       ],
-        'PRODUCT_DETAIL_ID_LIST': set([ 2306, 32767]),
-        'DEVICE_MODEL_DESCRIPTION': 'Dummy Test Function',
-        'MANUFACTURER_LABEL': 'Open Lighting Project',
-        'FACTORY_DEFAULTS': False,
-        'SOFTWARE_VERSION_LABEL': 'OLA Version 0.8.33',
-        'BOOT_SOFTWARE_VERSION': 0xff,
-        'BOOT_SOFTWARE_LABEL': 'OLA Boot Version 0.8.33',
-    }
-    self.assertEquals(expected_data, data)
+  #   expected_data = {
+  #       'PARAM_NAMES': ['PRODUCT_DETAIL_ID_LIST', 
+  #                       'DEVICE_MODEL_DESCRIPTION',
+  #                       'MANUFACTURER_LABEL',
+  #                       'FACTORY_DEFAULTS',
+  #                       'BOOT_SOFTWARE_VERSION', 
+  #                       'BOOT_SOFTWARE_LABEL',
+  #                      ],
+  #       'PRODUCT_DETAIL_ID_LIST': set([ 2306, 32767]),
+  #       'DEVICE_MODEL_DESCRIPTION': 'Dummy Test Function',
+  #       'MANUFACTURER_LABEL': 'Open Lighting Project',
+  #       'FACTORY_DEFAULTS': False,
+  #       'SOFTWARE_VERSION_LABEL': 'OLA Version 0.8.33',
+  #       'BOOT_SOFTWARE_VERSION': 0xff,
+  #       'BOOT_SOFTWARE_LABEL': 'OLA Boot Version 0.8.33',
+  #   }
+  #   self.assertEquals(expected_data, data)
 
 if __name__ == "__main__":
   unittest.main()
