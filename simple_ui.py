@@ -636,6 +636,7 @@ class DisplayApp(object):
               otherwise this value will be None 
           data: Not Present
     '''
+    #print self._uid_dict[self._cur_uid]
     if error is None:
       self._notebook.set_dmx_personality_complete(self._uid_dict[self._cur_uid])
     else:

@@ -282,6 +282,7 @@ class TestBasicInfoGets(unittest.TestCase):
         self._uid,
         action_list,
         self.on_complete)
+    flow.run()
 
     self.assertTrue(self._callback_run)
 
