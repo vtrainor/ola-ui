@@ -594,7 +594,7 @@ class DisplayApp(object):
                 self.universe.get(),
                 self._cur_uid,
                 flow_actions,
-                lambda b, s: self._get_slot_info(personality, b, s))
+                lambda: self._get_slot_info(personality, None, data))
     flow.run()
 
   def _get_slot_info(self, personality, error, data):
@@ -621,7 +621,7 @@ class DisplayApp(object):
                 self.universe.get(),
                 self._cur_uid,
                 flow_actions,
-                lambda b, s: self._set_dmx_personality_complete(b, s))
+                lambda: self._set_dmx_personality_complete(None, data))
       flow.run()
     else:
       d = RDMDialog(self.root, error)
